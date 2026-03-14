@@ -37,7 +37,7 @@ def get_background_image_html(image_url):
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.6);  /* Overlay gelap untuk keterbacaan teks */
+        background: rgba(0, 0, 0, 0.6);
         z-index: 0;
     }}
     
@@ -47,7 +47,6 @@ def get_background_image_html(image_url):
         background-color: transparent !important;
     }}
     
-    /* Style untuk elemen di sidebar agar tetap terbaca */
     [data-testid="stSidebar"] .stImage,
     [data-testid="stSidebar"] h1,
     [data-testid="stSidebar"] h2,
@@ -64,7 +63,6 @@ def get_background_image_html(image_url):
         text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
     }}
     
-    /* Style khusus untuk radio button */
     [data-testid="stSidebar"] .stRadio > div {{
         background-color: rgba(255, 255, 255, 0.1);
         padding: 10px;
@@ -76,7 +74,6 @@ def get_background_image_html(image_url):
         color: white !important;
     }}
     
-    /* Style untuk button di sidebar */
     [data-testid="stSidebar"] .stButton > button {{
         background-color: rgba(102, 126, 234, 0.8);
         color: white !important;
@@ -89,13 +86,11 @@ def get_background_image_html(image_url):
         border: 1px solid white;
     }}
     
-    /* Style untuk metric di sidebar */
     [data-testid="stSidebar"] [data-testid="stMetricValue"],
     [data-testid="stSidebar"] [data-testid="stMetricLabel"] {{
         color: white !important;
     }}
     
-    /* Style untuk expander */
     [data-testid="stSidebar"] .streamlit-expanderHeader {{
         color: white !important;
         background-color: rgba(255, 255, 255, 0.1);
@@ -108,7 +103,6 @@ def get_background_image_html(image_url):
         border-radius: 0 0 10px 10px;
     }}
     
-    /* Style untuk selectbox */
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {{
         color: white !important;
@@ -119,12 +113,10 @@ def get_background_image_html(image_url):
         border-color: rgba(255,255,255,0.3);
     }}
     
-    /* Style untuk slider */
     [data-testid="stSidebar"] .stSlider label {{
         color: white !important;
     }}
     
-    /* Style untuk divider */
     [data-testid="stSidebar"] hr {{
         border-color: rgba(255,255,255,0.3);
     }}
@@ -137,12 +129,11 @@ def get_footer_background_html(image_url, brightness=0.7):
     Mengembalikan HTML untuk background footer dengan kontrol brightness
     brightness: nilai antara 0-1 (0: sangat gelap, 1: normal)
     """
-    overlay_opacity = 1 - brightness  # Semakin tinggi brightness, semakin rendah opacity overlay
+    overlay_opacity = 1 - brightness
     overlay_color = f"rgba(0, 0, 0, {overlay_opacity})"
     
     return f"""
     <style>
-    /* Style untuk footer dengan background */
     .footer-container {{
         position: relative;
         width: 100%;
@@ -167,12 +158,10 @@ def get_footer_background_html(image_url, brightness=0.7):
         z-index: 1;
     }}
     
-    /* Efek brightness pada gambar background */
     .footer-container {{
         filter: brightness({brightness});
     }}
     
-    /* Pastikan konten tidak terpengaruh filter brightness */
     .footer-content {{
         position: relative;
         z-index: 2;
@@ -180,7 +169,7 @@ def get_footer_background_html(image_url, brightness=0.7):
         text-align: center;
         padding: 15px;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        filter: brightness(1); /* Reset brightness untuk konten */
+        filter: brightness(1);
     }}
     
     .footer-content p {{
@@ -206,7 +195,6 @@ def get_footer_background_html(image_url, brightness=0.7):
         color: #ffaa00;
     }}
     
-    /* Style untuk garis pemisah footer */
     .footer-divider {{
         height: 3px;
         background: linear-gradient(90deg, transparent, #ffd700, transparent);
@@ -241,17 +229,14 @@ def create_footer_with_background(footer_text, image_url, brightness=0.7):
 def load_geojson(filename):
     """Memuat file GeoJSON dari direktori yang sama"""
     try:
-        # Cek apakah file ada
         if not os.path.exists(filename):
             st.error(f"File {filename} tidak ditemukan di direktori: {os.getcwd()}")
             st.info("Pastikan file GeoJSON berada di folder yang sama dengan script Python")
             return None
         
-        # Baca file
         with open(filename, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        # Verifikasi struktur
         if data.get('type') != 'FeatureCollection':
             st.error("Format GeoJSON tidak valid: harus FeatureCollection")
             return None
@@ -261,9 +246,9 @@ def load_geojson(filename):
         st.error(f"Error membaca file: {str(e)}")
         return None
 
-# Nama file GeoJSON
-GEOJSON_FILE = "38 Provinsi Indonesia - Kabupaten.json"  # Sesuaikan dengan nama file Anda
-SCOREBOARD_FILE = "scoreboard.json"  # File untuk menyimpan data papan skor
+# Nama file GeoJSON - SESUAIKAN DENGAN FILE BARU
+GEOJSON_FILE = "kabkot_jatim.geojson"
+SCOREBOARD_FILE = "scoreboard.json"
 
 # URL background
 SIDEBAR_BACKGROUND_URL = "https://rayadventure.com/wp-content/uploads/2018/06/tempat-wisata-di-jawa-timur.jpg"
@@ -271,39 +256,76 @@ FOOTER_BACKGROUND_URL = "https://awsimages.detik.net.id/community/media/visual/2
 
 # Inisialisasi session state untuk brightness footer
 if "footer_brightness" not in st.session_state:
-    st.session_state.footer_brightness = 0.7  # Nilai default brightness
+    st.session_state.footer_brightness = 0.7
 
 # Load data GeoJSON
 geojson_data = load_geojson(GEOJSON_FILE)
 
-# Jika gagal load, tampilkan pesan error dan hentikan
 if geojson_data is None:
     st.stop()
 
-# Filter hanya wilayah di Jawa Timur
-def filter_jatim_features(features):
-    """Filter fitur yang berada di Provinsi Jawa Timur"""
-    jatim_features = []
+# MODIFIKASI: Fungsi untuk mengekstrak nama wilayah dari properti
+def extract_wilayah_name(properties):
+    """
+    Mengekstrak nama wilayah dari properti dengan format yang benar
+    Berdasarkan struktur file kabkot_jatim.geojson
+    """
+    # Coba ambil dari WADMKK (kabupaten/kota)
+    kab_kota = properties.get('WADMKK', '')
+    
+    # Jika WADMKK ada, gunakan itu
+    if kab_kota and kab_kota.strip():
+        return kab_kota.strip()
+    
+    # Fallback ke NAMOBJ jika WADMKK tidak ada
+    nama_obj = properties.get('NAMOBJ', '')
+    if nama_obj and nama_obj.strip():
+        return nama_obj.strip()
+    
+    # Jika tidak ada, return None
+    return None
+
+# MODIFIKASI: Filter fitur untuk mendapatkan wilayah unik (kabupaten/kota)
+def get_unique_kabkot_features(features):
+    """
+    Mendapatkan fitur unik per kabupaten/kota
+    Karena dalam file ada banyak fitur per kecamatan/desa
+    """
+    wilayah_dict = {}
+    
     for feature in features:
         props = feature.get('properties', {})
-        # Cek apakah provinsi adalah Jawa Timur
-        if props.get('WADMPR') == 'Jawa Timur':
-            # Gunakan WADMKK sebagai nama kabupaten/kota
-            kab_kota = props.get('WADMKK', '')
-            if kab_kota:  # Hanya tambahkan jika ada nama
-                # Buat salinan feature dengan properti yang dimodifikasi
-                new_feature = feature.copy()
-                new_feature['properties'] = {
-                    'name': kab_kota,  # Gunakan nama kabupaten/kota
-                    'WADMKK': kab_kota,
-                    'WADMPR': 'Jawa Timur'
-                }
-                jatim_features.append(new_feature)
+        
+        # Hanya proses yang memiliki WADMPR = Jawa Timur
+        if props.get('WADMPR') != 'Jawa Timur':
+            continue
+        
+        # Ekstrak nama wilayah
+        wilayah_name = extract_wilayah_name(props)
+        
+        if wilayah_name and wilayah_name not in wilayah_dict:
+            # Buat salinan feature dengan properti yang dimodifikasi
+            new_feature = {
+                "type": "Feature",
+                "properties": {
+                    "name": wilayah_name,
+                    "WADMKK": wilayah_name,
+                    "WADMPR": "Jawa Timur",
+                    "NAMOBJ": props.get('NAMOBJ', ''),
+                    "WADMKC": props.get('WADMKC', ''),
+                    "WADMKD": props.get('WADMKD', ''),
+                    "TIPADM": props.get('TIPADM', ''),
+                    "LUAS": props.get('LUAS', 0)
+                },
+                "geometry": feature.get('geometry')
+            }
+            wilayah_dict[wilayah_name] = new_feature
     
-    return jatim_features
+    return list(wilayah_dict.values())
 
-# Filter fitur Jawa Timur
-jatim_features = filter_jatim_features(geojson_data.get('features', []))
+# MODIFIKASI: Proses data GeoJSON
+all_features = geojson_data.get('features', [])
+jatim_features = get_unique_kabkot_features(all_features)
 
 # Buat GeoJSON baru untuk Jawa Timur
 jatim_geojson = {
@@ -330,20 +352,17 @@ def load_scoreboard():
         try:
             with open(SCOREBOARD_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # Validasi format data
                 if isinstance(data, list):
                     return data
                 else:
                     return []
         except json.JSONDecodeError:
-            # Jika file corrupt, buat file baru
             save_scoreboard([])
             return []
         except Exception as e:
             st.error(f"Error loading scoreboard: {str(e)}")
             return []
     else:
-        # Buat file baru jika belum ada
         save_scoreboard([])
         return []
 
@@ -351,17 +370,12 @@ def load_scoreboard():
 def save_scoreboard(scoreboard):
     """Menyimpan data papan skor ke file JSON"""
     try:
-        # Pastikan scoreboard adalah list
         if not isinstance(scoreboard, list):
             scoreboard = []
         
-        # Urutkan berdasarkan skor (tertinggi) dan timestamp (terbaru)
         scoreboard.sort(key=lambda x: (-x.get("skor", 0), -x.get("timestamp", 0)))
-        
-        # Simpan hanya 10 teratas
         scoreboard = scoreboard[:10]
         
-        # Buat direktori jika belum ada
         os.makedirs(os.path.dirname(SCOREBOARD_FILE) if os.path.dirname(SCOREBOARD_FILE) else '.', exist_ok=True)
         
         with open(SCOREBOARD_FILE, 'w', encoding='utf-8') as f:
@@ -375,13 +389,11 @@ def save_scoreboard(scoreboard):
 def add_score(nama, skor, level, total_soal, waktu_mulai=None, waktu_selesai=None):
     """Menambahkan skor baru ke papan skor dengan informasi waktu"""
     try:
-        # Validasi input
         if not nama or not isinstance(skor, (int, float)) or not isinstance(total_soal, (int, float)):
             return False
         
         scoreboard = load_scoreboard()
         
-        # Hitung durasi bermain jika waktu tersedia
         durasi = None
         if waktu_mulai and waktu_selesai:
             durasi_detik = waktu_selesai - waktu_mulai
@@ -391,7 +403,6 @@ def add_score(nama, skor, level, total_soal, waktu_mulai=None, waktu_selesai=Non
                 "format": f"{int(durasi_detik // 60)} menit {int(durasi_detik % 60)} detik"
             }
         
-        # Buat entri baru dengan berbagai informasi waktu
         new_entry = {
             "nama": str(nama),
             "skor": int(skor),
@@ -413,7 +424,6 @@ def add_score(nama, skor, level, total_soal, waktu_mulai=None, waktu_selesai=Non
         
         scoreboard.append(new_entry)
         
-        # Simpan ke file
         if save_scoreboard(scoreboard):
             return True
         else:
@@ -427,11 +437,9 @@ def get_filtered_scoreboard(level_filter="Semua Level", time_filter="Semua Waktu
     """Mendapatkan papan skor dengan filter level dan waktu"""
     scoreboard = load_scoreboard()
     
-    # Filter berdasarkan level
     if level_filter != "Semua Level" and scoreboard:
         scoreboard = [s for s in scoreboard if s.get("level") == level_filter]
     
-    # Filter berdasarkan waktu
     if time_filter != "Semua Waktu" and scoreboard:
         now = datetime.now()
         if time_filter == "Hari Ini":
@@ -448,7 +456,6 @@ def get_filtered_scoreboard(level_filter="Semua Level", time_filter="Semua Waktu
                          s.get("tahun") == now.year and 
                          s.get("bulan") == now.month]
     
-    # Urutkan ulang setelah filter
     scoreboard.sort(key=lambda x: (-x.get("skor", 0), x.get("durasi", {}).get("detik", float('inf')), -x.get("timestamp", 0)))
     
     return scoreboard
@@ -470,14 +477,12 @@ def get_scoreboard_stats(scoreboard):
     skor_tertinggi = max(s.get("skor", 0) for s in scoreboard)
     rata_rata = sum(s.get("skor", 0) for s in scoreboard) / total_pemain if total_pemain > 0 else 0
     
-    # Hitung level paling populer
     level_counts = {}
     for s in scoreboard:
         level = s.get("level", "Unknown")
         level_counts[level] = level_counts.get(level, 0) + 1
     level_populer = max(level_counts.items(), key=lambda x: x[1])[0] if level_counts else "-"
     
-    # Hitung waktu tercepat (hanya untuk yang sempurna)
     waktu_tercepat = None
     total_waktu = 0
     waktu_count = 0
@@ -487,7 +492,7 @@ def get_scoreboard_stats(scoreboard):
             total_waktu += s["durasi"]["detik"]
             waktu_count += 1
             
-            if s.get("skor") == s.get("total_soal"):  # Hanya untuk skor sempurna
+            if s.get("skor") == s.get("total_soal"):
                 if not waktu_tercepat or s["durasi"]["detik"] < waktu_tercepat["detik"]:
                     waktu_tercepat = {
                         "nama": s.get("nama"),
@@ -525,7 +530,6 @@ def get_current_time_info():
 def get_wilayah_info(nama_wilayah):
     """Mengembalikan informasi lengkap tentang suatu wilayah"""
     
-    # Database informasi wilayah (dipersingkat untuk kejelasan)
     info_database = {
         "Kabupaten Banyuwangi": {
             "geografis": "Terletak di ujung timur Pulau Jawa, berbatasan dengan Selat Bali. Memiliki wilayah terluas di Jawa Timur dengan pantai indah dan pegunungan.",
@@ -564,7 +568,6 @@ def get_wilayah_info(nama_wilayah):
         }
     }
     
-    # Kembalikan info jika ada, jika tidak ada kembalikan info default
     if nama_wilayah in info_database:
         return info_database[nama_wilayah]
     else:
@@ -579,7 +582,6 @@ def get_wilayah_info(nama_wilayah):
 
 # ==================== INISIALISASI SESSION STATE ====================
 
-# Inisialisasi session state dengan variabel waktu
 if "user_name" not in st.session_state:
     st.session_state.user_name = ""
 if "name_submitted" not in st.session_state:
@@ -602,7 +604,6 @@ if "score" not in st.session_state:
     st.session_state.score_saved = False
     st.session_state.show_save_form = False
     
-    # Variabel waktu baru
     st.session_state.game_start_time = None
     st.session_state.game_end_time = None
     st.session_state.question_start_time = None
@@ -635,7 +636,6 @@ def end_question_timer():
             "duration": duration,
             "correct": st.session_state.feedback.startswith("✅")
         })
-        # Update rata-rata waktu menjawab
         total_time = sum(q["duration"] for q in st.session_state.question_times)
         st.session_state.average_answer_time = total_time / len(st.session_state.question_times)
         return duration
@@ -669,10 +669,8 @@ def update_last_activity():
 
 # ==================== APLIKASI UTAMA ====================
 
-# Terapkan background sidebar
 st.markdown(get_background_image_html(SIDEBAR_BACKGROUND_URL), unsafe_allow_html=True)
 
-# Terapkan background footer dengan brightness dari session state
 st.markdown(get_footer_background_html(FOOTER_BACKGROUND_URL, st.session_state.footer_brightness), unsafe_allow_html=True)
 
 # ==================== INPUT NAMA ====================
@@ -683,7 +681,6 @@ if not st.session_state.name_submitted:
         with col2:
             st.image("https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg", width=150)
             
-            # Tampilkan waktu sekarang
             time_info = get_current_time_info()
             st.markdown(f"""
             <div style="text-align: center; margin: 10px 0; color: #666; font-size: 14px;">
@@ -724,7 +721,6 @@ if not st.session_state.name_submitted:
     
     st.stop()
 
-# Update waktu aktivitas terakhir
 update_last_activity()
 
 # ==================== FUNGSI GAME ====================
@@ -744,12 +740,11 @@ def pilih_wilayah():
     st.session_state.questions_asked.append(target)
     st.session_state.correct_answer = target
     
-    # Sesuaikan jumlah opsi berdasarkan kesulitan
     if st.session_state.difficulty == "Mudah":
         num_options = 2
     elif st.session_state.difficulty == "Sulit":
         num_options = 6
-    else:  # Normal
+    else:
         num_options = 4
     
     others = [w for w in wilayah_list if w != target]
@@ -762,7 +757,6 @@ def pilih_wilayah():
     st.session_state.feedback = ""
     st.session_state.game_started = True
     
-    # Mulai timer untuk pertanyaan baru
     start_question_timer()
 
 def reset_game():
@@ -777,7 +771,6 @@ def reset_game():
     st.session_state.score_saved = False
     st.session_state.show_save_form = False
     
-    # Reset timer
     st.session_state.game_start_time = None
     st.session_state.game_end_time = None
     st.session_state.total_game_duration = 0
@@ -793,7 +786,6 @@ with st.sidebar:
              width=100)
     st.title("🧩 Tebak Jatim")
     
-    # Tampilkan waktu di sidebar
     time_info = get_current_time_info()
     st.markdown(f"""
     <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 8px; border-radius: 10px; margin-bottom: 10px; text-align: center;">
@@ -846,7 +838,6 @@ with st.sidebar:
         with col2:
             st.metric("Soal", f"{st.session_state.total_questions}/{st.session_state.max_questions}")
         
-        # Tampilkan waktu jika game sedang berjalan
         if st.session_state.game_started and not st.session_state.game_over:
             if st.session_state.game_start_time:
                 current_duration = time.time() - st.session_state.game_start_time
@@ -930,7 +921,6 @@ with st.sidebar:
             st.metric("Total Pertanyaan", len(st.session_state.question_times))
             st.metric("Rata-rata Waktu Jawab", f"{st.session_state.average_answer_time:.1f} detik")
             
-            # Waktu tercepat
             fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
             st.metric("⚡ Jawaban Tercepat", f"{fastest['duration']:.1f} detik (Soal {fastest['question_number']})")
     
@@ -944,7 +934,6 @@ with st.sidebar:
             step=5
         )
         
-        # Tambahkan slider untuk mengatur brightness footer
         st.markdown("---")
         st.markdown("### 🎨 Pengaturan Tampilan Footer")
         new_brightness = st.slider(
@@ -982,7 +971,6 @@ if "Game" in selected_menu:
     if st.session_state.game_started and not st.session_state.game_over:
         st.markdown(f"**Tingkat Kesulitan:** {st.session_state.difficulty} | **Soal:** {st.session_state.total_questions + 1}/{st.session_state.max_questions}")
         
-        # Tampilkan timer jika game sedang berjalan
         if st.session_state.game_start_time:
             current_duration = time.time() - st.session_state.game_start_time
             col_timer1, col_timer2, col_timer3 = st.columns(3)
@@ -1013,7 +1001,9 @@ elif "Bromo" in selected_menu:
                 title="Mount Bromo" 
                 frameborder="0" 
                 allowfullscreen 
-                src="https://sketchfab.com/models/72f1c983ba4040eab89d75eb2b0d3e32/embed" 
+                mozallowfullscreen="true" 
+                webkitallowfullscreen="true"
+                src="https://sketchfab.com/models/72f1c983ba4040eab89d75eb2b0d3e32/embed?autostart=1&internal=1&tracking=0&ui_controls=1&ui_infos=1&ui_stop=1" 
                 style="width:100%; height:100%; position:absolute; top:0; left:0;">
             </iframe>
         </div>
@@ -1033,15 +1023,13 @@ elif "Bromo" in selected_menu:
         - Kawah berdiameter ±800 × 600 meter
         - Dikelilingi "Lautan Pasir" seluas 5.250 hektar
         """)
-
-# Statistik singkat
+        
         col1, col2 = st.columns(2)
         with col1:
             st.metric("Ketinggian", "2.329 m")
         with col2:
             st.metric("Status", "Aktif")
         
-        # Info tambahan dalam expander
         with st.expander("📖 Sejarah & Keunikan"):
             st.markdown("""
             **Sejarah:**
@@ -1057,7 +1045,6 @@ elif "Bromo" in selected_menu:
             Kawasan ini memiliki keanekaragaman hayati yang unik dengan berbagai flora dan fauna yang beradaptasi dengan kondisi vulkanik.
             """)
         
-        # Tips kunjungan
         with st.expander("🎫 Tips Kunjungan"):
             st.markdown("""
             **Waktu terbaik:** Mei - Oktober (musim kemarau)
@@ -1081,7 +1068,6 @@ elif "Papan Skor" in selected_menu:
         stats = get_scoreboard_stats(scoreboard)
         st.metric("Total Pemain", stats["total_pemain"])
     
-    # Tampilkan papan skor
     if scoreboard:
         df_data = []
         for i, player in enumerate(scoreboard[:10], 1):
@@ -1098,7 +1084,6 @@ elif "Papan Skor" in selected_menu:
             if player.get("nama") == st.session_state.user_name:
                 nama_display = f"⭐ {player.get('nama')} (Kamu)"
             
-            # Format durasi jika ada
             durasi_display = player.get("durasi", {}).get("format", "-") if player.get("durasi") else "-"
             
             df_data.append({
@@ -1128,7 +1113,6 @@ elif "Papan Skor" in selected_menu:
             use_container_width=True
         )
         
-        # Statistik tambahan
         col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
         with col_stat1:
             st.metric("🏆 Juara 1", scoreboard[0].get("nama", "-") if scoreboard else "-")
@@ -1139,7 +1123,6 @@ elif "Papan Skor" in selected_menu:
         with col_stat4:
             st.metric("🎯 Level Populer", stats["level_populer"])
         
-        # Tampilkan informasi waktu tercepat jika ada
         if stats["waktu_tercepat"]:
             st.success(f"⚡ Waktu Tercepat (Skor Sempurna): {stats['waktu_tercepat']['format']} oleh {stats['waktu_tercepat']['nama']}")
     
@@ -1151,7 +1134,6 @@ elif "Papan Skor" in selected_menu:
         </div>
         """, unsafe_allow_html=True)
     
-    # Tampilkan skor pemain saat ini dengan informasi waktu
     st.markdown("---")
     st.markdown(f"### 📝 Skor Kamu: **{st.session_state.user_name}**")
     st.markdown(f"**Skor:** {st.session_state.score}/{st.session_state.max_questions} (Level: {st.session_state.difficulty})")
@@ -1162,10 +1144,8 @@ elif "Papan Skor" in selected_menu:
     if st.session_state.average_answer_time > 0:
         st.markdown(f"**Rata-rata Waktu Jawab:** {st.session_state.average_answer_time:.1f} detik")
     
-    # Tombol untuk menyimpan skor dari halaman papan skor
     if st.session_state.score > 0 and not st.session_state.score_saved:
         if st.button("💾 Simpan Skor Saya ke Papan Skor", use_container_width=True, type="primary"):
-            # Akhiri timer game jika belum
             if st.session_state.game_start_time and not st.session_state.game_end_time:
                 end_game_timer()
             
@@ -1217,11 +1197,9 @@ elif "Statistik Waktu" in selected_menu:
     with col_time3:
         st.metric("Total Pertanyaan", st.session_state.total_questions)
     
-    # Statistik waktu menjawab
     if st.session_state.question_times:
         st.markdown("### 📊 Statistik Waktu Menjawab")
         
-        # Dataframe statistik
         df_times = pd.DataFrame(st.session_state.question_times)
         df_times['duration_display'] = df_times['duration'].apply(lambda x: f"{x:.1f} detik")
         df_times['status'] = df_times['correct'].apply(lambda x: "✅ Benar" if x else "❌ Salah")
@@ -1237,7 +1215,6 @@ elif "Statistik Waktu" in selected_menu:
             use_container_width=True
         )
         
-        # Grafik waktu menjawab
         st.markdown("### 📈 Grafik Waktu Menjawab")
         chart_data = pd.DataFrame({
             'Soal': df_times['question_number'],
@@ -1274,7 +1251,6 @@ elif "Pengaturan" in selected_menu:
         st.selectbox("Tema", ["Terang", "Gelap", "Kontras Tinggi"], key="setting_theme")
         st.selectbox("Ukuran Font", ["Kecil", "Sedang", "Besar"], key="setting_font")
         
-        # Pengaturan brightness footer di tab tampilan
         st.markdown("---")
         st.markdown("#### 🎨 Pengaturan Footer")
         footer_brightness = st.slider(
@@ -1437,7 +1413,7 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
         
         if "Game" in selected_menu and not st.session_state.game_started and not st.session_state.game_over:
             if st.button("🎮 Mulai Game 10 Pertanyaan", use_container_width=True, type="primary"):
-                start_game_timer()  # Mulai timer game
+                start_game_timer()
                 pilih_wilayah()
                 st.rerun()
     
@@ -1491,7 +1467,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
             st.markdown("---")
             
             if st.session_state.game_over:
-                # Akhiri timer game
                 end_game_timer()
                 
                 col1, col2, col3 = st.columns([1, 2, 1])
@@ -1499,7 +1474,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     st.markdown("## 🎮 Game Selesai!")
                     st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
                     
-                    # Tampilkan informasi waktu
                     if st.session_state.total_game_duration > 0:
                         st.info(f"⏱️ **Total Waktu:** {format_duration(st.session_state.total_game_duration)}")
                     
@@ -1510,7 +1484,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                         st.balloons()
                         st.markdown("### 🏆 Selamat! Nilai Sempurna!")
                         
-                        # Tampilkan statistik khusus untuk nilai sempurna
                         if st.session_state.question_times:
                             fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
                             st.success(f"⚡ **Jawaban Tercepat:** Soal {fastest['question_number']} dalam {fastest['duration']:.1f} detik!")
@@ -1522,7 +1495,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     else:
                         st.markdown("### 💪 Ayo coba lagi! Pasti bisa lebih baik!")
                     
-                    # Form untuk menyimpan skor
                     if not st.session_state.score_saved and st.session_state.score > 0:
                         st.markdown("---")
                         st.markdown("### 📝 Simpan Skor ke Papan Skor")
@@ -1556,7 +1528,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                         reset_game()
                         st.rerun()
                     
-                    # Tombol untuk melihat papan skor
                     if st.button("🏆 Lihat Papan Skor", use_container_width=True):
                         st.session_state.current_page = "Papan Skor"
                         st.rerun()
@@ -1571,7 +1542,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                 with col2:
                     st.markdown(f"### Soal {st.session_state.total_questions + 1}/{st.session_state.max_questions}")
                 
-                # Tampilkan timer untuk soal saat ini
                 if st.session_state.question_start_time:
                     current_question_time = time.time() - st.session_state.question_start_time
                     st.progress(min(current_question_time / 60, 1.0), 
@@ -1595,7 +1565,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                             answer_selected = opt
                 
                 if answer_selected and not st.session_state.answered:
-                    # Catat waktu menjawab
                     question_time = end_question_timer()
                     
                     st.session_state.total_questions += 1
@@ -1645,5 +1614,4 @@ footer_text = {
     "Tentang": "ℹ️ Tebak Jawa Timur - Aplikasi Interaktif untuk Mempelajari Geografi"
 }.get(selected_menu.split(" ")[1] if " " in selected_menu else selected_menu, "🧩 Tebak Jawa Timur")
 
-# Tampilkan footer dengan background dan brightness dari session state
 st.markdown(create_footer_with_background(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness), unsafe_allow_html=True)
