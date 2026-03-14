@@ -1,0 +1,20 @@
+# Requirements untuk Aplikasi Tebak Jawa Timur
+# Dibuat: Maret 2026
+
+# Framework utama
+streamlit==1.31.0
+
+# Library untuk peta interaktif
+folium==0.15.1
+streamlit-folium==0.19.0
+
+# Library untuk manipulasi data
+pandas==2.2.0
+
+# Library bawaan Python (tidak perlu diinstall tapi dicantumkan untuk dokumentasi)
+# json - bawaan Python
+# os - bawaan Python
+# random - bawaan Python
+# datetime - bawaan Python
+# time - bawaan Python
+# base64 - bawaan Python
