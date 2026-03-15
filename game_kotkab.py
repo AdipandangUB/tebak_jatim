@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Belajar Jawa Timur",
+    page_title="Belajar Bentuk Kota & Kabupaten di Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -924,10 +924,10 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Belajar Kota & Wilayah Jawa Timur</div>
+            <div class="footer-title">🧩 Belajar Kota & Kabupaten di Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Belajar Kota & Wilayah Jawa Timur | Versi 2.6.0</p>
-            <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
+            <p>⏰ {current_time} WIB | © 2026 Belajar Kota & Kabupaten di Jawa Timur | Versi 2.6.0</p>
+            <p>Game Belajar Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
     """
