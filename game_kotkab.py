@@ -5,7 +5,14 @@ import random
 import json
 import os
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# Timezone WIB (UTC+7)
+WIB = timezone(timedelta(hours=7))
+
+def now_wib() -> datetime:
+    """Mengembalikan waktu saat ini dalam zona waktu WIB (GMT+7)."""
+    return datetime.now(WIB)
 import time
 
 # ==================== KONFIGURASI HALAMAN ====================
@@ -199,7 +206,7 @@ def add_score(nama, skor, level, total_soal, waktu_mulai=None, waktu_selesai=Non
                 "format": f"{int(durasi_detik // 60)} menit {int(durasi_detik % 60)} detik"
             }
 
-        now = datetime.now()
+        now = now_wib()
         new_entry = {
             "nama": str(nama),
             "skor": int(skor),
@@ -233,7 +240,7 @@ def get_filtered_scoreboard(level_filter="Semua Level", time_filter="Semua Waktu
         scoreboard = [s for s in scoreboard if s.get("level") == level_filter]
 
     if time_filter != "Semua Waktu" and scoreboard:
-        now = datetime.now()
+        now = now_wib()
         if time_filter == "Hari Ini":
             today_str = now.strftime("%Y-%m-%d")
             scoreboard = [s for s in scoreboard if s.get("tanggal_only") == today_str]
@@ -387,7 +394,7 @@ kab_list  = [w for w in wilayah_list if w.startswith("Kabupaten ")]
 # ==================== FUNGSI WAKTU ====================
 
 def get_current_time_info():
-    now = datetime.now()
+    now = now_wib()
     return {
         "tanggal": now.strftime("%Y-%m-%d"),
         "jam": now.strftime("%H:%M:%S"),
@@ -912,7 +919,7 @@ def get_footer_css(image_url, brightness=0.7):
 
 
 def create_footer(footer_text, image_url, brightness=0.7):
-    current_time = datetime.now().strftime("%H:%M:%S")
+    current_time = now_wib().strftime("%H:%M:%S")
     return f"""
     <div class="footer-divider"></div>
     <div class="footer-container">
