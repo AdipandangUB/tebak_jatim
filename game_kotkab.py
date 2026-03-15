@@ -28,7 +28,7 @@ GEOJSON_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kabkotj
 
 SIDEBAR_BACKGROUND_URL = "https://rayadventure.com/wp-content/uploads/2018/06/tempat-wisata-di-jawa-timur.jpg"
 FOOTER_BACKGROUND_URL = "https://awsimages.detik.net.id/community/media/visual/2025/05/08/peta-jawa-timur-1746688646408_169.jpeg?w=1200"
-MUSIC_VIDEO_ID = "77s99NET9Mw"
+MUSIC_VIDEO_ID = "H1tWb3axAdA"
 
 
 # ==================== FUNGSI BACKSOUND MUSIK ====================
