@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Belajar Kota & Kabupaten di Jawa Timur",
+    page_title="Pengetahuan Tentang Kota & Kabupaten di Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -924,9 +924,9 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Belajar Kota & Kabupaten di Jawa Timur</div>
+            <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat "Penguatan Spasial Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Platform Belajar Jawa Timur" Lab. Environmental Infrastructure & Information Systems (EIIS)- Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya  | Versi 2.6.0</p>
+            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat "Penguatan Geopasial Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Platform Pengetahuan Tentang Jawa Timur" Lab. Environmental Infrastructure & Information Systems (EIIS)- Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya  | Versi 2.6.0</p>
             <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
@@ -997,7 +997,7 @@ with st.sidebar:
         "https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg",
         width=100
     )
-    st.title("🧩 Belajar Jatim")
+    st.title("🧩 Pengetahuan Seputar Jatim")
 
     time_info = get_current_time_info()
     st.markdown(
@@ -1143,14 +1143,14 @@ with st.sidebar:
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Belajar Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
+        st.markdown("**Pengetahuan Tentang Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
 
 # --- HALAMAN GAME ---
 if "Game" in selected_menu:
-    st.title("🧩 Belajar Bentuk Kota & Kabupaten di Jawa Timur")
+    st.title("🧩 Tebak Bentuk Kota & Kabupaten di Jawa Timur")
 
     if st.session_state.game_started and not st.session_state.game_over:
         st.markdown(f"**Tingkat Kesulitan:** {st.session_state.difficulty} | "
@@ -1521,7 +1521,7 @@ elif "Tentang" in selected_menu:
         Aplikasi interaktif untuk mempelajari bentuk kota dan kabupaten di Jawa Timur.
 
         **Fitur:**
-        - 🧩 Belajar bentuk kota & kabupaten dari peta
+        - 🧩 Tebak bentuk kota & kabupaten dari peta
         - 📚 Mode belajar dengan info wilayah
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
@@ -1916,15 +1916,15 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
 
 menu_key = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
 footer_texts = {
-    "Game": f"🗺️ Belajar {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
+    "Game": f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
     "Belajar": f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
     "Bromo 3D": "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D": "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
     "Papan Skor": "🏆 Papan Skor Tebak Jawa Timur",
     "Statistik Waktu": "⏱️ Statistik Waktu Bermain",
     "Pengaturan": "⚙️ Sesuaikan pengalaman bermain Anda",
-    "Tentang": "ℹ️ Tebak Jawa Timur - Aplikasi Interaktif Geografi"
+    "Tentang": "ℹ️ Pengetahuan Tentang Jawa Timur - Aplikasi Interaktif Geografi"
 }
-footer_text = footer_texts.get(menu_key, "🧩 Belajar Kota & Kabupaten di Jawa Timur")
+footer_text = footer_texts.get(menu_key, "🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
