@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Pengetahuan Tentang Kota & Kabupaten di Jawa Timur",
+    page_title="Tebak Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -32,6 +32,169 @@ MUSIC_VIDEO_ID = "H1tWb3axAdA"
 
 
 # ==================== FUNGSI BACKSOUND MUSIK ====================
+
+def get_balloon_effect_html():
+    """Menghasilkan HTML efek balon warna-warni terbang ke atas saat nilai sempurna."""
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        background: transparent;
+        overflow: hidden;
+        width: 100%;
+        height: 320px;
+        position: relative;
+      }
+      #congrats-text {
+        position: absolute;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        text-align: center;
+        animation: popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+        white-space: nowrap;
+      }
+      #congrats-text h1 {
+        font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+        font-size: 30px;
+        color: #fff;
+        text-shadow: 0 3px 12px rgba(0,0,0,0.5), 0 0 30px #ffd700;
+        letter-spacing: 2px;
+      }
+      #congrats-text p {
+        font-size: 14px;
+        color: #ffe066;
+        text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        margin-top: 5px;
+      }
+      @keyframes popIn {
+        0%   { opacity:0; transform: translateX(-50%) scale(0.4); }
+        100% { opacity:1; transform: translateX(-50%) scale(1); }
+      }
+      .balloon {
+        position: absolute;
+        bottom: -120px;
+        border-radius: 50%;
+        animation: floatUp linear infinite;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+      }
+      .balloon::after {
+        content: '';
+        position: absolute;
+        bottom: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1.5px;
+        height: 20px;
+        background: rgba(0,0,0,0.2);
+      }
+      .balloon::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 12px;
+        width: 11px;
+        height: 7px;
+        background: rgba(255,255,255,0.45);
+        border-radius: 50%;
+        transform: rotate(-30deg);
+      }
+      @keyframes floatUp {
+        0%   { bottom: -130px; opacity: 0; transform: translateX(0) rotate(-2deg); }
+        6%   { opacity: 1; }
+        48%  { transform: translateX(20px) rotate(2deg); }
+        90%  { opacity: 0.85; }
+        100% { bottom: 110%; opacity: 0; transform: translateX(-10px) rotate(-2deg); }
+      }
+      .confetti {
+        position: absolute;
+        font-size: 18px;
+        animation: confettiFloat linear infinite;
+        opacity: 0;
+        pointer-events: none;
+      }
+      @keyframes confettiFloat {
+        0%   { bottom: -30px; opacity: 0; transform: rotate(0deg) scale(0.5); }
+        10%  { opacity: 1; }
+        85%  { opacity: 0.9; }
+        100% { bottom: 108%; opacity: 0; transform: rotate(360deg) scale(1.2); }
+      }
+    </style>
+    </head>
+    <body>
+    <div id="congrats-text">
+      <h1>🏆 NILAI SEMPURNA! 🏆</h1>
+      <p>Luar biasa! Semua soal dijawab dengan benar! 🎉🌟</p>
+    </div>
+    <div id="balloon-container"></div>
+    <div id="confetti-container"></div>
+    <script>
+    (function() {
+      var colors = [
+        '#FF6B6B','#FF8E53','#FFD93D','#6BCB77',
+        '#4D96FF','#C77DFF','#FF6BD6','#00C9A7',
+        '#F72585','#7209B7','#3A86FF','#FFBE0B',
+        '#06D6A0','#EF476F','#118AB2','#FFB703'
+      ];
+      var emojis = ['⭐','🌟','✨','💫','🎊','🎈','🌈','🎀','🎁','🎶','💖','🥳'];
+      var bc = document.getElementById('balloon-container');
+      var cc = document.getElementById('confetti-container');
+
+      for (var i = 0; i < 24; i++) {
+        (function(idx) {
+          var b = document.createElement('div');
+          b.className = 'balloon';
+          var col = colors[idx % colors.length];
+          b.style.background =
+            'radial-gradient(circle at 35% 32%, ' + lighten(col,0.4) +
+            ', ' + col + ' 58%, ' + darken(col,0.25) + ')';
+          var sz  = 42 + Math.floor(Math.random() * 22);
+          b.style.width    = sz + 'px';
+          b.style.height   = Math.round(sz * 1.22) + 'px';
+          b.style.left     = (2 + (idx / 24) * 96) + '%';
+          b.style.animationDuration = (4.2 + Math.random() * 5).toFixed(2) + 's';
+          b.style.animationDelay   = (Math.random() * 3.8).toFixed(2) + 's';
+          bc.appendChild(b);
+        })(i);
+      }
+
+      for (var j = 0; j < 20; j++) {
+        (function(idx) {
+          var s = document.createElement('div');
+          s.className   = 'confetti';
+          s.textContent = emojis[idx % emojis.length];
+          s.style.left  = (1 + Math.random() * 98) + '%';
+          s.style.fontSize = (12 + Math.random() * 16) + 'px';
+          s.style.animationDuration = (3.5 + Math.random() * 4).toFixed(2) + 's';
+          s.style.animationDelay   = (Math.random() * 4.5).toFixed(2) + 's';
+          cc.appendChild(s);
+        })(j);
+      }
+
+      function lighten(hex, t) { return blend(hex, '#ffffff', t); }
+      function darken(hex, t)  { return blend(hex, '#000000', t); }
+      function blend(h1, h2, t) {
+        var a = ph(h1), b = ph(h2);
+        return 'rgb(' +
+          Math.round(a[0]+(b[0]-a[0])*t) + ',' +
+          Math.round(a[1]+(b[1]-a[1])*t) + ',' +
+          Math.round(a[2]+(b[2]-a[2])*t) + ')';
+      }
+      function ph(hex) {
+        hex = hex.replace('#','');
+        return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
+      }
+    })();
+    </script>
+    </body>
+    </html>
+    """
+
 
 def get_backsound_html(volume=30):
     """Menghasilkan HTML untuk backsound musik dari YouTube (hidden player)."""
@@ -924,9 +1087,9 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur</div>
+            <div class="footer-title">🧩 Tebak Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat "Penguatan Geopasial Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Platform Pengetahuan Tentang Jawa Timur" Lab. Environmental Infrastructure & Information Systems (EIIS)- Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya  | Versi 2.6.0</p>
+            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.6.0</p>
             <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
@@ -962,14 +1125,14 @@ if not st.session_state.name_submitted:
             unsafe_allow_html=True
         )
         st.markdown(
-            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Belajar Kota & Kabupaten di Jawa Timur</h1>"
+            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Tebak Jawa Timur</h1>"
             "<p style='font-size:18px;color:#666;'>Game interaktif pembelajaran wilayah Jawa Timur!</p></div>",
             unsafe_allow_html=True
         )
 
         with st.form("name_form"):
-            st.markdown("### 👤 Silahkan Masukkan Nama Kakak yaa...")
-            name = st.text_input("Nama", placeholder="Contoh: Adipandang", max_chars=30)
+            st.markdown("### 👤 Masukkan Nama Anda")
+            name = st.text_input("Nama", placeholder="Contoh: Andi", max_chars=30)
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
                 submitted = st.form_submit_button("🚀 Mulai Bermain", use_container_width=True, type="primary")
@@ -997,7 +1160,7 @@ with st.sidebar:
         "https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg",
         width=100
     )
-    st.title("🧩 Pengetahuan Seputar Jatim")
+    st.title("🧩 Tebak Jatim")
 
     time_info = get_current_time_info()
     st.markdown(
@@ -1143,7 +1306,7 @@ with st.sidebar:
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Pengetahuan Tentang Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
+        st.markdown("**Tebak Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
@@ -1378,7 +1541,7 @@ elif "Papan Skor" in selected_menu:
         st.info("Belum ada skor. Mainkan game dulu!")
 
     st.markdown("---")
-    st.markdown(f"### 📝 Skor Kakak: **{st.session_state.user_name}**")
+    st.markdown(f"### 📝 Skor Kamu: **{st.session_state.user_name}**")
     st.markdown(f"**Skor:** {st.session_state.score}/{st.session_state.max_questions} (Level: {st.session_state.difficulty})")
     if st.session_state.total_game_duration > 0:
         st.markdown(f"**Waktu:** {format_duration(st.session_state.total_game_duration)}")
@@ -1521,7 +1684,7 @@ elif "Tentang" in selected_menu:
         Aplikasi interaktif untuk mempelajari bentuk kota dan kabupaten di Jawa Timur.
 
         **Fitur:**
-        - 🧩 Tebak bentuk kota & kabupaten dari peta
+        - 🧩 Belajar bentuk kota & wilayah dari peta
         - 📚 Mode belajar dengan info wilayah
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
@@ -1593,7 +1756,7 @@ elif "Tentang" in selected_menu:
                              border:1px solid rgba(255,215,0,0.4);'>📜 Script</span>
                 <span style='background:rgba(255,215,0,0.2);color:#ffd700;
                              padding:3px 10px;border-radius:12px;font-size:11px;
-                             border:1px solid rgba(255,215,0,0.4);'>🗺️ GIS Engineer</span>
+                             border:1px solid rgba(255,215,0,0.4);'>🗺️ WebGIS</span>
               </div>
             </div>
             """,
@@ -1804,6 +1967,8 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     st.info(f"⚡ **Rata-rata Jawab:** {st.session_state.average_answer_time:.1f} dtk")
 
                 if st.session_state.score == st.session_state.max_questions:
+                    # ── Efek Balon Kustom ──
+                    st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
                     st.balloons()
                     st.markdown("### 🏆 Selamat! Nilai Sempurna!")
                     if st.session_state.question_times:
@@ -1923,8 +2088,8 @@ footer_texts = {
     "Papan Skor": "🏆 Papan Skor Tebak Jawa Timur",
     "Statistik Waktu": "⏱️ Statistik Waktu Bermain",
     "Pengaturan": "⚙️ Sesuaikan pengalaman bermain Anda",
-    "Tentang": "ℹ️ Pengetahuan Tentang Jawa Timur - Aplikasi Interaktif Geografi"
+    "Tentang": "ℹ️ Tebak Jawa Timur - Aplikasi Interaktif Geografi"
 }
-footer_text = footer_texts.get(menu_key, "🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur")
+footer_text = footer_texts.get(menu_key, "🧩 Tebak Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
