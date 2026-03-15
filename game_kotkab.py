@@ -39,7 +39,7 @@ def get_backsound_html(volume=30):
     <style>
     #backsound-container {{
         position: fixed;
-        bottom: 20px;
+        top: 14px;
         right: 20px;
         z-index: 99999;
         background: linear-gradient(135deg, #667eea, #764ba2);
