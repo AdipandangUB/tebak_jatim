@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Belajar Kota dan Wilayah Jawa Timur",
+    page_title="Tebak Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -467,13 +467,13 @@ def start_question_timer():
     st.session_state.question_start_time = time.time()
 
 
-def end_question_timer():
+def end_question_timer(is_correct=False):
     if st.session_state.question_start_time:
         duration = time.time() - st.session_state.question_start_time
         st.session_state.question_times.append({
-            "question_number": st.session_state.total_questions,
+            "question_number": st.session_state.total_questions + 1,  # mulai dari 1
             "duration": duration,
-            "correct": st.session_state.feedback.startswith("✅")
+            "correct": is_correct  # nilai benar/salah dikirim langsung, bukan dari feedback
         })
         total = sum(q["duration"] for q in st.session_state.question_times)
         st.session_state.average_answer_time = total / len(st.session_state.question_times)
@@ -924,9 +924,9 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Belajar Kota & Wilayah Jawa Timur</div>
+            <div class="footer-title">🧩 Tebak Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Belajar Jawa Timur | Versi 2.6.0</p>
+            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.6.0</p>
             <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
@@ -962,7 +962,7 @@ if not st.session_state.name_submitted:
             unsafe_allow_html=True
         )
         st.markdown(
-            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Belajar Kota & Wilayah Jawa Timur</h1>"
+            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Tebak Jawa Timur</h1>"
             "<p style='font-size:18px;color:#666;'>Game interaktif pembelajaran wilayah Jawa Timur!</p></div>",
             unsafe_allow_html=True
         )
@@ -997,7 +997,7 @@ with st.sidebar:
         "https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg",
         width=100
     )
-    st.title("🧩 Belajar Kota & Wilayah Jatim")
+    st.title("🧩 Tebak Jatim")
 
     time_info = get_current_time_info()
     st.markdown(
@@ -1150,7 +1150,7 @@ with st.sidebar:
 
 # --- HALAMAN GAME ---
 if "Game" in selected_menu:
-    st.title("🧩 Belajar Bentuk Kota & Kabupaten di Jawa Timur")
+    st.title("🧩 Tebak Bentuk Kota & Kabupaten di Jawa Timur")
 
     if st.session_state.game_started and not st.session_state.game_over:
         st.markdown(f"**Tingkat Kesulitan:** {st.session_state.difficulty} | "
@@ -1519,7 +1519,7 @@ elif "Tentang" in selected_menu:
         Aplikasi interaktif untuk mempelajari bentuk kota dan kabupaten di Jawa Timur.
 
         **Fitur:**
-        - 🧩 Belajar bentuk kota & kabupaten dari peta
+        - 🧩 Tebak bentuk wilayah dari peta
         - 📚 Mode belajar dengan info wilayah
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
@@ -1733,9 +1733,10 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                         answer_selected = opt
 
             if answer_selected and not st.session_state.answered:
-                q_time = end_question_timer()
+                is_correct = (answer_selected == st.session_state.correct_answer)
+                q_time = end_question_timer(is_correct)
                 st.session_state.total_questions += 1
-                if answer_selected == st.session_state.correct_answer:
+                if is_correct:
                     st.session_state.score += 1
                     st.session_state.feedback = f"✅ **Benar! Hebat! (Waktu: {q_time:.1f} dtk)**"
                 else:
@@ -1777,7 +1778,7 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
 
 menu_key = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
 footer_texts = {
-    "Game": f"🗺️ Belajar {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
+    "Game": f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
     "Belajar": f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
     "Bromo 3D": "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D": "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
@@ -1786,6 +1787,6 @@ footer_texts = {
     "Pengaturan": "⚙️ Sesuaikan pengalaman bermain Anda",
     "Tentang": "ℹ️ Tebak Jawa Timur - Aplikasi Interaktif Geografi"
 }
-footer_text = footer_texts.get(menu_key, "🧩 Belajar Kota & Wilayah Jawa Timur")
+footer_text = footer_texts.get(menu_key, "🧩 Tebak Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
