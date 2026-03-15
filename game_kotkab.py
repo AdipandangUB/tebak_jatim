@@ -926,8 +926,8 @@ def create_footer(footer_text, image_url, brightness=0.7):
         <div class="footer-content">
             <div class="footer-title">🧩 Tebak Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.5.0</p>
-            <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
+            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.6.0</p>
+            <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
     """
@@ -984,7 +984,7 @@ if not st.session_state.name_submitted:
         st.markdown("---")
         st.markdown(
             "<div style='text-align:center;color:#666;font-size:14px;'>"
-            "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🌋 Bromo 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
+            "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
             unsafe_allow_html=True
         )
     st.stop()
@@ -1014,8 +1014,8 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    menu_options = ["🎮 Game", "📚 Belajar", "🌋 Bromo 3D", "🏆 Papan Skor",
-                    "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
+    menu_options = ["🎮 Game", "📚 Belajar", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
+                    "🏆 Papan Skor", "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
     selected_menu = st.radio("Menu", menu_options, index=0,
                              label_visibility="collapsed", key="main_navigation")
 
@@ -1080,6 +1080,15 @@ with st.sidebar:
             st.metric("Ketinggian", "2.329 m")
         with c2:
             st.metric("Status", "Aktif")
+
+    elif "Balaikota" in selected_menu:
+        st.header("🏛️ Balaikota Malang 3D")
+        st.markdown("Visualisasi 3D interaktif Balaikota Malang.")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.metric("Kota", "Malang")
+        with c2:
+            st.metric("Teknologi", "Cesium 3D")
 
     elif "Papan Skor" in selected_menu:
         st.header("🏆 Papan Skor")
@@ -1209,6 +1218,114 @@ elif "Bromo" in selected_menu:
             **Waktu terbaik:** Mei – Oktober
             **Akses:** ±3-4 jam dari Surabaya
             **Tiket masuk:** Rp 29.000–34.000
+            """)
+
+# --- HALAMAN BALAIKOTA MALANG 3D ---
+elif "Balaikota" in selected_menu:
+    st.title("🏛️ Balaikota Malang - Visualisasi 3D Interaktif")
+
+    CESIUM_URL = (
+        "https://sandcastle.cesium.com/standalone.html#c=jZJvb9owEMa/ipUXVZA2p4G2"
+        "KhqtxmCjQRBEyWiDIk3GMWBi7NQ2lGTqd5/zh62dtmmvLPt+99zdc3YcMJCIa9AjSu53wxlA"
+        "GBOlgBYgE3sJqOAAKUW0injFQE9wGJMV2jPdLeFAJISDGxBZJBtulgNMJ3Tofc0916ee8vj9"
+        "Je55V16SPs57wzY00FM8SAzkNcMgOZ8Ec7qYnTfD5mIzCqbu4iHUk76f+JnL/P70Ypzj3M9j"
+        "Ng4wHfWG6cKIjYOw6ffHRtzfLlufGM68qwdTHLe8guFhNowLNnyc0sn2s+vn3Qt/uz5OAtaG"
+        "yZfD/bzVPzbDRM7zULa/Pb5funfr6+l8sF0trikdNf0gu7sLRWR9iDgWXGlwoOSZSDMmJ8+1"
+        "XXBevtmRhct7T3CNKCcyshomL+JaZuB7xAGoJDRlxFhpNNAzoifTYXW0+kEVhispdsbkbmG7"
+        "F9vNS/eyfVEIgroJqDDhBKaS7qimB6IgimO7Vq/AqkCN50LsAvEaKBDHAd00ZRnQGwLqhQKl"
+        "M0YAXQGTTY5UFXs/tU+OWiJluq+FYPkxYPVcVjV5dnGC02hG1vgR2xXTAGdn/whD89n+Azl9"
+        "vlnRaqOAG5XJ4Gdj1RRvVvXa5DLzr4rlJC8RfwEYabwBNpFSyMavRQpGIBPr+t3gBrbeWZ2y"
+        "6m1BfaS7VEgN9pLZEDqa7FKGNFHOco8T0x9WqsjrOKeUTkwPgMY3f/hJADPjs4ms9ozNaE4i"
+        "67bjGP5NGhMopnw9ORDJUGaQoo3Oxr0dVQEIYccx16Lo77laCLZE8pXuDw"
+    )
+
+    cl, cr = st.columns([2, 1])
+
+    with cl:
+        st.markdown("### 🗺️ Model 3D Balaikota Malang")
+        st.markdown(
+            "<div style='background:#e8f4fd;padding:10px;border-radius:8px;margin-bottom:10px;"
+            "border-left:4px solid #0066cc;font-size:13px;color:#333;'>"
+            "💡 <strong>Tips:</strong> Gunakan mouse untuk memutar, scroll untuk zoom, "
+            "dan klik kanan + drag untuk geser tampilan 3D.</div>",
+            unsafe_allow_html=True
+        )
+        st.components.v1.html(
+            f"""
+            <div style="width:100%;height:600px;position:relative;border-radius:12px;
+                        overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                <iframe
+                    src="{CESIUM_URL}"
+                    width="100%"
+                    height="100%"
+                    style="border:none;position:absolute;top:0;left:0;"
+                    allow="fullscreen"
+                    allowfullscreen
+                ></iframe>
+            </div>
+            """,
+            height=620,
+            scrolling=False
+        )
+
+    with cr:
+        st.markdown("### 📍 Informasi Balaikota")
+        st.markdown(
+            "<div style='background:linear-gradient(135deg,#667eea,#764ba2);"
+            "padding:15px;border-radius:12px;color:white;margin-bottom:15px;'>"
+            "<h4 style='margin:0 0 8px 0;color:#ffd700;'>🏛️ Balaikota Malang</h4>"
+            "<p style='margin:3px 0;font-size:13px;'>📍 Jl. Tugu No.1, Klojen</p>"
+            "<p style='margin:3px 0;font-size:13px;'>🏙️ Kota Malang, Jawa Timur</p>"
+            "<p style='margin:3px 0;font-size:13px;'>🇮🇩 Indonesia</p>"
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+        c1, c2 = st.columns(2)
+        with c1:
+            st.metric("Kota", "Malang")
+            st.metric("Gaya", "Kolonial")
+        with c2:
+            st.metric("Dibangun", "1929")
+            st.metric("Teknologi", "Cesium")
+
+        with st.expander("📖 Sejarah & Arsitektur", expanded=True):
+            st.markdown("""
+            Balaikota Malang dibangun pada masa kolonial Belanda tahun **1929** dengan
+            arsitektur bergaya **Art Deco** dan Neo-Klasik yang khas.
+
+            **Ciri Arsitektur:**
+            - Fasad simetris dengan pilar-pilar besar
+            - Atap pelana tinggi khas bangunan kolonial
+            - Ornamen detail khas era 1920-an
+            - Taman depan yang tertata rapi
+
+            **Fungsi Saat Ini:**
+            - Kantor Walikota Malang
+            - Pusat pemerintahan Kota Malang
+            - Objek wisata sejarah dan arsitektur
+            """)
+
+        with st.expander("🎫 Info Kunjungan"):
+            st.markdown("""
+            **Lokasi:** Jl. Tugu No.1, Malang
+            **Akses:** ±5 menit dari Alun-alun Kota Malang
+            **Transportasi:** Angkot, ojek online, atau jalan kaki dari pusat kota
+            **Jam Buka:** Senin–Jumat, 08.00–16.00 WIB
+            **Tiket:** Gratis (area taman depan)
+            """)
+
+        with st.expander("🌐 Tentang Visualisasi Cesium"):
+            st.markdown("""
+            Visualisasi ini menggunakan **CesiumJS**, platform 3D geospatial
+            berbasis WebGL untuk menampilkan model bangunan dalam lingkungan
+            peta 3D yang interaktif.
+
+            **Kontrol:**
+            - 🖱️ **Klik kiri + drag** → Putar tampilan
+            - 🖱️ **Scroll** → Zoom in/out
+            - 🖱️ **Klik kanan + drag** → Geser peta
+            - 🖱️ **Double klik** → Fokus ke titik
             """)
 
 # --- HALAMAN PAPAN SKOR ---
@@ -1400,6 +1517,7 @@ elif "Tentang" in selected_menu:
         - 🧩 Tebak bentuk wilayah dari peta
         - 📚 Mode belajar dengan info wilayah
         - 🌋 Visualisasi 3D Gunung Bromo
+        - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
         - 🏆 Papan skor sesi
         - ⏱️ Statistik waktu bermain
         - 🎵 Musik latar otomatis (play/pause via tombol pojok kanan bawah)
@@ -1407,12 +1525,13 @@ elif "Tentang" in selected_menu:
         **Teknologi:**
         - Streamlit, Folium, streamlit-folium
         - GeoJSON data wilayah
-        - Sketchfab embed 3D
+        - Sketchfab embed 3D (Bromo)
+        - CesiumJS 3D Geospatial (Balaikota)
         - YouTube IFrame API (backsound)
         """)
     with c2:
         st.image("https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg")
-        st.markdown("**Versi:** 2.5.0")
+        st.markdown("**Versi:** 2.6.0")
         st.markdown("**Musik:** 🎵 Aktif (YouTube)")
 
 
@@ -1656,6 +1775,7 @@ footer_texts = {
     "Game": f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
     "Belajar": f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
     "Bromo 3D": "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
+    "Balaikota 3D": "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
     "Papan Skor": "🏆 Papan Skor Tebak Jawa Timur",
     "Statistik Waktu": "⏱️ Statistik Waktu Bermain",
     "Pengaturan": "⚙️ Sesuaikan pengalaman bermain Anda",
