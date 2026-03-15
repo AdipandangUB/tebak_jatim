@@ -997,7 +997,7 @@ with st.sidebar:
         "https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg",
         width=100
     )
-    st.title("🧩 Tebak Jatim")
+    st.title("🧩 Belajar Jatim")
 
     time_info = get_current_time_info()
     st.markdown(
@@ -1143,7 +1143,7 @@ with st.sidebar:
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Tebak Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
+        st.markdown("**Belajar Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
@@ -1378,7 +1378,7 @@ elif "Papan Skor" in selected_menu:
         st.info("Belum ada skor. Mainkan game dulu!")
 
     st.markdown("---")
-    st.markdown(f"### 📝 Skor Kamu: **{st.session_state.user_name}**")
+    st.markdown(f"### 📝 Skor Kakak: **{st.session_state.user_name}**")
     st.markdown(f"**Skor:** {st.session_state.score}/{st.session_state.max_questions} (Level: {st.session_state.difficulty})")
     if st.session_state.total_game_duration > 0:
         st.markdown(f"**Waktu:** {format_duration(st.session_state.total_game_duration)}")
