@@ -968,7 +968,7 @@ if not st.session_state.name_submitted:
         )
 
         with st.form("name_form"):
-            st.markdown("### 👤 Silahkan Masukkan Nama Kakak ya...")
+            st.markdown("### 👤 Silahkan Masukkan Nama Kakak yaa...")
             name = st.text_input("Nama", placeholder="Contoh: Adipandang", max_chars=30)
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
