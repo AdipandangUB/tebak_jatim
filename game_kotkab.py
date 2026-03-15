@@ -27,7 +27,7 @@ st.set_page_config(
 GEOJSON_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kabkotjatim_ok.geojson")
 
 SIDEBAR_BACKGROUND_URL = "https://rayadventure.com/wp-content/uploads/2018/06/tempat-wisata-di-jawa-timur.jpg"
-FOOTER_BACKGROUND_URL = "https://awsimages.detik.net.id/community/media/visual/2025/05/08/peta-jawa-timur-1746688646408_169.jpeg?w=1200"
+FOOTER_BACKGROUND_URL = "https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/231/2024/09/11/Bisa-melihat-sunrise-yang-menakjubkan-di-Gunung-Bromo-Gambar-dari-Elizaveta-G-Shutterstock-213080307.png"
 MUSIC_VIDEO_ID = "H1tWb3axAdA"
 
 
