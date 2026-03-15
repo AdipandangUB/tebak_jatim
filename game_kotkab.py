@@ -34,11 +34,6 @@ MUSIC_VIDEO_ID = "H1tWb3axAdA"
 # ==================== FUNGSI EFEK BALON 3 LAPISAN ====================
 
 def get_perfect_score_markdown_effect():
-    """
-    LAPISAN 2: Efek balon & banner via st.markdown + CSS @keyframes.
-    Tidak bergantung iframe — berjalan langsung di DOM utama Streamlit.
-    Paling reliable di Streamlit Cloud.
-    """
     return """
     <style>
     @keyframes drift {
@@ -187,10 +182,6 @@ def get_perfect_score_markdown_effect():
 
 
 def get_balloon_effect_html():
-    """
-    LAPISAN 3: Efek balon SVG warna-warni terbang ke atas via iframe.
-    Bonus visual — tetap dipertahankan sebagai pelengkap lapisan 2.
-    """
     return """
     <!DOCTYPE html>
     <html>
@@ -352,36 +343,56 @@ def get_balloon_effect_html():
     """
 
 
+# ==================== FUNGSI BACKSOUND (PERBAIKAN) ====================
+# PERUBAHAN: Tombol musik sekarang dirender di dalam sidebar dengan height=58
+# sehingga tombol terlihat dan tidak ter-clip oleh iframe height=0.
+
 def get_backsound_html(volume=30):
-    """Menghasilkan HTML untuk backsound musik dari YouTube (hidden player)."""
+    """
+    PERBAIKAN v2.7:
+    - Hapus position:fixed (tidak berfungsi di dalam iframe Streamlit)
+    - Render tombol sebagai elemen in-flow biasa
+    - height=58 di st.components memberi ruang cukup untuk tombol
+    - Tombol ditempatkan di sidebar agar selalu terlihat di semua halaman
+    """
     return f"""
     <style>
-    #backsound-container {{
-        position: fixed;
-        top: 14px;
-        right: 20px;
-        z-index: 99999;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 50px;
-        padding: 8px 18px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.35);
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    body {{
+        background: transparent;
+        overflow: hidden;
         display: flex;
         align-items: center;
+        justify-content: center;
+        height: 54px;
+    }}
+
+    #backsound-btn {{
+        display: inline-flex;
+        align-items: center;
         gap: 10px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50px;
+        padding: 10px 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.35);
         cursor: pointer;
         color: white;
         font-size: 13px;
         font-weight: bold;
+        font-family: Arial, sans-serif;
         transition: all 0.3s ease;
-        min-width: 140px;
-        justify-content: center;
-        user-select: none;
         border: 1.5px solid rgba(255,255,255,0.25);
+        user-select: none;
+        white-space: nowrap;
     }}
-    #backsound-container:hover {{
-        transform: scale(1.07);
+    #backsound-btn:hover {{
+        transform: scale(1.05);
         box-shadow: 0 8px 24px rgba(102,126,234,0.5);
     }}
+    #backsound-btn:active {{
+        transform: scale(0.97);
+    }}
+
     #yt-iframe-hidden {{
         display: none;
         width: 0;
@@ -389,6 +400,7 @@ def get_backsound_html(volume=30):
         position: absolute;
         pointer-events: none;
     }}
+
     #music-visualizer {{
         display: flex;
         align-items: flex-end;
@@ -401,7 +413,7 @@ def get_backsound_html(volume=30):
         border-radius: 2px;
         animation: musicBounce 0.7s ease-in-out infinite alternate;
     }}
-    .music-bar:nth-child(1) {{ animation-delay: 0.0s; height: 6px; }}
+    .music-bar:nth-child(1) {{ animation-delay: 0.00s; height: 6px; }}
     .music-bar:nth-child(2) {{ animation-delay: 0.15s; height: 14px; }}
     .music-bar:nth-child(3) {{ animation-delay: 0.05s; height: 9px; }}
     .music-bar:nth-child(4) {{ animation-delay: 0.20s; height: 16px; }}
@@ -417,6 +429,7 @@ def get_backsound_html(volume=30):
     }}
     </style>
 
+    <!-- Hidden YouTube Audio Player -->
     <iframe
         id="yt-iframe-hidden"
         src="https://www.youtube.com/embed/{MUSIC_VIDEO_ID}?autoplay=1&loop=1&playlist={MUSIC_VIDEO_ID}&enablejsapi=1&controls=0&rel=0&modestbranding=1"
@@ -424,7 +437,8 @@ def get_backsound_html(volume=30):
         allowfullscreen
     ></iframe>
 
-    <div id="backsound-container" onclick="toggleMusic()" title="Klik untuk play / pause musik latar">
+    <!-- Tombol Musik Visible -->
+    <div id="backsound-btn" onclick="toggleMusic()" title="Klik untuk play / pause musik latar">
         <div id="music-visualizer">
             <div class="music-bar"></div>
             <div class="music-bar"></div>
@@ -441,7 +455,7 @@ def get_backsound_html(volume=30):
         var ytPlayer = null;
         var initVolume = {volume};
 
-        /* Load YouTube IFrame API */
+        /* Load YouTube IFrame API sekali saja */
         if (!window._ytApiLoaded) {{
             window._ytApiLoaded = true;
             var tag = document.createElement('script');
@@ -449,7 +463,7 @@ def get_backsound_html(volume=30):
             document.head.appendChild(tag);
         }}
 
-        /* Callback dipanggil oleh YouTube API */
+        /* Callback dipanggil oleh YouTube API setelah siap */
         window.onYouTubeIframeAPIReady = function() {{
             ytPlayer = new YT.Player('yt-iframe-hidden', {{
                 events: {{
@@ -766,7 +780,7 @@ _defaults = {
     "scoreboard_data": [],
     "music_volume": 30,
     "music_enabled": True,
-    "show_perfect_balloon": False,   # ← trigger efek balon sempurna
+    "show_perfect_balloon": False,
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
@@ -1190,6 +1204,11 @@ def get_background_image_html(image_url):
     }}
     [data-testid="stSidebar"] .stSlider label {{ color: white !important; }}
     [data-testid="stSidebar"] hr {{ border-color: rgba(255,255,255,0.3); }}
+
+    /* Hapus padding default iframe komponen di sidebar agar tombol musik rapat */
+    [data-testid="stSidebar"] iframe {{
+        display: block;
+    }}
     </style>
     """
 
@@ -1247,7 +1266,7 @@ def create_footer(footer_text, image_url, brightness=0.7):
         <div class="footer-content">
             <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.6.0</p>
+            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.7.0</p>
             <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
@@ -1258,13 +1277,6 @@ def create_footer(footer_text, image_url, brightness=0.7):
 
 st.markdown(get_background_image_html(SIDEBAR_BACKGROUND_URL), unsafe_allow_html=True)
 st.markdown(get_footer_css(FOOTER_BACKGROUND_URL, st.session_state.footer_brightness), unsafe_allow_html=True)
-
-# ==================== RENDER BACKSOUND MUSIK ====================
-st.components.v1.html(
-    get_backsound_html(st.session_state.music_volume),
-    height=0,
-    scrolling=False
-)
 
 
 # ==================== HALAMAN LOGIN NAMA ====================
@@ -1358,6 +1370,24 @@ with st.sidebar:
         f"<p style='color:white;margin:0;'>👋 Halo Kak <strong>{st.session_state.user_name}</strong>!</p></div>",
         unsafe_allow_html=True
     )
+
+    # ============================================================
+    # ✅ PERBAIKAN TOMBOL MUSIK — dirender di sidebar dengan height=58
+    # Ini menggantikan render lama yang menggunakan height=0 di luar sidebar.
+    # position:fixed tidak berfungsi di dalam iframe Streamlit, sehingga
+    # tombol harus dirender sebagai elemen in-flow di dalam sidebar.
+    # ============================================================
+    st.markdown(
+        "<p style='color:rgba(255,255,255,0.7);font-size:11px;margin-bottom:2px;'>🎵 Kontrol Musik</p>",
+        unsafe_allow_html=True
+    )
+    st.components.v1.html(
+        get_backsound_html(st.session_state.music_volume),
+        height=58,
+        scrolling=False
+    )
+
+    st.markdown("---")
 
     menu_options = ["🎮 Game", "📚 Belajar", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
                     "🏆 Papan Skor", "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
@@ -1483,11 +1513,11 @@ with st.sidebar:
         if new_vol_sb != st.session_state.music_volume:
             st.session_state.music_volume = new_vol_sb
             st.rerun()
-        st.caption("Tombol 🎵 di pojok kanan bawah untuk play/pause")
+        st.caption("Gunakan tombol 🎵 di atas untuk play/pause musik")
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.6.0\n\nAplikasi interaktif geografi Jawa Timur.")
+        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.7.0\n\nAplikasi interaktif geografi Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
@@ -1809,8 +1839,8 @@ elif "Pengaturan" in selected_menu:
         st.markdown(
             "<div style='background:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:10px;'>"
             "<p style='margin:0;font-size:14px;color:#555;'>🎵 Musik latar berjalan otomatis saat "
-            "aplikasi dibuka. Gunakan tombol <strong>🎵 Musik On/Off</strong> di pojok kanan "
-            "bawah layar untuk pause/play musik kapan saja.</p></div>",
+            "aplikasi dibuka. Gunakan tombol <strong>🎵 Musik On/Off</strong> di sidebar "
+            "(bagian atas, bawah nama Anda) untuk pause/play musik kapan saja.</p></div>",
             unsafe_allow_html=True
         )
 
@@ -1820,11 +1850,11 @@ elif "Pengaturan" in selected_menu:
             value=st.session_state.music_volume,
             step=5,
             key="settings_music_volume",
-            help="Geser untuk mengatur volume musik latar. Ubah volume lalu refresh halaman untuk menerapkan."
+            help="Geser untuk mengatur volume musik latar. Klik Simpan & Terapkan untuk menerapkan."
         )
         if new_vol != st.session_state.music_volume:
             st.session_state.music_volume = new_vol
-            st.info("⚠️ Perubahan volume akan diterapkan saat halaman di-refresh berikutnya.")
+            st.info("⚠️ Klik 'Simpan & Terapkan Volume' untuk menerapkan perubahan.")
 
         vol_pct = st.session_state.music_volume
         if vol_pct == 0:
@@ -1870,7 +1900,7 @@ elif "Tentang" in selected_menu:
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
         - 🏆 Papan skor sesi
         - ⏱️ Statistik waktu bermain
-        - 🎵 Musik latar otomatis (play/pause via tombol pojok kanan atas)
+        - 🎵 Musik latar otomatis (tombol play/pause di sidebar)
         - 🎈 Efek balon kejutan untuk nilai sempurna!
 
         **Teknologi:**
@@ -1882,7 +1912,7 @@ elif "Tentang" in selected_menu:
         """)
     with c2:
         st.image("https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg")
-        st.markdown("**Versi:** 2.6.0")
+        st.markdown("**Versi:** 2.7.0")
         st.markdown("**Musik:** 🎵 Aktif (YouTube)")
 
     st.markdown("---")
@@ -2135,23 +2165,12 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
             end_game_timer()
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
-                # ============================================================
-                # ✅ EFEK BALON 3 LAPISAN — NILAI SEMPURNA
-                # Ditampilkan PERTAMA agar langsung terlihat saat scroll
-                # ============================================================
                 is_perfect = (st.session_state.score == st.session_state.max_questions)
 
                 if is_perfect or st.session_state.show_perfect_balloon:
-                    # ── LAPISAN 1: st.balloons() bawaan Streamlit (PASTI JALAN) ──
                     st.balloons()
-
-                    # ── LAPISAN 2: CSS @keyframes via st.markdown (PALING RELIABLE) ──
                     st.markdown(get_perfect_score_markdown_effect(), unsafe_allow_html=True)
-
-                    # ── LAPISAN 3: HTML iframe balon SVG (bonus visual) ──
                     st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
-
-                    # Reset flag setelah ditampilkan
                     st.session_state.show_perfect_balloon = False
 
                 st.markdown("## 🎮 Game Selesai!")
@@ -2241,11 +2260,9 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     )
                 st.session_state.answered = True
 
-                # ── Cek apakah soal terakhir sudah selesai → set game_over ──
                 if st.session_state.total_questions >= st.session_state.max_questions:
                     st.session_state.game_over = True
                     end_game_timer()
-                    # Cek nilai sempurna — aktifkan flag balon
                     if st.session_state.score == st.session_state.max_questions:
                         st.session_state.show_perfect_balloon = True
 
