@@ -1355,7 +1355,7 @@ with st.sidebar:
     st.markdown(
         f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);padding:10px;border-radius:10px;"
         f"margin-bottom:10px;text-align:center;'>"
-        f"<p style='color:white;margin:0;'>👋 Halo, <strong>{st.session_state.user_name}</strong>!</p></div>",
+        f"<p style='color:white;margin:0;'>👋 Halo Kak <strong>{st.session_state.user_name}</strong>!</p></div>",
         unsafe_allow_html=True
     )
 
