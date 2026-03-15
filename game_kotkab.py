@@ -2017,7 +2017,7 @@ elif "Tentang" in selected_menu:
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(192,57,106,0.3);
                         height:100%;'>
-              <img src='https://pwk.ub.ac.id/wp-content/uploads/2024/09/f38dab14-ce4b-4ead-b3d5-acd4c9afa5b4.jpg'
+              <img src='https://0.academia-photos.com/12624073/3599023/4222310/s200_mustika.anggraeni.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
