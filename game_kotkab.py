@@ -21,18 +21,156 @@ GEOJSON_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kabkotj
 
 SIDEBAR_BACKGROUND_URL = "https://rayadventure.com/wp-content/uploads/2018/06/tempat-wisata-di-jawa-timur.jpg"
 FOOTER_BACKGROUND_URL = "https://awsimages.detik.net.id/community/media/visual/2025/05/08/peta-jawa-timur-1746688646408_169.jpeg?w=1200"
+MUSIC_VIDEO_ID = "77s99NET9Mw"
+
+
+# ==================== FUNGSI BACKSOUND MUSIK ====================
+
+def get_backsound_html(volume=30):
+    """Menghasilkan HTML untuk backsound musik dari YouTube (hidden player)."""
+    return f"""
+    <style>
+    #backsound-container {{
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 99999;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50px;
+        padding: 8px 18px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.35);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        color: white;
+        font-size: 13px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        min-width: 140px;
+        justify-content: center;
+        user-select: none;
+        border: 1.5px solid rgba(255,255,255,0.25);
+    }}
+    #backsound-container:hover {{
+        transform: scale(1.07);
+        box-shadow: 0 8px 24px rgba(102,126,234,0.5);
+    }}
+    #yt-iframe-hidden {{
+        display: none;
+        width: 0;
+        height: 0;
+        position: absolute;
+        pointer-events: none;
+    }}
+    #music-visualizer {{
+        display: flex;
+        align-items: flex-end;
+        gap: 2px;
+        height: 18px;
+    }}
+    .music-bar {{
+        width: 3px;
+        background: linear-gradient(to top, #ffd700, #fff);
+        border-radius: 2px;
+        animation: musicBounce 0.7s ease-in-out infinite alternate;
+    }}
+    .music-bar:nth-child(1) {{ animation-delay: 0.0s; height: 6px; }}
+    .music-bar:nth-child(2) {{ animation-delay: 0.15s; height: 14px; }}
+    .music-bar:nth-child(3) {{ animation-delay: 0.05s; height: 9px; }}
+    .music-bar:nth-child(4) {{ animation-delay: 0.20s; height: 16px; }}
+    .music-bar:nth-child(5) {{ animation-delay: 0.10s; height: 7px; }}
+    @keyframes musicBounce {{
+        from {{ transform: scaleY(0.35); opacity: 0.55; }}
+        to   {{ transform: scaleY(1.15); opacity: 1.0; }}
+    }}
+    .music-bar.paused {{
+        animation: none !important;
+        height: 3px !important;
+        opacity: 0.4;
+    }}
+    </style>
+
+    <iframe
+        id="yt-iframe-hidden"
+        src="https://www.youtube.com/embed/{MUSIC_VIDEO_ID}?autoplay=1&loop=1&playlist={MUSIC_VIDEO_ID}&enablejsapi=1&controls=0&rel=0&modestbranding=1"
+        allow="autoplay; encrypted-media"
+        allowfullscreen
+    ></iframe>
+
+    <div id="backsound-container" onclick="toggleMusic()" title="Klik untuk play / pause musik latar">
+        <div id="music-visualizer">
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+        </div>
+        <span id="music-label">🎵 Musik On</span>
+    </div>
+
+    <script>
+    (function() {{
+        var isMusicPlaying = true;
+        var ytPlayer = null;
+        var initVolume = {volume};
+
+        /* Load YouTube IFrame API */
+        if (!window._ytApiLoaded) {{
+            window._ytApiLoaded = true;
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
+        }}
+
+        /* Callback dipanggil oleh YouTube API */
+        window.onYouTubeIframeAPIReady = function() {{
+            ytPlayer = new YT.Player('yt-iframe-hidden', {{
+                events: {{
+                    'onReady': function(event) {{
+                        event.target.setVolume(initVolume);
+                        event.target.playVideo();
+                    }},
+                    'onStateChange': function(event) {{
+                        /* Auto-replay jika selesai */
+                        if (event.data === YT.PlayerState.ENDED) {{
+                            event.target.playVideo();
+                        }}
+                    }}
+                }}
+            }});
+        }};
+
+        window.toggleMusic = function() {{
+            var bars  = document.querySelectorAll('.music-bar');
+            var label = document.getElementById('music-label');
+
+            if (isMusicPlaying) {{
+                if (ytPlayer && ytPlayer.pauseVideo) {{ ytPlayer.pauseVideo(); }}
+                bars.forEach(function(b) {{ b.classList.add('paused'); }});
+                label.textContent = '🎵 Musik Off';
+                isMusicPlaying = false;
+            }} else {{
+                if (ytPlayer && ytPlayer.playVideo) {{ ytPlayer.playVideo(); }}
+                bars.forEach(function(b) {{ b.classList.remove('paused'); }});
+                label.textContent = '🎵 Musik On';
+                isMusicPlaying = true;
+            }}
+        }};
+    }})();
+    </script>
+    """
+
 
 # ==================== PAPAN SKOR (SESSION STATE - CLOUD SAFE) ====================
 
 def load_scoreboard():
-    """Memuat papan skor dari session state (aman untuk Streamlit Cloud)."""
     if "scoreboard_data" not in st.session_state:
         st.session_state.scoreboard_data = []
     return list(st.session_state.scoreboard_data)
 
 
 def save_scoreboard(scoreboard):
-    """Menyimpan papan skor ke session state."""
     try:
         if not isinstance(scoreboard, list):
             scoreboard = []
@@ -46,7 +184,6 @@ def save_scoreboard(scoreboard):
 
 
 def add_score(nama, skor, level, total_soal, waktu_mulai=None, waktu_selesai=None):
-    """Menambahkan skor baru ke papan skor."""
     try:
         if not nama or not isinstance(skor, (int, float)) or not isinstance(total_soal, (int, float)):
             return False
@@ -90,7 +227,6 @@ def add_score(nama, skor, level, total_soal, waktu_mulai=None, waktu_selesai=Non
 
 
 def get_filtered_scoreboard(level_filter="Semua Level", time_filter="Semua Waktu"):
-    """Mendapatkan papan skor dengan filter level dan waktu."""
     scoreboard = load_scoreboard()
 
     if level_filter != "Semua Level" and scoreboard:
@@ -120,7 +256,6 @@ def get_filtered_scoreboard(level_filter="Semua Level", time_filter="Semua Waktu
 
 
 def get_scoreboard_stats(scoreboard):
-    """Mendapatkan statistik dari papan skor."""
     if not scoreboard:
         return {
             "total_pemain": 0, "skor_tertinggi": 0, "rata_rata": 0,
@@ -167,7 +302,6 @@ def get_scoreboard_stats(scoreboard):
 
 @st.cache_data(show_spinner="Memuat data wilayah...")
 def load_and_process_geojson(filepath):
-    """Memuat dan memproses GeoJSON. Di-cache agar tidak diproses ulang setiap rerun."""
     if not os.path.exists(filepath):
         return None, f"File GeoJSON tidak ditemukan: {filepath}"
 
@@ -221,7 +355,6 @@ def load_and_process_geojson(filepath):
 
 
 def _merge_geometries(features):
-    """Menggabungkan beberapa geometri Polygon/MultiPolygon menjadi MultiPolygon."""
     all_coords = []
     for feat in features:
         geom = feat.get("geometry", {})
@@ -248,7 +381,7 @@ if error or result is None:
 
 jatim_geojson, wilayah_list = result
 kota_list = [w for w in wilayah_list if w.startswith("Kota ")]
-kab_list = [w for w in wilayah_list if w.startswith("Kabupaten ")]
+kab_list  = [w for w in wilayah_list if w.startswith("Kabupaten ")]
 
 
 # ==================== FUNGSI WAKTU ====================
@@ -305,6 +438,8 @@ _defaults = {
     "session_start_time": time.time(),
     "footer_brightness": 0.7,
     "scoreboard_data": [],
+    "music_volume": 30,          # ← BARU: volume musik (0-100)
+    "music_enabled": True,       # ← BARU: status musik on/off
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
@@ -672,7 +807,6 @@ def get_wilayah_info(nama):
     if nama in db:
         return db[nama]
 
-    # Fallback generik
     tipe = "Kota" if nama.startswith("Kota ") else "Kabupaten"
     return {
         "geografis": f"{tipe} di Provinsi Jawa Timur dengan berbagai potensi sumber daya alam.",
@@ -785,8 +919,8 @@ def create_footer(footer_text, image_url, brightness=0.7):
         <div class="footer-content">
             <div class="footer-title">🧩 Tebak Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.4.0</p>
-            <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Papan Skor | Statistik Waktu</p>
+            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.5.0</p>
+            <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
     """
@@ -796,6 +930,14 @@ def create_footer(footer_text, image_url, brightness=0.7):
 
 st.markdown(get_background_image_html(SIDEBAR_BACKGROUND_URL), unsafe_allow_html=True)
 st.markdown(get_footer_css(FOOTER_BACKGROUND_URL, st.session_state.footer_brightness), unsafe_allow_html=True)
+
+# ==================== RENDER BACKSOUND MUSIK ====================
+# Musik dimuat sekali saat aplikasi dibuka, tersimpan sebagai komponen persisten
+st.components.v1.html(
+    get_backsound_html(st.session_state.music_volume),
+    height=0,
+    scrolling=False
+)
 
 
 # ==================== HALAMAN LOGIN NAMA ====================
@@ -835,7 +977,7 @@ if not st.session_state.name_submitted:
         st.markdown("---")
         st.markdown(
             "<div style='text-align:center;color:#666;font-size:14px;'>"
-            "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🌋 Bromo 3D | 🏆 Papan Skor</p></div>",
+            "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🌋 Bromo 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
             unsafe_allow_html=True
         )
     st.stop()
@@ -973,10 +1115,19 @@ with st.sidebar:
         if new_br != st.session_state.footer_brightness:
             st.session_state.footer_brightness = new_br
             st.rerun()
+        st.markdown("---")
+        st.markdown("### 🎵 Volume Musik")
+        new_vol_sb = st.slider("Volume (%)", min_value=0, max_value=100,
+                               value=st.session_state.music_volume, step=5,
+                               key="sidebar_music_volume")
+        if new_vol_sb != st.session_state.music_volume:
+            st.session_state.music_volume = new_vol_sb
+            st.rerun()
+        st.caption("Tombol 🎵 di pojok kanan bawah untuk play/pause")
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Tebak Jawa Timur** v2.4.0\n\nAplikasi interaktif geografi Jawa Timur.")
+        st.markdown("**Tebak Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
@@ -1157,7 +1308,7 @@ elif "Statistik" in selected_menu:
 # --- HALAMAN PENGATURAN ---
 elif "Pengaturan" in selected_menu:
     st.title("⚙️ Pengaturan Aplikasi")
-    t1, t2, t3 = st.tabs(["🎮 Game", "🎨 Tampilan", "⏱️ Waktu"])
+    t1, t2, t3 = st.tabs(["🎮 Game", "🎨 Tampilan & Musik", "⏱️ Waktu"])
     with t1:
         c1, c2 = st.columns(2)
         with c1:
@@ -1167,15 +1318,63 @@ elif "Pengaturan" in selected_menu:
             new_diff = st.selectbox("Kesulitan", ["Mudah", "Normal", "Sulit"],
                                     index=["Mudah", "Normal", "Sulit"].index(st.session_state.difficulty),
                                     key="s_diff")
-        if st.button("💾 Simpan", use_container_width=True):
+        if st.button("💾 Simpan Pengaturan Game", use_container_width=True):
             st.session_state.max_questions = new_max
             st.session_state.difficulty = new_diff
-            st.success("✅ Disimpan!")
+            st.success("✅ Pengaturan game disimpan!")
+
     with t2:
-        br = st.slider("Brightness Footer", 0.3, 1.0, st.session_state.footer_brightness, 0.05)
+        st.markdown("### 🎨 Tampilan")
+        br = st.slider("Brightness Footer", 0.3, 1.0, st.session_state.footer_brightness, 0.05,
+                       key="settings_brightness")
         if br != st.session_state.footer_brightness:
             st.session_state.footer_brightness = br
             st.rerun()
+
+        st.markdown("---")
+        st.markdown("### 🎵 Pengaturan Musik Latar")
+        st.markdown(
+            "<div style='background:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:10px;'>"
+            "<p style='margin:0;font-size:14px;color:#555;'>🎵 Musik latar berjalan otomatis saat "
+            "aplikasi dibuka. Gunakan tombol <strong>🎵 Musik On/Off</strong> di pojok kanan "
+            "bawah layar untuk pause/play musik kapan saja.</p></div>",
+            unsafe_allow_html=True
+        )
+
+        new_vol = st.slider(
+            "🔊 Volume Musik (%)",
+            min_value=0, max_value=100,
+            value=st.session_state.music_volume,
+            step=5,
+            key="settings_music_volume",
+            help="Geser untuk mengatur volume musik latar. Ubah volume lalu refresh halaman untuk menerapkan."
+        )
+        if new_vol != st.session_state.music_volume:
+            st.session_state.music_volume = new_vol
+            st.info("⚠️ Perubahan volume akan diterapkan saat halaman di-refresh berikutnya.")
+
+        vol_pct = st.session_state.music_volume
+        if vol_pct == 0:
+            vol_label = "🔇 Mute"
+        elif vol_pct <= 30:
+            vol_label = "🔈 Rendah"
+        elif vol_pct <= 70:
+            vol_label = "🔉 Sedang"
+        else:
+            vol_label = "🔊 Tinggi"
+
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);padding:12px;"
+            f"border-radius:8px;text-align:center;color:white;font-weight:bold;'>"
+            f"{vol_label} — Volume: {vol_pct}%</div>",
+            unsafe_allow_html=True
+        )
+
+        if st.button("💾 Simpan & Terapkan Volume", use_container_width=True, type="primary"):
+            st.session_state.music_volume = new_vol
+            st.success(f"✅ Volume disimpan: {new_vol}%. Musik akan reload otomatis.")
+            st.rerun()
+
     with t3:
         st.checkbox("Tampilkan timer di game", value=True, key="s_timer")
         st.info("Pengaturan waktu aktif secara default.")
@@ -1196,15 +1395,18 @@ elif "Tentang" in selected_menu:
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏆 Papan skor sesi
         - ⏱️ Statistik waktu bermain
+        - 🎵 Musik latar otomatis (play/pause via tombol pojok kanan bawah)
 
         **Teknologi:**
         - Streamlit, Folium, streamlit-folium
         - GeoJSON data wilayah
         - Sketchfab embed 3D
+        - YouTube IFrame API (backsound)
         """)
     with c2:
         st.image("https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg")
-        st.markdown("**Versi:** 2.4.0")
+        st.markdown("**Versi:** 2.5.0")
+        st.markdown("**Musik:** 🎵 Aktif (YouTube)")
 
 
 # ==================== PETA (GAME & BELAJAR) ====================
