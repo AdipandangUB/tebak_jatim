@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Tebak Jawa Timur",
+    page_title="Belajar Kota & Kabupaten di Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -924,9 +924,9 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Tebak Jawa Timur</div>
+            <div class="footer-title">🧩 Belajar Kota & Kabupaten di Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.6.0</p>
+            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat "Penguatan Spasial Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Platform Belajar Jawa Timur" Lab. Environmental Infrastructure & Information Systems (EIIS)- Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya  | Versi 2.6.0</p>
             <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
@@ -962,7 +962,7 @@ if not st.session_state.name_submitted:
             unsafe_allow_html=True
         )
         st.markdown(
-            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Tebak Jawa Timur</h1>"
+            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Belajar Kota & Kabupaten di Jawa Timur</h1>"
             "<p style='font-size:18px;color:#666;'>Game interaktif pembelajaran wilayah Jawa Timur!</p></div>",
             unsafe_allow_html=True
         )
@@ -1150,7 +1150,7 @@ with st.sidebar:
 
 # --- HALAMAN GAME ---
 if "Game" in selected_menu:
-    st.title("🧩 Tebak Bentuk Kota & Kabupaten di Jawa Timur")
+    st.title("🧩 Belajar Bentuk Kota & Kabupaten di Jawa Timur")
 
     if st.session_state.game_started and not st.session_state.game_over:
         st.markdown(f"**Tingkat Kesulitan:** {st.session_state.difficulty} | "
@@ -1521,7 +1521,7 @@ elif "Tentang" in selected_menu:
         Aplikasi interaktif untuk mempelajari bentuk kota dan kabupaten di Jawa Timur.
 
         **Fitur:**
-        - 🧩 Belajar bentuk kota & wilayah dari peta
+        - 🧩 Belajar bentuk kota & kabupaten dari peta
         - 📚 Mode belajar dengan info wilayah
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
@@ -1593,7 +1593,7 @@ elif "Tentang" in selected_menu:
                              border:1px solid rgba(255,215,0,0.4);'>📜 Script</span>
                 <span style='background:rgba(255,215,0,0.2);color:#ffd700;
                              padding:3px 10px;border-radius:12px;font-size:11px;
-                             border:1px solid rgba(255,215,0,0.4);'>🗺️ WebGIS</span>
+                             border:1px solid rgba(255,215,0,0.4);'>🗺️ GIS Engineer</span>
               </div>
             </div>
             """,
@@ -1916,7 +1916,7 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
 
 menu_key = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
 footer_texts = {
-    "Game": f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
+    "Game": f"🗺️ Belajar {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
     "Belajar": f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
     "Bromo 3D": "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D": "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
@@ -1925,6 +1925,6 @@ footer_texts = {
     "Pengaturan": "⚙️ Sesuaikan pengalaman bermain Anda",
     "Tentang": "ℹ️ Tebak Jawa Timur - Aplikasi Interaktif Geografi"
 }
-footer_text = footer_texts.get(menu_key, "🧩 Tebak Jawa Timur")
+footer_text = footer_texts.get(menu_key, "🧩 Belajar Kota & Kabupaten di Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
