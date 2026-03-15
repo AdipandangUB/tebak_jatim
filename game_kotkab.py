@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Tebak Jawa Timur",
+    page_title="Pengetahuan Tentang Kota & Kabupaten di Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -1087,9 +1087,9 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Tebak Jawa Timur</div>
+            <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.6.0</p>
+            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejah Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.6.0</p>
             <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
@@ -1131,8 +1131,8 @@ if not st.session_state.name_submitted:
         )
 
         with st.form("name_form"):
-            st.markdown("### 👤 Masukkan Nama Anda")
-            name = st.text_input("Nama", placeholder="Contoh: Andi", max_chars=30)
+            st.markdown("### 👤 Silahkan Masukkan Nama Kakak yaa...")
+            name = st.text_input("Nama", placeholder="Contoh: Adipandang", max_chars=30)
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
                 submitted = st.form_submit_button("🚀 Mulai Bermain", use_container_width=True, type="primary")
@@ -1160,7 +1160,7 @@ with st.sidebar:
         "https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg",
         width=100
     )
-    st.title("🧩 Tebak Jatim")
+    st.title("🧩 Pengetahuan Jatim")
 
     time_info = get_current_time_info()
     st.markdown(
@@ -1306,7 +1306,7 @@ with st.sidebar:
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Tebak Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
+        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
@@ -1541,7 +1541,7 @@ elif "Papan Skor" in selected_menu:
         st.info("Belum ada skor. Mainkan game dulu!")
 
     st.markdown("---")
-    st.markdown(f"### 📝 Skor Kamu: **{st.session_state.user_name}**")
+    st.markdown(f"### 📝 Skor Kakak: **{st.session_state.user_name}**")
     st.markdown(f"**Skor:** {st.session_state.score}/{st.session_state.max_questions} (Level: {st.session_state.difficulty})")
     if st.session_state.total_game_duration > 0:
         st.markdown(f"**Waktu:** {format_duration(st.session_state.total_game_duration)}")
@@ -1679,12 +1679,12 @@ elif "Tentang" in selected_menu:
     c1, c2 = st.columns([2, 1])
     with c1:
         st.markdown("""
-        ### Belajar Kota & Wilayah Jawa Timur
+        ### Pengetahuan Tentang Kota & Wilayah di Jawa Timur
 
         Aplikasi interaktif untuk mempelajari bentuk kota dan kabupaten di Jawa Timur.
 
         **Fitur:**
-        - 🧩 Belajar bentuk kota & wilayah dari peta
+        - 🧩 Tebak bentuk kota & wilayah dari peta
         - 📚 Mode belajar dengan info wilayah
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
@@ -1756,7 +1756,7 @@ elif "Tentang" in selected_menu:
                              border:1px solid rgba(255,215,0,0.4);'>📜 Script</span>
                 <span style='background:rgba(255,215,0,0.2);color:#ffd700;
                              padding:3px 10px;border-radius:12px;font-size:11px;
-                             border:1px solid rgba(255,215,0,0.4);'>🗺️ WebGIS</span>
+                             border:1px solid rgba(255,215,0,0.4);'>🗺️ GIS Engineer</span>
               </div>
             </div>
             """,
@@ -2088,8 +2088,8 @@ footer_texts = {
     "Papan Skor": "🏆 Papan Skor Tebak Jawa Timur",
     "Statistik Waktu": "⏱️ Statistik Waktu Bermain",
     "Pengaturan": "⚙️ Sesuaikan pengalaman bermain Anda",
-    "Tentang": "ℹ️ Tebak Jawa Timur - Aplikasi Interaktif Geografi"
+    "Tentang": "ℹ️ Pengetahuan Jawa Timur - Aplikasi Interaktif Geografi"
 }
-footer_text = footer_texts.get(menu_key, "🧩 Tebak Jawa Timur")
+footer_text = footer_texts.get(menu_key, "🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
