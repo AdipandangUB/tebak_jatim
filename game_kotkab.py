@@ -766,6 +766,7 @@ _defaults = {
     "scoreboard_data": [],
     "music_volume": 30,
     "music_enabled": True,
+    "show_perfect_balloon": False,   # ← trigger efek balon sempurna
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
@@ -855,6 +856,7 @@ def reset_game():
     st.session_state.total_game_duration = 0
     st.session_state.question_times = []
     st.session_state.average_answer_time = 0
+    st.session_state.show_perfect_balloon = False
     pilih_wilayah()
 
 
@@ -2108,18 +2110,13 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
             end_game_timer()
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
-                st.markdown("## 🎮 Game Selesai!")
-                st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
-                if st.session_state.total_game_duration > 0:
-                    st.info(f"⏱️ **Total Waktu:** {format_duration(st.session_state.total_game_duration)}")
-                if st.session_state.average_answer_time > 0:
-                    st.info(f"⚡ **Rata-rata Jawab:** {st.session_state.average_answer_time:.1f} dtk")
-
                 # ============================================================
                 # ✅ EFEK BALON 3 LAPISAN — NILAI SEMPURNA
+                # Ditampilkan PERTAMA agar langsung terlihat saat scroll
                 # ============================================================
-                if st.session_state.score == st.session_state.max_questions:
+                is_perfect = (st.session_state.score == st.session_state.max_questions)
 
+                if is_perfect or st.session_state.show_perfect_balloon:
                     # ── LAPISAN 1: st.balloons() bawaan Streamlit (PASTI JALAN) ──
                     st.balloons()
 
@@ -2129,12 +2126,21 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     # ── LAPISAN 3: HTML iframe balon SVG (bonus visual) ──
                     st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
 
+                    # Reset flag setelah ditampilkan
+                    st.session_state.show_perfect_balloon = False
+
+                st.markdown("## 🎮 Game Selesai!")
+                st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
+                if st.session_state.total_game_duration > 0:
+                    st.info(f"⏱️ **Total Waktu:** {format_duration(st.session_state.total_game_duration)}")
+                if st.session_state.average_answer_time > 0:
+                    st.info(f"⚡ **Rata-rata Jawab:** {st.session_state.average_answer_time:.1f} dtk")
+
+                if is_perfect:
                     st.markdown("### 🏆 Selamat! Nilai Sempurna!")
                     if st.session_state.question_times:
                         fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
                         st.success(f"⚡ **Tercepat:** Soal {fastest['question_number']} dalam {fastest['duration']:.1f} dtk!")
-
-                # ============================================================
                 elif st.session_state.score >= 7:
                     st.markdown("### 👍 Bagus! Terus belajar!")
                 elif st.session_state.score >= 5:
@@ -2209,6 +2215,15 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                         f"(Waktu: {q_time:.1f} dtk)**"
                     )
                 st.session_state.answered = True
+
+                # ── Cek apakah soal terakhir sudah selesai → set game_over ──
+                if st.session_state.total_questions >= st.session_state.max_questions:
+                    st.session_state.game_over = True
+                    end_game_timer()
+                    # Cek nilai sempurna — aktifkan flag balon
+                    if st.session_state.score == st.session_state.max_questions:
+                        st.session_state.show_perfect_balloon = True
+
                 st.rerun()
 
             if st.session_state.feedback:
