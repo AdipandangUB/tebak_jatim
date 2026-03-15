@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Belajar Bentuk Kota & Kabupaten di Jawa Timur",
+    page_title="Tebak Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -924,10 +924,10 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Belajar Kota & Kabupaten di Jawa Timur</div>
+            <div class="footer-title">🧩 Tebak Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Belajar Kota & Kabupaten di Jawa Timur | Versi 2.6.0</p>
-            <p>Game Belajar Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
+            <p>⏰ {current_time} WIB | © 2026 Tebak Jawa Timur | Versi 2.6.0</p>
+            <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
     """
@@ -962,7 +962,7 @@ if not st.session_state.name_submitted:
             unsafe_allow_html=True
         )
         st.markdown(
-            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Belajar Kota & Wilayah Jawa Timur</h1>"
+            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Tebak Jawa Timur</h1>"
             "<p style='font-size:18px;color:#666;'>Game interaktif pembelajaran wilayah Jawa Timur!</p></div>",
             unsafe_allow_html=True
         )
@@ -997,7 +997,7 @@ with st.sidebar:
         "https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg",
         width=100
     )
-    st.title("🧩 Belajar Jatim")
+    st.title("🧩 Tebak Jatim")
 
     time_info = get_current_time_info()
     st.markdown(
@@ -1150,7 +1150,7 @@ with st.sidebar:
 
 # --- HALAMAN GAME ---
 if "Game" in selected_menu:
-    st.title("🧩 Belajar Bentuk Kota & Kabupaten di Jawa Timur")
+    st.title("🧩 Tebak Bentuk Kota & Kabupaten di Jawa Timur")
 
     if st.session_state.game_started and not st.session_state.game_over:
         st.markdown(f"**Tingkat Kesulitan:** {st.session_state.difficulty} | "
@@ -1511,6 +1511,8 @@ elif "Pengaturan" in selected_menu:
 # --- HALAMAN TENTANG ---
 elif "Tentang" in selected_menu:
     st.title("ℹ️ Tentang Aplikasi")
+
+    # --- Baris 1: Info Aplikasi + Logo ---
     c1, c2 = st.columns([2, 1])
     with c1:
         st.markdown("""
@@ -1525,7 +1527,7 @@ elif "Tentang" in selected_menu:
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
         - 🏆 Papan skor sesi
         - ⏱️ Statistik waktu bermain
-        - 🎵 Musik latar otomatis (play/pause via tombol pojok kanan bawah)
+        - 🎵 Musik latar otomatis (play/pause via tombol pojok kanan atas)
 
         **Teknologi:**
         - Streamlit, Folium, streamlit-folium
@@ -1538,6 +1540,142 @@ elif "Tentang" in selected_menu:
         st.image("https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg")
         st.markdown("**Versi:** 2.6.0")
         st.markdown("**Musik:** 🎵 Aktif (YouTube)")
+
+    st.markdown("---")
+
+    # --- Baris 2: Tim Pengembang ---
+    st.markdown(
+        "<h2 style='text-align:center;color:#0066cc;margin-bottom:6px;'>👨‍💻 Tim Pengembang Aplikasi</h2>"
+        "<p style='text-align:center;color:#666;font-size:14px;margin-bottom:24px;'>"
+        "Dikembangkan oleh tim Departemen Perencanaan Wilayah dan Kota, Universitas Brawijaya</p>",
+        unsafe_allow_html=True
+    )
+
+    # ── KETUA ──────────────────────────────────────────────────────────────────
+    st.markdown(
+        "<div style='text-align:center;margin-bottom:8px;'>"
+        "<span style='background:linear-gradient(135deg,#ffd700,#ffaa00);color:#333;"
+        "padding:4px 20px;border-radius:20px;font-weight:bold;font-size:13px;'>👑 KETUA</span>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    k1, k2, k3 = st.columns([1, 2, 1])
+    with k2:
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#667eea,#764ba2);
+                        border-radius:16px;padding:24px;text-align:center;
+                        box-shadow:0 6px 24px rgba(102,126,234,0.35);
+                        margin-bottom:20px;'>
+              <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4q4OFNy-m3dc68a8SC7Nmo1UZn7N_p8QU7Q&s'
+                   style='width:120px;height:120px;border-radius:50%;
+                          object-fit:cover;border:4px solid #ffd700;
+                          box-shadow:0 4px 12px rgba(0,0,0,0.3);
+                          margin-bottom:14px;'>
+              <h3 style='color:#ffd700;margin:0 0 4px 0;font-size:17px;'>
+                Adipandang Yudono, S.Si., MURP., PhD
+              </h3>
+              <p style='color:rgba(255,255,255,0.85);margin:0 0 12px 0;font-size:13px;
+                        font-style:italic;'>Ketua Tim Pengembang</p>
+              <div style='display:flex;flex-wrap:wrap;justify-content:center;gap:6px;'>
+                <span style='background:rgba(255,215,0,0.2);color:#ffd700;
+                             padding:3px 10px;border-radius:12px;font-size:11px;
+                             border:1px solid rgba(255,215,0,0.4);'>🖥️ Lead Developer</span>
+                <span style='background:rgba(255,215,0,0.2);color:#ffd700;
+                             padding:3px 10px;border-radius:12px;font-size:11px;
+                             border:1px solid rgba(255,215,0,0.4);'>🏗️ Architecture System</span>
+                <span style='background:rgba(255,215,0,0.2);color:#ffd700;
+                             padding:3px 10px;border-radius:12px;font-size:11px;
+                             border:1px solid rgba(255,215,0,0.4);'>🎨 UI/UX</span>
+                <span style='background:rgba(255,215,0,0.2);color:#ffd700;
+                             padding:3px 10px;border-radius:12px;font-size:11px;
+                             border:1px solid rgba(255,215,0,0.4);'>📜 Script</span>
+                <span style='background:rgba(255,215,0,0.2);color:#ffd700;
+                             padding:3px 10px;border-radius:12px;font-size:11px;
+                             border:1px solid rgba(255,215,0,0.4);'>🗺️ WebGIS</span>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # ── ANGGOTA ────────────────────────────────────────────────────────────────
+    st.markdown(
+        "<div style='text-align:center;margin-bottom:16px;'>"
+        "<span style='background:linear-gradient(135deg,#43b89c,#1a8f6f);color:white;"
+        "padding:4px 20px;border-radius:20px;font-weight:bold;font-size:13px;'>👥 ANGGOTA</span>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    a1, a2 = st.columns(2)
+
+    with a1:
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#1a8f6f,#43b89c);
+                        border-radius:16px;padding:22px;text-align:center;
+                        box-shadow:0 6px 20px rgba(67,184,156,0.3);
+                        height:100%;'>
+              <img src='https://kanal24.co.id/wp-content/uploads/2024/06/WhatsApp-Image-2024-06-07-at-11.35.24-AM-1024x576.jpeg'
+                   style='width:110px;height:110px;border-radius:50%;
+                          object-fit:cover;object-position:top;
+                          border:4px solid rgba(255,255,255,0.6);
+                          box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                          margin-bottom:12px;'>
+              <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
+                Fauzul Rizal Sutikno,<br>S.T., M.T., Ph.D
+              </h4>
+              <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
+                        font-size:12px;font-style:italic;'>Anggota 1</p>
+              <span style='background:rgba(255,255,255,0.2);color:white;
+                           padding:4px 12px;border-radius:12px;font-size:11px;
+                           border:1px solid rgba(255,255,255,0.3);'>
+                🏙️ Participatory Planning
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with a2:
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#e05c8a,#c0396a);
+                        border-radius:16px;padding:22px;text-align:center;
+                        box-shadow:0 6px 20px rgba(192,57,106,0.3);
+                        height:100%;'>
+              <img src='https://pwk.ub.ac.id/wp-content/uploads/2024/09/f38dab14-ce4b-4ead-b3d5-acd4c9afa5b4.jpg'
+                   style='width:110px;height:110px;border-radius:50%;
+                          object-fit:cover;object-position:top;
+                          border:4px solid rgba(255,255,255,0.6);
+                          box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                          margin-bottom:12px;'>
+              <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
+                Dr. (Cand.) Mustika Anggraeni,<br>S.T., M.Si.
+              </h4>
+              <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
+                        font-size:12px;font-style:italic;'>Anggota 2</p>
+              <span style='background:rgba(255,255,255,0.2);color:white;
+                           padding:4px 12px;border-radius:12px;font-size:11px;
+                           border:1px solid rgba(255,255,255,0.3);'>
+                🌿 Environmental Planning
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        "<div style='text-align:center;background:#f8f9fa;padding:12px;border-radius:10px;"
+        "border:1px solid #dee2e6;color:#666;font-size:13px;'>"
+        "🏛️ <strong>Departemen Perencanaan Wilayah dan Kota</strong> · "
+        "Fakultas Teknik · Universitas Brawijaya · Malang, Jawa Timur"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
 
 # ==================== PETA (GAME & BELAJAR) ====================
@@ -1778,15 +1916,15 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
 
 menu_key = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
 footer_texts = {
-    "Game": f"🗺️ Belajar {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
+    "Game": f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
     "Belajar": f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
     "Bromo 3D": "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D": "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
     "Papan Skor": "🏆 Papan Skor Tebak Jawa Timur",
     "Statistik Waktu": "⏱️ Statistik Waktu Bermain",
     "Pengaturan": "⚙️ Sesuaikan pengalaman bermain Anda",
-    "Tentang": "ℹ️ Belajar Bentuk Kota & Kabupaten Jawa Timur - Aplikasi Interaktif Geografi"
+    "Tentang": "ℹ️ Tebak Jawa Timur - Aplikasi Interaktif Geografi"
 }
-footer_text = footer_texts.get(menu_key, "🧩 Belajar Bentuk Kota & Kabupaten Jawa Timur")
+footer_text = footer_texts.get(menu_key, "🧩 Tebak Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
