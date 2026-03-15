@@ -1517,7 +1517,7 @@ with st.sidebar:
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.7.0\n\nAplikasi interaktif geografi Jawa Timur.")
+        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.7.0\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
