@@ -2306,7 +2306,7 @@ footer_texts = {
     "Papan Skor": "🏆 Papan Skor Tebak Jawa Timur",
     "Statistik Waktu": "⏱️ Statistik Waktu Bermain",
     "Pengaturan": "⚙️ Sesuaikan pengalaman bermain Anda",
-    "Tentang": "ℹ️ Pengetahuan Jawa Timur - Aplikasi Interaktif Geografi"
+    "Tentang": "ℹ️ Pengetahuan Jawa Timur - Aplikasi Interaktif Pembelajaran Geospasial Jawa Timur"
 }
 footer_text = footer_texts.get(menu_key, "🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
