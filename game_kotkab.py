@@ -1514,7 +1514,7 @@ elif "Tentang" in selected_menu:
     c1, c2 = st.columns([2, 1])
     with c1:
         st.markdown("""
-        ### Tebak Jawa Timur
+        ### Belajar Kota & Wilayah Jawa Timur
 
         Aplikasi interaktif untuk mempelajari bentuk kota dan kabupaten di Jawa Timur.
 
