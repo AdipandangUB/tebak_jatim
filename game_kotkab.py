@@ -1235,153 +1235,43 @@ elif "Balaikota" in selected_menu:
             "dan klik kanan + drag untuk geser tampilan 3D.</div>",
             unsafe_allow_html=True
         )
-        st.components.v1.html("""
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Balaikota Malang 3D</title>
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #cesiumContainer { width: 100%; height: 620px; }
-    #loadingOverlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 620px;
-      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      color: white; z-index: 999; font-family: Arial, sans-serif;
-    }
-    #loadingOverlay h3 { margin: 0 0 10px 0; font-size: 20px; color: #ffd700; }
-    #loadingOverlay p  { margin: 0; font-size: 13px; color: #aaa; }
-    .spinner {
-      width: 50px; height: 50px; border: 5px solid rgba(255,215,0,0.2);
-      border-top: 5px solid #ffd700; border-radius: 50%;
-      animation: spin 1s linear infinite; margin-bottom: 20px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
-</head>
-<body>
-  <div id="loadingOverlay">
-    <div class="spinner"></div>
-    <h3>🏛️ Memuat Balaikota Malang 3D...</h3>
-    <p>Mengambil data terrain & bangunan 3D</p>
-  </div>
-  <div id="cesiumContainer"></div>
+        SANDCASTLE_URL = "https://sandcastle.cesium.com/standalone.html#c=jZJvb9owEMa/ipUXVZA2p4G2KhqtxmCjQRBEyWiDIk3GMWBi7NQ2lGTqd5/zh62dtmmvLPt+99zdc3YcMJCIa9Ajiu53wxlAGBOlgBYgE3sJqOAAKUW0injFQE9wGJMV2jPdLeFAJISDGxBZJBtulgNMJ3Tofc0916ee8vj9Je55V16SPs57wzY00FM8SAzkNcMgOZ8Ec7qYnTfD5mIzCqbu4iHUk76f+JnL/P70Ypzj3M9jNg4wHfWG6cKIjYOw6ffHRtzfLlufGM68qwdTHLe8guFhNowLNnyc0sn2s+vn3Qt/uz5OAtaGyZfD/bzVPzbDRM7zULa/Pb5funfr6+l8sF0trikdNf0gu7sLRWR9iDgWXGlwoOSZSDMmJ8+1XXBevtmRhct7T3CNKCcyshomL+JaZuB7xAGoJDRlxFhpNNAzoifTYXW0+kEVhispdsbkbmG7F9vNS/eyfVEIgroJqDDhBKaS7qimB6IgimO7Vq/AqkCN50LsAvEaKBDHAd00ZRnQGwLqhQKlM0YAXQGTTY5UFXs/tU+OWiJluq+FYPkxYPVcVjV5dnGC02hG1vgR2xXTAGdn/whD89n+Azl9vlnRaqOAG5XJ4Gdj1RRvVvXa5DLzr4rlJC8RfwEYabwBNpFSyMavRQpGIBPr+t3gBrbeWZ2y6m1BfaS7VEgN9pLZEDqa7FKGNFHOco8T0x9WqsjrOKeUTkwPgMY3f/hJADPjs4ms9ozNaE4i67bjGP5NGhMopnw9ORDJUGaQoo3Oxr0dVQEIYccx16Lo77laCLZE8pXuDw"
 
-  <script>
-    // Token Cesium Ion default (ion.cesium.com - publik read-only)
-    Cesium.Ion.defaultAccessToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-      'eyJqdGkiOiJlYWE1OWIxYy1jMjhjLTQ4YTctOGQ5Ni1hMDg3MDZlZjI0YzkiLCJpZCI6NTc3MzMsImlhdCI6MTYyMjY0NTE1N30.' +
-      'XcKpgANiY19MC4bdkd8Q-aQEV_O7znE5-0BJrF2Hg0k';
-
-    const viewer = new Cesium.Viewer('cesiumContainer', {
-      terrainProvider: new Cesium.EllipsoidTerrainProvider(),
-      imageryProvider: new Cesium.IonImageryProvider({ assetId: 2 }),
-      baseLayerPicker: false,
-      geocoder: false,
-      homeButton: true,
-      sceneModePicker: true,
-      navigationHelpButton: true,
-      animation: false,
-      timeline: false,
-      fullscreenButton: true,
-      shadows: true,
-      shouldAnimate: true
-    });
-
-    // Aktifkan OSM Buildings 3D
-    async function loadBuildings() {
-      try {
-        const osmBuildings = await Cesium.createOsmBuildingsAsync();
-        viewer.scene.primitives.add(osmBuildings);
-      } catch(e) {
-        console.warn('OSM Buildings gagal:', e);
-      }
-    }
-    loadBuildings();
-
-    // Koordinat Balaikota Malang: Jl. Tugu No.1, Malang
-    // Lat: -7.9797, Lon: 112.6304
-    const balaikota = Cesium.Cartesian3.fromDegrees(112.6304, -7.9797, 0);
-
-    // Tambah marker Balaikota
-    viewer.entities.add({
-      name: 'Balaikota Malang',
-      position: balaikota,
-      billboard: {
-        image: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-        width: 40,
-        height: 40,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM
-      },
-      label: {
-        text: '🏛️ Balaikota Malang',
-        font: 'bold 14px Arial',
-        fillColor: Cesium.Color.YELLOW,
-        outlineColor: Cesium.Color.BLACK,
-        outlineWidth: 2,
-        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -50)
-      },
-      point: {
-        pixelSize: 12,
-        color: Cesium.Color.RED,
-        outlineColor: Cesium.Color.WHITE,
-        outlineWidth: 2
-      }
-    });
-
-    // Tambah marker Tugu Malang (landmark terdekat)
-    viewer.entities.add({
-      name: 'Tugu Malang',
-      position: Cesium.Cartesian3.fromDegrees(112.6308, -7.9778, 0),
-      point: {
-        pixelSize: 10,
-        color: Cesium.Color.ORANGE,
-        outlineColor: Cesium.Color.WHITE,
-        outlineWidth: 2
-      },
-      label: {
-        text: '🗿 Tugu Malang',
-        font: '12px Arial',
-        fillColor: Cesium.Color.WHITE,
-        outlineColor: Cesium.Color.BLACK,
-        outlineWidth: 2,
-        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -15)
-      }
-    });
-
-    // Fly to Balaikota Malang dengan sudut 3D
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(112.6304, -7.9830, 400),
-      orientation: {
-        heading: Cesium.Math.toRadians(0),
-        pitch:   Cesium.Math.toRadians(-35),
-        roll:    0
-      },
-      duration: 2.5,
-      complete: function() {
-        document.getElementById('loadingOverlay').style.display = 'none';
-      }
-    });
-
-    // Fallback sembunyikan loading jika flyTo selesai
-    setTimeout(function() {
-      const overlay = document.getElementById('loadingOverlay');
-      if (overlay) overlay.style.display = 'none';
-    }, 5000);
-  </script>
-</body>
-</html>
-        """, height=640, scrolling=False)
+        st.components.v1.html(
+            f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                html, body {{
+                  margin: 0; padding: 0;
+                  width: 100%; height: 100%;
+                  overflow: hidden;
+                  background: #000;
+                }}
+                iframe {{
+                  width: 100%;
+                  height: 640px;
+                  border: none;
+                  display: block;
+                  border-radius: 10px;
+                }}
+              </style>
+            </head>
+            <body>
+              <iframe
+                src="{SANDCASTLE_URL}"
+                allowfullscreen
+                allow="fullscreen"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              ></iframe>
+            </body>
+            </html>
+            """,
+            height=660,
+            scrolling=False
+        )
 
     with cr:
         st.markdown("### 📍 Informasi Balaikota")
