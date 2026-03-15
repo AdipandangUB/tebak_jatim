@@ -31,10 +31,166 @@ FOOTER_BACKGROUND_URL = "https://static.promediateknologi.id/crop/0x0:0x0/0x0/we
 MUSIC_VIDEO_ID = "H1tWb3axAdA"
 
 
-# ==================== FUNGSI BACKSOUND MUSIK ====================
+# ==================== FUNGSI EFEK BALON 3 LAPISAN ====================
+
+def get_perfect_score_markdown_effect():
+    """
+    LAPISAN 2: Efek balon & banner via st.markdown + CSS @keyframes.
+    Tidak bergantung iframe — berjalan langsung di DOM utama Streamlit.
+    Paling reliable di Streamlit Cloud.
+    """
+    return """
+    <style>
+    @keyframes drift {
+        0%   { transform: translateY(0)   rotate(0deg)   scale(1);   opacity:1; }
+        80%  { opacity: 1; }
+        100% { transform: translateY(-110vh) rotate(720deg) scale(0.5); opacity:0; }
+    }
+    @keyframes sway {
+        0%,100% { margin-left: 0; }
+        25%     { margin-left: 40px; }
+        75%     { margin-left: -40px; }
+    }
+    @keyframes popIn {
+        0%   { transform: scale(0) rotate(-10deg); opacity:0; }
+        60%  { transform: scale(1.15) rotate(3deg); opacity:1; }
+        100% { transform: scale(1) rotate(0deg); opacity:1; }
+    }
+    @keyframes shimmer {
+        0%,100% { text-shadow: 0 0 10px #ffd700, 0 0 20px #ff6b35, 0 0 40px #ffd700; }
+        50%     { text-shadow: 0 0 20px #ff6b35, 0 0 40px #ffd700, 0 0 80px #ff6b35; }
+    }
+    @keyframes starPop {
+        0%   { transform: scale(0) rotate(0deg);   opacity:0; }
+        50%  { transform: scale(1.3) rotate(180deg); opacity:1; }
+        100% { transform: scale(1) rotate(360deg);  opacity:1; }
+    }
+    @keyframes bgPulse {
+        0%,100% { box-shadow: 0 0 30px rgba(255,215,0,0.5), inset 0 0 30px rgba(255,215,0,0.05); }
+        50%     { box-shadow: 0 0 60px rgba(255,107,53,0.7), inset 0 0 60px rgba(255,215,0,0.1); }
+    }
+    .perfect-banner {
+        animation: popIn 0.7s cubic-bezier(0.175,0.885,0.32,1.275) forwards,
+                   bgPulse 2s ease-in-out infinite 0.7s;
+        text-align: center;
+        padding: 24px 20px;
+        background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+        border-radius: 20px;
+        border: 3px solid #ffd700;
+        margin: 10px 0 18px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .perfect-banner::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: conic-gradient(
+            transparent 0deg, rgba(255,215,0,0.03) 60deg,
+            transparent 120deg, rgba(255,107,53,0.03) 180deg,
+            transparent 240deg, rgba(255,215,0,0.03) 300deg, transparent 360deg
+        );
+        animation: drift 8s linear infinite;
+        pointer-events: none;
+    }
+    .perfect-title {
+        font-size: 2.4em;
+        font-weight: 900;
+        color: #ffd700;
+        animation: shimmer 1.5s ease-in-out infinite;
+        letter-spacing: 3px;
+        margin: 0 0 6px 0;
+        position: relative;
+        z-index: 1;
+    }
+    .perfect-sub {
+        font-size: 1.05em;
+        color: #fff;
+        margin: 6px 0;
+        opacity: 0.92;
+        position: relative;
+        z-index: 1;
+    }
+    .balloon-float {
+        display: inline-block;
+        font-size: 2.1em;
+        animation: drift 3s ease-in infinite, sway 1.5s ease-in-out infinite;
+        margin: 0 5px;
+        position: relative;
+        z-index: 1;
+    }
+    .balloon-float:nth-child(1)  { animation-delay: 0.0s,  0.0s;  color: #ff6b6b; }
+    .balloon-float:nth-child(2)  { animation-delay: 0.3s,  0.3s;  color: #ffd93d; }
+    .balloon-float:nth-child(3)  { animation-delay: 0.6s,  0.6s;  color: #6bcb77; }
+    .balloon-float:nth-child(4)  { animation-delay: 0.9s,  0.9s;  color: #4d96ff; }
+    .balloon-float:nth-child(5)  { animation-delay: 1.2s,  1.2s;  color: #c77dff; }
+    .balloon-float:nth-child(6)  { animation-delay: 1.5s,  1.5s;  color: #ff6bd6; }
+    .balloon-float:nth-child(7)  { animation-delay: 0.15s, 0.15s; color: #ff8e53; }
+    .balloon-float:nth-child(8)  { animation-delay: 0.45s, 0.45s; color: #00c9a7; }
+    .balloon-float:nth-child(9)  { animation-delay: 0.75s, 0.75s; color: #ffb703; }
+    .balloon-float:nth-child(10) { animation-delay: 1.05s, 1.05s; color: #f72585; }
+    .star-float {
+        display: inline-block;
+        font-size: 1.4em;
+        animation: drift 2.5s ease-in infinite, starPop 0.5s ease-out forwards;
+        margin: 0 4px;
+        position: relative;
+        z-index: 1;
+    }
+    .star-float:nth-child(1) { animation-delay: 0.1s, 0.1s; }
+    .star-float:nth-child(2) { animation-delay: 0.4s, 0.4s; }
+    .star-float:nth-child(3) { animation-delay: 0.7s, 0.7s; }
+    .star-float:nth-child(4) { animation-delay: 1.0s, 1.0s; }
+    .star-float:nth-child(5) { animation-delay: 1.3s, 1.3s; }
+    .star-float:nth-child(6) { animation-delay: 1.6s, 1.6s; }
+    .emoji-row {
+        font-size: 1.9em;
+        margin-top: 14px;
+        letter-spacing: 4px;
+        position: relative;
+        z-index: 1;
+        animation: popIn 1s ease-out 0.5s both;
+    }
+    </style>
+
+    <div class="perfect-banner">
+        <div style="margin-bottom:14px;">
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+            <span class="balloon-float">🎈</span>
+        </div>
+        <p class="perfect-title">🏆 NILAI SEMPURNA! 🏆</p>
+        <p class="perfect-sub">
+            Luar biasa! Semua soal dijawab dengan benar! 🌟
+        </p>
+        <div style="margin-top:8px;">
+            <span class="star-float">⭐</span>
+            <span class="star-float">✨</span>
+            <span class="star-float">💫</span>
+            <span class="star-float">🌟</span>
+            <span class="star-float">⭐</span>
+            <span class="star-float">✨</span>
+        </div>
+        <div class="emoji-row">
+            🎉 &nbsp; 🎊 &nbsp; 🥳 &nbsp; 🎁 &nbsp; 🎀 &nbsp; 🎶 &nbsp; 💖 &nbsp; 🎊 &nbsp; 🎉
+        </div>
+    </div>
+    """
+
 
 def get_balloon_effect_html():
-    """Menghasilkan HTML efek balon warna-warni terbang ke atas saat nilai sempurna."""
+    """
+    LAPISAN 3: Efek balon SVG warna-warni terbang ke atas via iframe.
+    Bonus visual — tetap dipertahankan sebagai pelengkap lapisan 2.
+    """
     return """
     <!DOCTYPE html>
     <html>
@@ -608,8 +764,8 @@ _defaults = {
     "session_start_time": time.time(),
     "footer_brightness": 0.7,
     "scoreboard_data": [],
-    "music_volume": 30,          # ← BARU: volume musik (0-100)
-    "music_enabled": True,       # ← BARU: status musik on/off
+    "music_volume": 30,
+    "music_enabled": True,
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
@@ -634,9 +790,9 @@ def end_question_timer(is_correct=False):
     if st.session_state.question_start_time:
         duration = time.time() - st.session_state.question_start_time
         st.session_state.question_times.append({
-            "question_number": st.session_state.total_questions + 1,  # mulai dari 1
+            "question_number": st.session_state.total_questions + 1,
             "duration": duration,
-            "correct": is_correct  # nilai benar/salah dikirim langsung, bukan dari feedback
+            "correct": is_correct
         })
         total = sum(q["duration"] for q in st.session_state.question_times)
         st.session_state.average_answer_time = total / len(st.session_state.question_times)
@@ -1102,7 +1258,6 @@ st.markdown(get_background_image_html(SIDEBAR_BACKGROUND_URL), unsafe_allow_html
 st.markdown(get_footer_css(FOOTER_BACKGROUND_URL, st.session_state.footer_brightness), unsafe_allow_html=True)
 
 # ==================== RENDER BACKSOUND MUSIK ====================
-# Musik dimuat sekali saat aplikasi dibuka, tersimpan sebagai komponen persisten
 st.components.v1.html(
     get_backsound_html(st.session_state.music_volume),
     height=0,
@@ -1188,7 +1343,6 @@ with st.sidebar:
         st.rerun()
     st.markdown("---")
 
-    # Sidebar kontrol per halaman
     if "Game" in selected_menu:
         st.header("🎮 Kontrol Game")
         if not st.session_state.game_started or st.session_state.game_over:
@@ -1306,7 +1460,7 @@ with st.sidebar:
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.5.0\n\nAplikasi interaktif geografi Jawa Timur.")
+        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.6.0\n\nAplikasi interaktif geografi Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
@@ -1675,7 +1829,6 @@ elif "Pengaturan" in selected_menu:
 elif "Tentang" in selected_menu:
     st.title("ℹ️ Tentang Aplikasi")
 
-    # --- Baris 1: Info Aplikasi + Logo ---
     c1, c2 = st.columns([2, 1])
     with c1:
         st.markdown("""
@@ -1691,6 +1844,7 @@ elif "Tentang" in selected_menu:
         - 🏆 Papan skor sesi
         - ⏱️ Statistik waktu bermain
         - 🎵 Musik latar otomatis (play/pause via tombol pojok kanan atas)
+        - 🎈 Efek balon kejutan untuk nilai sempurna!
 
         **Teknologi:**
         - Streamlit, Folium, streamlit-folium
@@ -1706,7 +1860,6 @@ elif "Tentang" in selected_menu:
 
     st.markdown("---")
 
-    # --- Baris 2: Tim Pengembang ---
     st.markdown(
         "<h2 style='text-align:center;color:#0066cc;margin-bottom:6px;'>👨‍💻 Tim Pengembang Aplikasi</h2>"
         "<p style='text-align:center;color:#666;font-size:14px;margin-bottom:24px;'>"
@@ -1714,7 +1867,6 @@ elif "Tentang" in selected_menu:
         unsafe_allow_html=True
     )
 
-    # ── KETUA ──────────────────────────────────────────────────────────────────
     st.markdown(
         "<div style='text-align:center;margin-bottom:8px;'>"
         "<span style='background:linear-gradient(135deg,#ffd700,#ffaa00);color:#333;"
@@ -1763,7 +1915,6 @@ elif "Tentang" in selected_menu:
             unsafe_allow_html=True
         )
 
-    # ── ANGGOTA ────────────────────────────────────────────────────────────────
     st.markdown(
         "<div style='text-align:center;margin-bottom:16px;'>"
         "<span style='background:linear-gradient(135deg,#43b89c,#1a8f6f);color:white;"
@@ -1899,7 +2050,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
         map_data = st_folium(m, width=None, height=500, use_container_width=True,
                              key="belajar_map" if "Belajar" in selected_menu else "game_map")
 
-        # Deteksi klik pada mode Belajar
         if "Belajar" in selected_menu and map_data:
             clicked = map_data.get("last_active_drawing")
             if clicked and "properties" in clicked and "name" in clicked["properties"]:
@@ -1908,7 +2058,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     st.session_state.selected_wilayah_info = clicked_name
                     st.rerun()
 
-        # Tombol mulai game
         if "Game" in selected_menu and not st.session_state.game_started and not st.session_state.game_over:
             if st.button("🎮 Mulai Game", use_container_width=True, type="primary"):
                 start_game_timer()
@@ -1966,14 +2115,26 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                 if st.session_state.average_answer_time > 0:
                     st.info(f"⚡ **Rata-rata Jawab:** {st.session_state.average_answer_time:.1f} dtk")
 
+                # ============================================================
+                # ✅ EFEK BALON 3 LAPISAN — NILAI SEMPURNA
+                # ============================================================
                 if st.session_state.score == st.session_state.max_questions:
-                    # ── Efek Balon Kustom ──
-                    st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
+
+                    # ── LAPISAN 1: st.balloons() bawaan Streamlit (PASTI JALAN) ──
                     st.balloons()
+
+                    # ── LAPISAN 2: CSS @keyframes via st.markdown (PALING RELIABLE) ──
+                    st.markdown(get_perfect_score_markdown_effect(), unsafe_allow_html=True)
+
+                    # ── LAPISAN 3: HTML iframe balon SVG (bonus visual) ──
+                    st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
+
                     st.markdown("### 🏆 Selamat! Nilai Sempurna!")
                     if st.session_state.question_times:
                         fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
                         st.success(f"⚡ **Tercepat:** Soal {fastest['question_number']} dalam {fastest['duration']:.1f} dtk!")
+
+                # ============================================================
                 elif st.session_state.score >= 7:
                     st.markdown("### 👍 Bagus! Terus belajar!")
                 elif st.session_state.score >= 5:
