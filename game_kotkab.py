@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Tebak Jawa Timur",
+    page_title="Belajar Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
