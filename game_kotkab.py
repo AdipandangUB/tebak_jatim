@@ -1241,19 +1241,26 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                 "fillOpacity": 0.3 if st.session_state.game_started else 0.1
             }
 
-        folium.GeoJson(
-            jatim_geojson,
-            name="Wilayah Jatim",
-            style_function=style_function,
-            tooltip=folium.GeoJsonTooltip(
-                fields=["name"], aliases=["Wilayah:"],
-                style="background-color:white;color:#333;font-weight:bold;padding:5px;"
-            ) if "Belajar" in selected_menu else None,
-            highlight_function=(
-                lambda x: {"fillColor": "#ffaa00", "color": "#ffaa00", "weight": 3, "fillOpacity": 0.7}
-                if "Belajar" in selected_menu else None
-            )
-        ).add_to(m)
+        if "Belajar" in selected_menu:
+            folium.GeoJson(
+                jatim_geojson,
+                name="Wilayah Jatim",
+                style_function=style_function,
+                tooltip=folium.GeoJsonTooltip(
+                    fields=["name"], aliases=["Wilayah:"],
+                    style="background-color:white;color:#333;font-weight:bold;padding:5px;"
+                ),
+                highlight_function=lambda x: {
+                    "fillColor": "#ffaa00", "color": "#ffaa00",
+                    "weight": 3, "fillOpacity": 0.7
+                }
+            ).add_to(m)
+        else:
+            folium.GeoJson(
+                jatim_geojson,
+                name="Wilayah Jatim",
+                style_function=style_function,
+            ).add_to(m)
 
         map_data = st_folium(m, width=None, height=500, use_container_width=True,
                              key="belajar_map" if "Belajar" in selected_menu else "game_map")
