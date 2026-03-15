@@ -1307,6 +1307,31 @@ if not st.session_state.name_submitted:
             "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
             unsafe_allow_html=True
         )
+        st.markdown(
+            """
+            <div style='
+                text-align:center;
+                margin-top:18px;
+                padding:14px 18px;
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                border-radius: 10px;
+                border-top: 3px solid #667eea;
+            '>
+                <p style='
+                    color:#555;
+                    font-size:12px;
+                    line-height:1.7;
+                    margin:0;
+                '>
+                    © 2026 <strong>Program Pengabdian Masyarakat</strong> — Penguatan Geospasial Tentang Jawa Timur
+                    Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform <em>"Pengetahuan Jatim"</em><br>
+                    🏛️ Lab. <strong>Environmental, Infrastructure, and Information System (EIIS)</strong> ·
+                    Dept. Perencanaan Wilayah &amp; Kota · Fak. Teknik · <strong>Universitas Brawijaya</strong>
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     st.stop()
 
 
