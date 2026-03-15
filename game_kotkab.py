@@ -1089,7 +1089,7 @@ def create_footer(footer_text, image_url, brightness=0.7):
         <div class="footer-content">
             <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejah Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.6.0</p>
+            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.6.0</p>
             <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
