@@ -2314,13 +2314,16 @@ with st.sidebar:
     selected_menu = st.radio("Menu", menu_options, index=0,
                              label_visibility="collapsed", key="main_navigation")
 
+    # Derive clean page key for exact matching (strip emoji prefix)
+    PAGE = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
+
     st.markdown("---")
     if st.button("🔄 Ganti Nama", use_container_width=True):
         st.session_state.name_submitted = False
         st.rerun()
     st.markdown("---")
 
-    if "Game" in selected_menu and "Puzzle" not in selected_menu:
+    if PAGE == "Game":
         st.header("🎮 Kontrol Game")
         if not st.session_state.game_started or st.session_state.game_over:
             if st.button("🎲 Mulai Game Baru", use_container_width=True, type="primary"):
@@ -2353,7 +2356,7 @@ with st.sidebar:
                 st.session_state.difficulty = diff
                 st.rerun()
 
-    elif "Puzzle" in selected_menu:
+    elif PAGE == "Puzzle":
         st.header("🧩 Puzzle Kontrol")
         st.markdown("**Pilih tingkat kesulitan:**")
         puzzle_diff = st.radio(
@@ -2399,7 +2402,7 @@ with st.sidebar:
             st.session_state.puzzle_start_time = time.time()
             st.rerun()
 
-    elif "Belajar" in selected_menu:
+    elif PAGE == "Belajar":
         st.header("📚 Mode Belajar")
         st.markdown("Klik wilayah di peta untuk melihat informasi lengkap.")
         c1, c2, c3 = st.columns(3)
@@ -2410,7 +2413,7 @@ with st.sidebar:
         with c3:
             st.metric("Kota", len(kota_list))
 
-    elif "Bromo" in selected_menu:
+    elif PAGE == "Bromo 3D":
         st.header("🌋 Gunung Bromo 3D")
         st.markdown("Visualisasi interaktif Gunung Bromo.")
         c1, c2 = st.columns(2)
@@ -2419,7 +2422,7 @@ with st.sidebar:
         with c2:
             st.metric("Status", "Aktif")
 
-    elif "Balaikota" in selected_menu:
+    elif PAGE == "Balaikota 3D":
         st.header("🏛️ Balaikota Malang 3D")
         st.markdown("Visualisasi 3D interaktif Balaikota Malang.")
         c1, c2 = st.columns(2)
@@ -2428,7 +2431,7 @@ with st.sidebar:
         with c2:
             st.metric("Teknologi", "Cesium 3D")
 
-    elif "Papan Skor" in selected_menu:
+    elif PAGE == "Papan Skor":
         st.header("🏆 Papan Skor")
         st.selectbox("Filter level:", ["Semua Level", "Mudah", "Normal", "Sulit"],
                      key="scoreboard_level_filter")
@@ -2447,7 +2450,7 @@ with st.sidebar:
             if sb:
                 st.metric("Tertinggi", f"{stats['skor_tertinggi']}/{sb[0]['total_soal']}")
 
-    elif "Statistik" in selected_menu:
+    elif PAGE == "Statistik Waktu":
         st.header("⏱️ Statistik Waktu")
         st.metric("Durasi Sesi", format_duration(get_session_duration()))
         if st.session_state.question_times:
@@ -2456,7 +2459,7 @@ with st.sidebar:
             fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
             st.metric("⚡ Tercepat", f"{fastest['duration']:.1f} dtk (Soal {fastest['question_number']})")
 
-    elif "Pengaturan" in selected_menu:
+    elif PAGE == "Pengaturan":
         st.header("⚙️ Pengaturan")
         new_max = st.slider("Jumlah Soal", min_value=5, max_value=20,
                             value=st.session_state.max_questions, step=5)
@@ -2479,15 +2482,19 @@ with st.sidebar:
             st.rerun()
         st.caption("Gunakan tombol 🎵 di atas untuk play/pause musik")
 
-    elif "Tentang" in selected_menu:
+    elif PAGE == "Tentang":
         st.header("ℹ️ Tentang")
         st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.8.0\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
+
+# Expose PAGE for main content area (re-derive outside sidebar scope)
+PAGE = st.session_state.get("main_navigation", "🎮 Game")
+PAGE = PAGE.split(" ", 1)[1] if " " in PAGE else PAGE
 
 
 # ==================== KONTEN UTAMA ====================
 
 # --- HALAMAN GAME ---
-if "Game" in selected_menu and "Puzzle" not in selected_menu:
+if PAGE == "Game":
     st.title("🧩 Tebak Bentuk Kota & Kabupaten di Jawa Timur")
 
     if st.session_state.game_started and not st.session_state.game_over:
@@ -2507,7 +2514,7 @@ if "Game" in selected_menu and "Puzzle" not in selected_menu:
                     st.info(f"📊 **Rata-rata:** {st.session_state.average_answer_time:.1f} dtk")
 
 # --- HALAMAN PUZZLE ---
-elif "Puzzle" in selected_menu:
+elif PAGE == "Puzzle":
     st.title("🧩 Puzzle Peta Jawa Timur — Drag & Drop")
 
     # Info cards
@@ -2669,12 +2676,12 @@ elif "Puzzle" in selected_menu:
             )
 
 # --- HALAMAN BELAJAR ---
-elif "Belajar" in selected_menu:
+elif PAGE == "Belajar":
     st.title("📚 Mode Belajar Wilayah Jawa Timur")
     st.markdown("**Klik wilayah pada peta** untuk melihat informasi lengkap!")
 
 # --- HALAMAN BROMO ---
-elif "Bromo" in selected_menu:
+elif PAGE == "Bromo 3D":
     st.title("🌋 Gunung Bromo - Visualisasi 3D Interaktif")
     cl, cr = st.columns([2, 1])
     with cl:
@@ -2721,7 +2728,7 @@ elif "Bromo" in selected_menu:
             """)
 
 # --- HALAMAN BALAIKOTA MALANG 3D ---
-elif "Balaikota" in selected_menu:
+elif PAGE == "Balaikota 3D":
     st.title("🏛️ Balaikota Malang - Visualisasi 3D Interaktif")
 
     cl, cr = st.columns([2, 1])
@@ -2834,7 +2841,7 @@ elif "Balaikota" in selected_menu:
             """)
 
 # --- HALAMAN PAPAN SKOR ---
-elif "Papan Skor" in selected_menu:
+elif PAGE == "Papan Skor":
     st.title("🏆 Papan Skor Pemain")
     st.info("ℹ️ Papan skor tersimpan selama sesi berlangsung. Refresh halaman akan mereset data.")
 
@@ -2907,7 +2914,7 @@ elif "Papan Skor" in selected_menu:
             st.rerun()
 
 # --- HALAMAN STATISTIK WAKTU ---
-elif "Statistik" in selected_menu:
+elif PAGE == "Statistik Waktu":
     st.title("⏱️ Statistik Waktu")
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -2937,7 +2944,7 @@ elif "Statistik" in selected_menu:
         st.info("Belum ada data. Mulai game untuk melihat statistik waktu.")
 
 # --- HALAMAN PENGATURAN ---
-elif "Pengaturan" in selected_menu:
+elif PAGE == "Pengaturan":
     st.title("⚙️ Pengaturan Aplikasi")
     t1, t2, t3 = st.tabs(["🎮 Game", "🎨 Tampilan & Musik", "⏱️ Waktu"])
     with t1:
@@ -3011,7 +3018,7 @@ elif "Pengaturan" in selected_menu:
         st.info("Pengaturan waktu aktif secara default.")
 
 # --- HALAMAN TENTANG ---
-elif "Tentang" in selected_menu:
+elif PAGE == "Tentang":
     st.title("ℹ️ Tentang Aplikasi")
 
     c1, c2 = st.columns([2, 1])
@@ -3181,14 +3188,14 @@ elif "Tentang" in selected_menu:
 
 # ==================== PETA (GAME & BELAJAR) ====================
 
-if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in selected_menu:
-    if "Belajar" in selected_menu:
+if (PAGE == "Game") or PAGE == "Belajar":
+    if PAGE == "Belajar":
         col_map, col_info = st.columns([2, 1])
     else:
         col_map = st.container()
         col_info = None
 
-    map_container = col_map if "Belajar" in selected_menu else st.container()
+    map_container = col_map if PAGE == "Belajar" else st.container()
 
     with map_container:
         m = folium.Map(location=[-7.5, 112.3], zoom_start=8,
@@ -3200,7 +3207,7 @@ if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in s
 
         def style_function(feature):
             name = feature["properties"]["name"]
-            if "Belajar" in selected_menu:
+            if PAGE == "Belajar":
                 return {"fillColor": "#33cc33", "color": "#ffffff",
                         "weight": 1.5, "fillOpacity": 0.5}
             if (st.session_state.game_started and not st.session_state.game_over
@@ -3213,7 +3220,7 @@ if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in s
                 "fillOpacity": 0.3 if st.session_state.game_started else 0.1
             }
 
-        if "Belajar" in selected_menu:
+        if PAGE == "Belajar":
             folium.GeoJson(
                 jatim_geojson,
                 name="Wilayah Jatim",
@@ -3235,9 +3242,9 @@ if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in s
             ).add_to(m)
 
         map_data = st_folium(m, width=None, height=500, use_container_width=True,
-                             key="belajar_map" if "Belajar" in selected_menu else "game_map")
+                             key="belajar_map" if PAGE == "Belajar" else "game_map")
 
-        if "Belajar" in selected_menu and map_data:
+        if PAGE == "Belajar" and map_data:
             clicked = map_data.get("last_active_drawing")
             if clicked and "properties" in clicked and "name" in clicked["properties"]:
                 clicked_name = clicked["properties"]["name"]
@@ -3245,13 +3252,13 @@ if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in s
                     st.session_state.selected_wilayah_info = clicked_name
                     st.rerun()
 
-        if "Game" in selected_menu and not st.session_state.game_started and not st.session_state.game_over:
+        if PAGE == "Game" and not st.session_state.game_started and not st.session_state.game_over:
             if st.button("🎮 Mulai Game", use_container_width=True, type="primary"):
                 reset_game()
                 st.rerun()
 
     # Panel info wilayah (mode Belajar)
-    if "Belajar" in selected_menu and col_info is not None:
+    if PAGE == "Belajar" and col_info is not None:
         with col_info:
             st.markdown("## 📋 Info Wilayah")
             if st.session_state.selected_wilayah_info:
@@ -3287,7 +3294,7 @@ if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in s
                             st.rerun()
 
     # ==================== AREA GAME ====================
-    if "Game" in selected_menu and "Puzzle" not in selected_menu:
+    if PAGE == "Game":
         st.markdown("---")
 
         if st.session_state.game_over:
@@ -3415,7 +3422,7 @@ if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in s
                             st.rerun()
 
     # Progress bar
-    if "Game" in selected_menu and "Puzzle" not in selected_menu and st.session_state.game_started and not st.session_state.game_over:
+    if PAGE == "Game" and st.session_state.game_started and not st.session_state.game_over:
         st.markdown("---")
         cp1, cp2, cp3, cp4 = st.columns([2, 1, 1, 1])
         with cp1:
@@ -3433,7 +3440,7 @@ if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in s
 
 # ==================== FOOTER ====================
 
-menu_key = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
+menu_key = PAGE
 footer_texts = {
     "Game": f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
     "Belajar": f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
