@@ -706,7 +706,6 @@ if error or result is None:
     st.stop()
 
 jatim_geojson, wilayah_list = result
-# PERBAIKAN: kab_list menggunakan logika "bukan Kota" agar menghitung 29 kabupaten dengan benar
 kota_list = [w for w in wilayah_list if w.startswith("Kota ")]
 kab_list  = [w for w in wilayah_list if not w.startswith("Kota ")]
 
@@ -768,6 +767,13 @@ _defaults = {
     "music_volume": 30,
     "music_enabled": True,
     "show_perfect_balloon": False,
+    # Puzzle state
+    "puzzle_difficulty": "Normal",
+    "puzzle_started": False,
+    "puzzle_target_region": None,
+    "puzzle_start_time": None,
+    "puzzle_completed": False,
+    "puzzle_best_times": {},
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
@@ -777,9 +783,8 @@ for key, val in _defaults.items():
 # ==================== FUNGSI TIMER ====================
 
 def start_game_timer():
-    """Mulai timer game — dicatat tepat saat tombol Mulai Game ditekan."""
     st.session_state.game_start_time = time.time()
-    st.session_state.game_end_time = None          # reset waktu selesai
+    st.session_state.game_end_time = None
     st.session_state.total_game_duration = 0
     st.session_state.question_times = []
     st.session_state.average_answer_time = 0
@@ -803,24 +808,16 @@ def end_question_timer(is_correct=False):
     return 0
 
 
-# PERBAIKAN UTAMA: end_game_timer tidak overwrite game_end_time jika sudah di-set
 def end_game_timer():
-    """
-    Hitung total durasi game.
-    game_end_time di-set tepat saat jawaban terakhir dikirim (bukan saat render halaman).
-    Guard None ditambahkan agar tidak TypeError.
-    """
     if st.session_state.game_start_time is not None:
         if not st.session_state.game_end_time:
             st.session_state.game_end_time = time.time()
-        # Pastikan keduanya bukan None sebelum dikurangi
         if st.session_state.game_end_time is not None:
             st.session_state.total_game_duration = (
                 st.session_state.game_end_time - st.session_state.game_start_time
             )
         return st.session_state.total_game_duration
     elif st.session_state.total_game_duration > 0:
-        # Durasi sudah tersimpan sebelumnya, kembalikan nilainya
         return st.session_state.total_game_duration
     return 0
 
@@ -856,8 +853,6 @@ def pilih_wilayah():
 
 
 def reset_game():
-    # Catat waktu mulai game SEKARANG — sebelum apapun di-reset
-    # Ini memastikan game_start_time selalu valid saat game dimulai
     _new_start = time.time()
     st.session_state.score = 0
     st.session_state.total_questions = 0
@@ -868,7 +863,6 @@ def reset_game():
     st.session_state.answered = False
     st.session_state.game_started = False
     st.session_state.score_saved = False
-    # Set game_start_time dengan nilai baru yang sudah dicatat di atas
     st.session_state.game_start_time = _new_start
     st.session_state.game_end_time = None
     st.session_state.total_game_duration = 0
@@ -1268,14 +1262,944 @@ def create_footer(footer_text, image_url, brightness=0.7):
         <div class="footer-content">
             <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.7.1</p>
-            <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
+            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.8.0</p>
+            <p>Game Tebak Wilayah | Mode Belajar | Puzzle Drag & Drop | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
     """
 
 
-# ==================== RENDER CSS ====================
+# ==================== PUZZLE DRAG & DROP FEATURE ====================
+
+def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_time_ms):
+    """
+    Generate self-contained HTML puzzle game with drag-and-drop SVG pieces.
+    The map is sliced into a grid; only the target region's polygon pieces are shown.
+    """
+    # Find the target feature
+    target_feature = None
+    all_features = geojson_data.get("features", [])
+    for feat in all_features:
+        if feat["properties"]["name"] == target_region:
+            target_feature = feat
+            break
+
+    if not target_feature:
+        return "<p>❌ Data wilayah tidak ditemukan.</p>"
+
+    # Serialize only needed data - target + neighbors for context
+    # Pass just enough GeoJSON for the puzzle
+    context_features = []
+    for feat in all_features:
+        context_features.append({
+            "type": "Feature",
+            "properties": {"name": feat["properties"]["name"]},
+            "geometry": feat["geometry"]
+        })
+
+    geojson_str = json.dumps({
+        "type": "FeatureCollection",
+        "features": context_features
+    })
+
+    target_str = json.dumps(target_feature)
+
+    level_config = {
+        "Pemula":  {"pieces": 5,  "color": "#4CAF50", "label": "🌱 Pemula",  "snap_dist": 40},
+        "Mudah":   {"pieces": 10, "color": "#2196F3", "label": "😊 Mudah",   "snap_dist": 30},
+        "Normal":  {"pieces": 25, "color": "#FF9800", "label": "⚡ Normal",  "snap_dist": 22},
+        "Sulit":   {"pieces": 38, "color": "#f44336", "label": "🔥 Sulit",   "snap_dist": 15},
+    }
+    cfg = level_config.get(difficulty, level_config["Normal"])
+
+    html = f"""<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+  * {{ margin:0; padding:0; box-sizing:border-box; }}
+  body {{
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: white;
+    padding: 10px;
+  }}
+  #puzzle-header {{
+    text-align: center;
+    padding: 8px 0 12px 0;
+  }}
+  #puzzle-header h2 {{
+    font-size: 1.5em;
+    font-weight: 900;
+    background: linear-gradient(90deg, #ffd700, #ff6b35, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+  }}
+  #puzzle-header .subtitle {{
+    font-size: 0.85em;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+  }}
+  #stats-bar {{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }}
+  .stat-pill {{
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 30px;
+    padding: 5px 16px;
+    font-size: 0.82em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }}
+  .stat-pill span {{ color: #ffd700; font-size: 1.1em; }}
+  #level-badge {{
+    display: inline-block;
+    background: {cfg['color']};
+    color: white;
+    padding: 3px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.82em;
+    margin-bottom: 6px;
+  }}
+  #main-layout {{
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+  }}
+  #canvas-wrapper {{
+    position: relative;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    overflow: hidden;
+    flex: 1 1 520px;
+    max-width: 620px;
+  }}
+  #canvas-label {{
+    position: absolute;
+    top: 8px; left: 12px;
+    font-size: 0.72em;
+    color: rgba(255,255,255,0.5);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }}
+  #puzzle-canvas {{
+    display: block;
+    width: 100%;
+    touch-action: none;
+    user-select: none;
+    cursor: grab;
+  }}
+  #puzzle-canvas:active {{ cursor: grabbing; }}
+  #pieces-panel {{
+    background: rgba(255,255,255,0.06);
+    border: 2px dashed rgba(255,255,255,0.2);
+    border-radius: 16px;
+    padding: 12px;
+    flex: 0 0 200px;
+    max-height: 580px;
+    overflow-y: auto;
+    min-width: 160px;
+  }}
+  #pieces-panel h4 {{
+    font-size: 0.8em;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-align: center;
+  }}
+  #pieces-container {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }}
+  .piece-thumb {{
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    cursor: grab;
+    transition: all 0.2s;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }}
+  .piece-thumb:hover {{
+    background: rgba(255,215,0,0.15);
+    border-color: #ffd700;
+    transform: scale(1.08);
+    box-shadow: 0 4px 14px rgba(255,215,0,0.3);
+  }}
+  .piece-thumb.placed {{
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+    border-color: #4CAF50;
+    background: rgba(76,175,80,0.1);
+  }}
+  .piece-thumb svg {{
+    pointer-events: none;
+  }}
+  #progress-bar-wrap {{
+    margin: 10px 0 6px 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+  }}
+  #progress-bar-fill {{
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }}
+  #progress-text {{
+    text-align: center;
+    font-size: 0.78em;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+  }}
+  #btn-row {{
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 10px 0 6px 0;
+    flex-wrap: wrap;
+  }}
+  .puzzle-btn {{
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 0.85em;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+  }}
+  .puzzle-btn:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(102,126,234,0.6);
+  }}
+  .puzzle-btn.danger {{
+    background: linear-gradient(135deg, #f44336, #c62828);
+    box-shadow: 0 4px 12px rgba(244,67,54,0.4);
+  }}
+  .puzzle-btn.success {{
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+  }}
+  #win-overlay {{
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }}
+  #win-overlay.show {{ display: flex; }}
+  #win-box {{
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 3px solid #ffd700;
+    border-radius: 24px;
+    padding: 36px 40px;
+    max-width: 400px;
+    box-shadow: 0 0 60px rgba(255,215,0,0.4);
+    animation: popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+  }}
+  @keyframes popIn {{
+    from {{ transform: scale(0.4); opacity:0; }}
+    to   {{ transform: scale(1);   opacity:1; }}
+  }}
+  #win-box h1 {{
+    font-size: 2.2em;
+    font-weight: 900;
+    background: linear-gradient(90deg, #ffd700, #ff6b35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }}
+  #win-box p {{
+    color: rgba(255,255,255,0.85);
+    font-size: 1.05em;
+    margin: 8px 0;
+  }}
+  #win-time {{
+    font-size: 1.8em;
+    font-weight: 900;
+    color: #ffd700;
+    margin: 12px 0;
+  }}
+  .hint-zone {{
+    stroke-dasharray: 6,3;
+    stroke: rgba(255,215,0,0.4);
+    fill: rgba(255,215,0,0.05);
+    stroke-width: 1.5;
+    pointer-events: none;
+  }}
+  .placed-piece {{
+    fill: rgba(76,175,80,0.5);
+    stroke: #4CAF50;
+    stroke-width: 2;
+    pointer-events: none;
+    filter: drop-shadow(0 0 6px rgba(76,175,80,0.8));
+  }}
+  .dragging-piece {{
+    opacity: 0.9;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6));
+  }}
+  #tooltip {{
+    position: absolute;
+    background: rgba(0,0,0,0.8);
+    color: #ffd700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75em;
+    font-weight: 700;
+    pointer-events: none;
+    display: none;
+    white-space: nowrap;
+    z-index: 100;
+  }}
+  #snap-feedback {{
+    position: absolute;
+    pointer-events: none;
+    font-size: 1.6em;
+    animation: floatUp 0.8s ease-out forwards;
+    z-index: 200;
+    display: none;
+  }}
+  @keyframes floatUp {{
+    0%   {{ opacity:1; transform: translateY(0) scale(1); }}
+    100% {{ opacity:0; transform: translateY(-60px) scale(1.5); }}
+  }}
+</style>
+</head>
+<body>
+
+<div id="puzzle-header">
+  <div id="level-badge">{cfg['label']} — {cfg['pieces']} Keping</div>
+  <h2>🧩 PUZZLE: {target_region.upper()}</h2>
+  <div class="subtitle">Susun kepingan untuk membentuk peta wilayah!</div>
+</div>
+
+<div id="stats-bar">
+  <div class="stat-pill">⏱️ Waktu <span id="timer-display">00:00</span></div>
+  <div class="stat-pill">🧩 Keping <span id="placed-count">0</span>/<span id="total-count">0</span></div>
+  <div class="stat-pill">🎯 Akurasi <span id="accuracy-display">100%</span></div>
+</div>
+
+<div id="progress-bar-wrap"><div id="progress-bar-fill"></div></div>
+<div id="progress-text">Seret kepingan ke area peta yang benar!</div>
+
+<div id="btn-row">
+  <button class="puzzle-btn" onclick="shufflePieces()">🔀 Acak Ulang</button>
+  <button class="puzzle-btn" onclick="showHint()">💡 Petunjuk</button>
+  <button class="puzzle-btn danger" onclick="resetPuzzle()">🔄 Reset</button>
+  <button class="puzzle-btn success" onclick="autoSolve()">✨ Selesaikan</button>
+</div>
+
+<div id="main-layout">
+  <div id="canvas-wrapper">
+    <div id="canvas-label">AREA PUZZLE</div>
+    <canvas id="puzzle-canvas"></canvas>
+    <div id="tooltip"></div>
+    <div id="snap-feedback">✅</div>
+  </div>
+  <div id="pieces-panel">
+    <h4>📦 Kepingan ({cfg['pieces']})</h4>
+    <div id="progress-bar-wrap" style="margin:6px 0 10px 0;">
+      <div id="progress-bar-fill2" style="height:8px;background:linear-gradient(90deg,#4CAF50,#8BC34A);border-radius:10px;width:0%;transition:width 0.4s;"></div>
+    </div>
+    <div id="pieces-container"></div>
+  </div>
+</div>
+
+<div id="win-overlay">
+  <div id="win-box">
+    <div style="font-size:3em;margin-bottom:8px;">🏆</div>
+    <h1>PUZZLE SELESAI!</h1>
+    <p>Wilayah: <strong>{target_region}</strong></p>
+    <p>Tingkat: <strong>{cfg['label']}</strong></p>
+    <div id="win-time">00:00</div>
+    <p id="win-moves">0 kesalahan</p>
+    <p style="color:#ffd700;font-size:0.9em;margin-top:10px;">🎉 Luar biasa! Kamu berhasil!</p>
+    <button class="puzzle-btn success" style="margin-top:18px;font-size:1em;padding:12px 32px;" onclick="location.reload()">🔄 Main Lagi</button>
+  </div>
+</div>
+
+<script>
+(function() {{
+  // ===== CONSTANTS =====
+  const GEOJSON = {geojson_str};
+  const TARGET_FEATURE = {target_str};
+  const TARGET_NAME = "{target_region}";
+  const PIECE_COUNT = {cfg['pieces']};
+  const SNAP_DIST = {cfg['snap_dist']};
+  const LEVEL_COLOR = "{cfg['color']}";
+  const START_TIME = Date.now();
+
+  // ===== CANVAS SETUP =====
+  const canvas = document.getElementById('puzzle-canvas');
+  const ctx = canvas.getContext('2d');
+  const wrapper = document.getElementById('canvas-wrapper');
+
+  let W = 600, H = 520;
+  canvas.width = W; canvas.height = H;
+
+  // ===== PROJECTION =====
+  // Compute bounding box of ALL Jawa Timur features
+  let minLon=180, maxLon=-180, minLat=90, maxLat=-90;
+  GEOJSON.features.forEach(f => {{
+    iterCoords(f.geometry, (lon, lat) => {{
+      if(lon<minLon) minLon=lon; if(lon>maxLon) maxLon=lon;
+      if(lat<minLat) minLat=lat; if(lat>maxLat) maxLat=lat;
+    }});
+  }});
+
+  // Add padding
+  const pad = 30;
+  const lonRange = maxLon - minLon;
+  const latRange = maxLat - minLat;
+  const scaleX = (W - pad*2) / lonRange;
+  const scaleY = (H - pad*2) / latRange;
+  const scale = Math.min(scaleX, scaleY);
+
+  function project(lon, lat) {{
+    const x = pad + (lon - minLon) * scale;
+    const y = H - pad - (lat - minLat) * scale;
+    return [x, y];
+  }}
+
+  function iterCoords(geometry, cb) {{
+    function rec(coords, depth) {{
+      if(typeof coords[0] === 'number') {{ cb(coords[0], coords[1]); return; }}
+      coords.forEach(c => rec(c, depth+1));
+    }}
+    rec(geometry.coordinates, 0);
+  }}
+
+  function buildPath(geometry) {{
+    const p = new Path2D();
+    function addRing(ring) {{
+      ring.forEach((coord, i) => {{
+        const [x,y] = project(coord[0], coord[1]);
+        if(i===0) p.moveTo(x,y); else p.lineTo(x,y);
+      }});
+      p.closePath();
+    }}
+    if(geometry.type === 'Polygon') {{
+      geometry.coordinates.forEach(addRing);
+    }} else if(geometry.type === 'MultiPolygon') {{
+      geometry.coordinates.forEach(poly => poly.forEach(addRing));
+    }}
+    return p;
+  }}
+
+  // Build path for target
+  const targetPath = buildPath(TARGET_FEATURE.geometry);
+
+  // Compute bounding box of target
+  let tMinX=W, tMaxX=0, tMinY=H, tMaxY=0;
+  iterCoords(TARGET_FEATURE.geometry, (lon, lat) => {{
+    const [x,y] = project(lon,lat);
+    if(x<tMinX) tMinX=x; if(x>tMaxX) tMaxX=x;
+    if(y<tMinY) tMinY=y; if(y>tMaxY) tMaxY=y;
+  }});
+  const targetCX = (tMinX+tMaxX)/2;
+  const targetCY = (tMinY+tMaxY)/2;
+
+  // ===== PUZZLE PIECES GENERATION =====
+  // Slice the target region into a grid of pieces
+  // Grid dims based on piece count
+  let gridCols, gridRows;
+  if(PIECE_COUNT <= 5)       {{ gridCols=2; gridRows=3; }}
+  else if(PIECE_COUNT <= 10) {{ gridCols=3; gridRows=4; }}
+  else if(PIECE_COUNT <= 25) {{ gridCols=5; gridRows=5; }}
+  else                       {{ gridCols=6; gridRows=7; }}
+
+  const tW = tMaxX - tMinX;
+  const tH = tMaxY - tMinY;
+  const cellW = tW / gridCols;
+  const cellH = tH / gridRows;
+
+  // Generate pieces by intersecting grid cells with target polygon
+  // We approximate this visually: each piece is a clipped rectangle
+  let pieces = [];
+  let pieceId = 0;
+
+  for(let row=0; row<gridRows; row++) {{
+    for(let col=0; col<gridCols; col++) {{
+      const cx1 = tMinX + col*cellW;
+      const cy1 = tMinY + row*cellH;
+      const cx2 = cx1 + cellW;
+      const cy2 = cy1 + cellH;
+      const centerX = (cx1+cx2)/2;
+      const centerY = (cy1+cy2)/2;
+
+      // Check if this cell center is inside the target polygon
+      // Use canvas hit test
+      const testCanvas = document.createElement('canvas');
+      testCanvas.width = W; testCanvas.height = H;
+      const testCtx = testCanvas.getContext('2d');
+      testCtx.fill(targetPath);
+      const isInside = testCtx.isPointInPath(targetPath, centerX, centerY);
+      if(!isInside) continue;
+
+      pieces.push({{
+        id: pieceId++,
+        col, row,
+        targetX: cx1, targetY: cy1,
+        targetW: cellW, targetH: cellH,
+        // Current position (scattered in puzzle panel)
+        currentX: 0, currentY: 0,
+        placed: false,
+        dragging: false,
+        dragOffX: 0, dragOffY: 0,
+        // Thumb offset in panel
+        panelX: 0, panelY: 0,
+        inPanel: true,
+      }});
+    }}
+  }}
+
+  // Limit to PIECE_COUNT
+  if(pieces.length > PIECE_COUNT) {{
+    pieces = pieces.slice(0, PIECE_COUNT);
+  }}
+
+  const totalPieces = pieces.length;
+  document.getElementById('total-count').textContent = totalPieces;
+
+  // ===== RENDER THUMBNAILS IN PANEL =====
+  const piecesContainer = document.getElementById('pieces-container');
+  const thumbCanvases = {{}};
+
+  function buildThumbnails() {{
+    piecesContainer.innerHTML = '';
+    pieces.forEach(p => {{
+      if(p.placed) return;
+      const thumbW = 70, thumbH = 60;
+      const div = document.createElement('div');
+      div.className = 'piece-thumb' + (p.placed ? ' placed' : '');
+      div.id = 'thumb-' + p.id;
+      div.style.width = thumbW+'px';
+      div.style.height = thumbH+'px';
+
+      const tc = document.createElement('canvas');
+      tc.width = thumbW; tc.height = thumbH;
+      thumbCanvases[p.id] = tc;
+
+      // Draw piece on thumbnail
+      const tctx = tc.getContext('2d');
+      // Scale to fit in thumb
+      const sx = (thumbW-8) / p.targetW;
+      const sy = (thumbH-8) / p.targetH;
+      const ts = Math.min(sx, sy);
+
+      tctx.save();
+      tctx.translate(thumbW/2, thumbH/2);
+      tctx.scale(ts, ts);
+      tctx.translate(-(p.targetX + p.targetW/2), -(p.targetY + p.targetH/2));
+
+      // Clip to target shape
+      tctx.save();
+      tctx.clip(targetPath);
+
+      // Fill piece color
+      const hue = (p.id * 37 + 180) % 360;
+      tctx.fillStyle = `hsla(${{hue}}, 70%, 55%, 0.85)`;
+      tctx.fillRect(p.targetX, p.targetY, p.targetW, p.targetH);
+      tctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      tctx.lineWidth = 2/ts;
+      tctx.strokeRect(p.targetX+1, p.targetY+1, p.targetW-2, p.targetH-2);
+
+      tctx.restore();
+      tctx.restore();
+
+      div.appendChild(tc);
+
+      // Drag events from panel
+      div.addEventListener('mousedown', (e) => startDragFromPanel(e, p));
+      div.addEventListener('touchstart', (e) => startDragFromPanelTouch(e, p), {{passive:false}});
+      piecesContainer.appendChild(div);
+    }});
+  }}
+
+  buildThumbnails();
+
+  // ===== DRAG STATE =====
+  let draggingPiece = null;
+  let dragX = 0, dragY = 0;
+  let mistakeCount = 0;
+
+  function startDragFromPanel(e, piece) {{
+    e.preventDefault();
+    if(piece.placed) return;
+    draggingPiece = piece;
+    piece.inPanel = false;
+    const rect = canvas.getBoundingClientRect();
+    dragX = e.clientX - rect.left;
+    dragY = e.clientY - rect.top;
+    piece.currentX = dragX - piece.targetW/2;
+    piece.currentY = dragY - piece.targetH/2;
+    piece.dragOffX = piece.targetW/2;
+    piece.dragOffY = piece.targetH/2;
+    render();
+  }}
+
+  function startDragFromPanelTouch(e, piece) {{
+    e.preventDefault();
+    if(piece.placed) return;
+    const touch = e.touches[0];
+    draggingPiece = piece;
+    piece.inPanel = false;
+    const rect = canvas.getBoundingClientRect();
+    dragX = touch.clientX - rect.left;
+    dragY = touch.clientY - rect.top;
+    piece.currentX = dragX - piece.targetW/2;
+    piece.currentY = dragY - piece.targetH/2;
+    piece.dragOffX = piece.targetW/2;
+    piece.dragOffY = piece.targetH/2;
+    render();
+  }}
+
+  canvas.addEventListener('mousedown', (e) => {{
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (W / rect.width);
+    const my = (e.clientY - rect.top) * (H / rect.height);
+    // Check if clicking on a floating piece
+    for(let i=pieces.length-1; i>=0; i--) {{
+      const p = pieces[i];
+      if(p.placed || p.inPanel) continue;
+      if(mx >= p.currentX && mx <= p.currentX+p.targetW &&
+         my >= p.currentY && my <= p.currentY+p.targetH) {{
+        draggingPiece = p;
+        p.dragOffX = mx - p.currentX;
+        p.dragOffY = my - p.currentY;
+        dragX = mx; dragY = my;
+        render();
+        break;
+      }}
+    }}
+  }});
+
+  document.addEventListener('mousemove', (e) => {{
+    if(!draggingPiece) return;
+    const rect = canvas.getBoundingClientRect();
+    dragX = (e.clientX - rect.left) * (W / rect.width);
+    dragY = (e.clientY - rect.top) * (H / rect.height);
+    draggingPiece.currentX = dragX - draggingPiece.dragOffX;
+    draggingPiece.currentY = dragY - draggingPiece.dragOffY;
+    render();
+  }});
+
+  document.addEventListener('mouseup', (e) => {{
+    if(draggingPiece) {{
+      trySnap(draggingPiece, dragX, dragY);
+      draggingPiece = null;
+      render();
+    }}
+  }});
+
+  canvas.addEventListener('touchmove', (e) => {{
+    e.preventDefault();
+    if(!draggingPiece) return;
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    dragX = (touch.clientX - rect.left) * (W / rect.width);
+    dragY = (touch.clientY - rect.top) * (H / rect.height);
+    draggingPiece.currentX = dragX - draggingPiece.dragOffX;
+    draggingPiece.currentY = dragY - draggingPiece.dragOffY;
+    render();
+  }}, {{passive: false}});
+
+  document.addEventListener('touchend', (e) => {{
+    if(draggingPiece) {{
+      trySnap(draggingPiece, dragX, dragY);
+      draggingPiece = null;
+      render();
+    }}
+  }});
+
+  // ===== SNAP LOGIC =====
+  function trySnap(piece, dropX, dropY) {{
+    const targetCenterX = piece.targetX + piece.targetW/2;
+    const targetCenterY = piece.targetY + piece.targetH/2;
+    const dist = Math.hypot(dropX - targetCenterX, dropY - targetCenterY);
+
+    if(dist <= SNAP_DIST * (W/600)) {{
+      // Snap!
+      piece.currentX = piece.targetX;
+      piece.currentY = piece.targetY;
+      piece.placed = true;
+      piece.inPanel = false;
+      showSnapFeedback(dropX, dropY, true);
+      updateThumb(piece.id);
+      updateProgress();
+      checkWin();
+    }} else {{
+      // Wrong placement
+      mistakeCount++;
+      showSnapFeedback(dropX, dropY, false);
+      updateAccuracy();
+      // Return to near center area (scattered)
+      piece.currentX = tMinX + Math.random()*tW*0.6 + tW*0.1;
+      piece.currentY = tMinY + Math.random()*tH*0.6 + tH*0.1;
+      piece.inPanel = false;
+    }}
+  }}
+
+  function showSnapFeedback(x, y, success) {{
+    const fb = document.getElementById('snap-feedback');
+    fb.textContent = success ? '✅' : '❌';
+    fb.style.left = Math.min(x, W-40)+'px';
+    fb.style.top = Math.max(y-30, 10)+'px';
+    fb.style.display = 'block';
+    fb.style.animation = 'none';
+    fb.offsetHeight; // reflow
+    fb.style.animation = 'floatUp 0.8s ease-out forwards';
+    setTimeout(() => {{ fb.style.display = 'none'; }}, 800);
+  }}
+
+  function updateThumb(id) {{
+    const el = document.getElementById('thumb-'+id);
+    if(el) el.classList.add('placed');
+  }}
+
+  function updateProgress() {{
+    const placed = pieces.filter(p => p.placed).length;
+    document.getElementById('placed-count').textContent = placed;
+    const pct = Math.round((placed / totalPieces) * 100);
+    document.getElementById('progress-bar-fill').style.width = pct+'%';
+    document.getElementById('progress-bar-fill2').style.width = pct+'%';
+    document.getElementById('progress-text').textContent =
+      placed === totalPieces ? '🎉 Selesai!' : `${{placed}}/${{totalPieces}} kepingan terpasang`;
+  }}
+
+  function updateAccuracy() {{
+    const placed = pieces.filter(p => p.placed).length;
+    const totalAttempts = placed + mistakeCount;
+    const acc = totalAttempts > 0 ? Math.round((placed/totalAttempts)*100) : 100;
+    document.getElementById('accuracy-display').textContent = acc+'%';
+  }}
+
+  function checkWin() {{
+    const placed = pieces.filter(p => p.placed).length;
+    if(placed >= totalPieces) {{
+      const elapsed = Math.floor((Date.now() - START_TIME) / 1000);
+      const m = Math.floor(elapsed/60).toString().padStart(2,'0');
+      const s = (elapsed%60).toString().padStart(2,'0');
+      document.getElementById('win-time').textContent = m+':'+s;
+      document.getElementById('win-moves').textContent = mistakeCount + ' kesalahan';
+      setTimeout(() => {{
+        document.getElementById('win-overlay').classList.add('show');
+      }}, 500);
+    }}
+  }}
+
+  // ===== TIMER =====
+  setInterval(() => {{
+    const elapsed = Math.floor((Date.now() - START_TIME) / 1000);
+    const m = Math.floor(elapsed/60).toString().padStart(2,'0');
+    const s = (elapsed%60).toString().padStart(2,'0');
+    document.getElementById('timer-display').textContent = m+':'+s;
+  }}, 1000);
+
+  // ===== RENDER =====
+  function render() {{
+    ctx.clearRect(0, 0, W, H);
+
+    // 1. Draw background map (all regions faded)
+    GEOJSON.features.forEach(f => {{
+      if(f.properties.name === TARGET_NAME) return;
+      const path = buildPath(f.geometry);
+      ctx.fillStyle = 'rgba(80,100,140,0.25)';
+      ctx.fill(path);
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke(path);
+    }});
+
+    // 2. Draw target region outline (hint)
+    ctx.save();
+    ctx.setLineDash([6,3]);
+    ctx.strokeStyle = 'rgba(255,215,0,0.5)';
+    ctx.lineWidth = 2;
+    ctx.stroke(targetPath);
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // 3. Draw grid hints (ghost cells)
+    for(let i=0; i<pieces.length; i++) {{
+      const p = pieces[i];
+      if(p.placed) continue;
+      ctx.save();
+      ctx.clip(targetPath);
+      ctx.setLineDash([4,4]);
+      ctx.strokeStyle = 'rgba(255,215,0,0.2)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(p.targetX, p.targetY, p.targetW, p.targetH);
+      ctx.setLineDash([]);
+      ctx.restore();
+    }}
+
+    // 4. Draw placed pieces
+    pieces.forEach(p => {{
+      if(!p.placed) return;
+      ctx.save();
+      ctx.clip(targetPath);
+      const hue = (p.id * 37 + 180) % 360;
+      ctx.fillStyle = `hsla(${{hue}}, 65%, 50%, 0.75)`;
+      ctx.fillRect(p.targetX, p.targetY, p.targetW, p.targetH);
+      ctx.strokeStyle = '#4CAF50';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(p.targetX, p.targetY, p.targetW, p.targetH);
+      ctx.restore();
+    }});
+
+    // 5. Draw floating (unplaced, not in panel) pieces
+    pieces.forEach(p => {{
+      if(p.placed || p.inPanel) return;
+      ctx.save();
+      // Clip the piece shape using offset
+      const clipPath = new Path2D();
+      // Create a shifted version of the target path for this cell
+      ctx.beginPath();
+      const dx = p.currentX - p.targetX;
+      const dy = p.currentY - p.targetY;
+      ctx.rect(p.currentX-1, p.currentY-1, p.targetW+2, p.targetH+2);
+      ctx.clip();
+
+      // Translate and draw target shape
+      ctx.translate(dx, dy);
+      ctx.clip(targetPath);
+
+      const hue = (p.id * 37 + 180) % 360;
+      const isDragging = (p === draggingPiece);
+      ctx.fillStyle = `hsla(${{hue}}, 70%, ${{isDragging?65:55}}%, ${{isDragging?0.95:0.85}})`;
+      ctx.fillRect(p.targetX, p.targetY, p.targetW, p.targetH);
+      ctx.strokeStyle = isDragging ? '#ffd700' : 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = isDragging ? 3 : 1.5;
+      ctx.strokeRect(p.targetX+1, p.targetY+1, p.targetW-2, p.targetH-2);
+      ctx.restore();
+
+      if(isDragging) {{
+        // Glow
+        ctx.save();
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 18;
+        ctx.strokeStyle = 'rgba(255,215,0,0.7)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(p.currentX, p.currentY, p.targetW, p.targetH);
+        ctx.restore();
+      }}
+    }});
+
+    // 6. Draw target label
+    ctx.fillStyle = 'rgba(255,215,0,0.9)';
+    ctx.font = 'bold 11px Nunito, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(TARGET_NAME, targetCX, tMinY - 6);
+  }}
+
+  render();
+
+  // ===== CONTROLS =====
+  window.shufflePieces = function() {{
+    pieces.forEach(p => {{
+      if(p.placed) return;
+      p.inPanel = false;
+      p.currentX = tMinX + Math.random() * (tW * 0.7);
+      p.currentY = tMinY + Math.random() * (tH * 0.7);
+    }});
+    render();
+  }};
+
+  window.showHint = function() {{
+    // Flash target border
+    let count = 0;
+    const interval = setInterval(() => {{
+      ctx.save();
+      ctx.strokeStyle = count%2===0 ? '#ffd700' : 'transparent';
+      ctx.lineWidth = 4;
+      ctx.stroke(targetPath);
+      ctx.restore();
+      count++;
+      if(count > 6) clearInterval(interval);
+    }}, 200);
+  }};
+
+  window.resetPuzzle = function() {{
+    pieces.forEach(p => {{
+      p.placed = false;
+      p.inPanel = true;
+    }});
+    mistakeCount = 0;
+    document.getElementById('accuracy-display').textContent = '100%';
+    buildThumbnails();
+    updateProgress();
+    render();
+  }};
+
+  window.autoSolve = function() {{
+    let i = 0;
+    const interval = setInterval(() => {{
+      const unplaced = pieces.filter(p => !p.placed);
+      if(unplaced.length === 0) {{
+        clearInterval(interval);
+        checkWin();
+        return;
+      }}
+      const p = unplaced[0];
+      p.placed = true;
+      p.inPanel = false;
+      p.currentX = p.targetX;
+      p.currentY = p.targetY;
+      updateThumb(p.id);
+      updateProgress();
+      render();
+      i++;
+    }}, 120);
+  }};
+
+  // Initial scatter of pieces
+  shufflePieces();
+
+}})();
+</script>
+</body>
+</html>"""
+
+    return html
+
+
+# ==================== CSS RENDER ====================
 
 st.markdown(get_background_image_html(SIDEBAR_BACKGROUND_URL), unsafe_allow_html=True)
 st.markdown(get_footer_css(FOOTER_BACKGROUND_URL, st.session_state.footer_brightness), unsafe_allow_html=True)
@@ -1318,7 +2242,7 @@ if not st.session_state.name_submitted:
         st.markdown("---")
         st.markdown(
             "<div style='text-align:center;color:#666;font-size:14px;'>"
-            "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
+            "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🧩 Puzzle | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
             unsafe_allow_html=True
         )
         st.markdown(
@@ -1385,7 +2309,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    menu_options = ["🎮 Game", "📚 Belajar", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
+    menu_options = ["🎮 Game", "📚 Belajar", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
                     "🏆 Papan Skor", "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
     selected_menu = st.radio("Menu", menu_options, index=0,
                              label_visibility="collapsed", key="main_navigation")
@@ -1396,7 +2320,7 @@ with st.sidebar:
         st.rerun()
     st.markdown("---")
 
-    if "Game" in selected_menu:
+    if "Game" in selected_menu and "Puzzle" not in selected_menu:
         st.header("🎮 Kontrol Game")
         if not st.session_state.game_started or st.session_state.game_over:
             if st.button("🎲 Mulai Game Baru", use_container_width=True, type="primary"):
@@ -1428,6 +2352,52 @@ with st.sidebar:
             if diff != st.session_state.difficulty:
                 st.session_state.difficulty = diff
                 st.rerun()
+
+    elif "Puzzle" in selected_menu:
+        st.header("🧩 Puzzle Kontrol")
+        st.markdown("**Pilih tingkat kesulitan:**")
+        puzzle_diff = st.radio(
+            "Kesulitan Puzzle",
+            ["Pemula", "Mudah", "Normal", "Sulit"],
+            index=["Pemula", "Mudah", "Normal", "Sulit"].index(st.session_state.puzzle_difficulty),
+            key="puzzle_diff_radio",
+            label_visibility="collapsed"
+        )
+        if puzzle_diff != st.session_state.puzzle_difficulty:
+            st.session_state.puzzle_difficulty = puzzle_diff
+            st.session_state.puzzle_started = False
+            st.rerun()
+
+        st.markdown("---")
+        pieces_info = {"Pemula": "5 keping", "Mudah": "10 keping", "Normal": "25 keping", "Sulit": "38 keping"}
+        desc_info = {
+            "Pemula": "🌱 Cocok untuk pemula",
+            "Mudah": "😊 Grid kecil, mudah disusun",
+            "Normal": "⚡ Tantangan standar",
+            "Sulit": "🔥 Banyak keping, butuh ketelitian"
+        }
+        st.info(f"**{puzzle_diff}** — {pieces_info[puzzle_diff]}\n\n{desc_info[puzzle_diff]}")
+
+        st.markdown("---")
+        st.markdown("**Pilih Wilayah:**")
+        selected_region = st.selectbox(
+            "Wilayah",
+            wilayah_list,
+            index=wilayah_list.index(st.session_state.puzzle_target_region) if st.session_state.puzzle_target_region in wilayah_list else 0,
+            key="puzzle_region_select",
+            label_visibility="collapsed"
+        )
+        st.session_state.puzzle_target_region = selected_region
+
+        if st.button("🎲 Wilayah Acak", use_container_width=True):
+            st.session_state.puzzle_target_region = random.choice(wilayah_list)
+            st.session_state.puzzle_started = False
+            st.rerun()
+
+        if st.button("▶️ Mulai Puzzle", use_container_width=True, type="primary"):
+            st.session_state.puzzle_started = True
+            st.session_state.puzzle_start_time = time.time()
+            st.rerun()
 
     elif "Belajar" in selected_menu:
         st.header("📚 Mode Belajar")
@@ -1511,13 +2481,13 @@ with st.sidebar:
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.7.1\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
+        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.8.0\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
 
 # --- HALAMAN GAME ---
-if "Game" in selected_menu:
+if "Game" in selected_menu and "Puzzle" not in selected_menu:
     st.title("🧩 Tebak Bentuk Kota & Kabupaten di Jawa Timur")
 
     if st.session_state.game_started and not st.session_state.game_over:
@@ -1535,6 +2505,168 @@ if "Game" in selected_menu:
             with c3:
                 if st.session_state.average_answer_time > 0:
                     st.info(f"📊 **Rata-rata:** {st.session_state.average_answer_time:.1f} dtk")
+
+# --- HALAMAN PUZZLE ---
+elif "Puzzle" in selected_menu:
+    st.title("🧩 Puzzle Peta Jawa Timur — Drag & Drop")
+
+    # Info cards
+    col_info1, col_info2, col_info3, col_info4 = st.columns(4)
+    level_data = {
+        "Pemula":  {"pieces": 5,  "color": "#4CAF50", "icon": "🌱"},
+        "Mudah":   {"pieces": 10, "color": "#2196F3", "icon": "😊"},
+        "Normal":  {"pieces": 25, "color": "#FF9800", "icon": "⚡"},
+        "Sulit":   {"pieces": 38, "color": "#f44336", "icon": "🔥"},
+    }
+    for i, (lvl, info) in enumerate(level_data.items()):
+        col = [col_info1, col_info2, col_info3, col_info4][i]
+        with col:
+            is_selected = (lvl == st.session_state.puzzle_difficulty)
+            border = f"3px solid {info['color']}" if is_selected else "1px solid #ddd"
+            bg = f"linear-gradient(135deg, {info['color']}22, {info['color']}11)" if is_selected else "#f8f9fa"
+            st.markdown(
+                f"""<div style='background:{bg};border:{border};border-radius:12px;
+                padding:14px;text-align:center;'>
+                <div style='font-size:1.8em;'>{info['icon']}</div>
+                <div style='font-weight:900;font-size:1.1em;color:{"#333" if not is_selected else info["color"]};'>{lvl}</div>
+                <div style='color:#666;font-size:0.85em;'>{info['pieces']} keping</div>
+                {"<div style='color:"+info['color']+";font-size:0.75em;font-weight:700;'>▲ AKTIF</div>" if is_selected else ""}
+                </div>""",
+                unsafe_allow_html=True
+            )
+
+    st.markdown("---")
+
+    if not st.session_state.puzzle_started:
+        # Show selection UI
+        st.markdown("### 🗺️ Pilih Wilayah & Mulai Puzzle")
+
+        sel_col1, sel_col2 = st.columns([2, 1])
+        with sel_col1:
+            # Show mini map preview
+            m_prev = folium.Map(location=[-7.5, 112.3], zoom_start=7, tiles=None)
+            folium.TileLayer(
+                tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                attr="Esri", name="Satellite"
+            ).add_to(m_prev)
+
+            target = st.session_state.puzzle_target_region or wilayah_list[0]
+
+            def puzzle_style(feature):
+                name = feature["properties"]["name"]
+                if name == target:
+                    return {"fillColor": "#FF6B35", "color": "#FF6B35", "weight": 3, "fillOpacity": 0.7}
+                return {"fillColor": "#3388ff", "color": "#ffffff", "weight": 1, "fillOpacity": 0.2}
+
+            folium.GeoJson(
+                jatim_geojson,
+                style_function=puzzle_style,
+                tooltip=folium.GeoJsonTooltip(fields=["name"], aliases=["Wilayah:"]),
+            ).add_to(m_prev)
+            st_folium(m_prev, width=None, height=400, use_container_width=True, key="puzzle_preview_map")
+
+        with sel_col2:
+            st.markdown("#### ⚙️ Pengaturan Puzzle")
+
+            new_diff = st.selectbox(
+                "Tingkat Kesulitan",
+                ["Pemula", "Mudah", "Normal", "Sulit"],
+                index=["Pemula", "Mudah", "Normal", "Sulit"].index(st.session_state.puzzle_difficulty),
+                key="puzzle_diff_main"
+            )
+            if new_diff != st.session_state.puzzle_difficulty:
+                st.session_state.puzzle_difficulty = new_diff
+
+            new_region = st.selectbox(
+                "Pilih Wilayah",
+                wilayah_list,
+                index=wilayah_list.index(st.session_state.puzzle_target_region) if st.session_state.puzzle_target_region in wilayah_list else 0,
+                key="puzzle_region_main"
+            )
+            st.session_state.puzzle_target_region = new_region
+
+            cfg_sel = level_data[new_diff]
+            st.markdown(
+                f"""<div style='background:linear-gradient(135deg,{cfg_sel["color"]}33,{cfg_sel["color"]}11);
+                border:2px solid {cfg_sel["color"]};border-radius:12px;padding:14px;margin:12px 0;text-align:center;'>
+                <div style='font-size:2em;'>{cfg_sel["icon"]}</div>
+                <div style='font-weight:900;font-size:1.2em;color:{cfg_sel["color"]};'>{new_diff}</div>
+                <div style='color:#555;'>{cfg_sel["pieces"]} keping puzzle</div>
+                </div>""",
+                unsafe_allow_html=True
+            )
+
+            if st.button("▶️ MULAI PUZZLE!", use_container_width=True, type="primary"):
+                st.session_state.puzzle_started = True
+                st.session_state.puzzle_start_time = time.time()
+                st.session_state.puzzle_target_region = new_region
+                st.session_state.puzzle_difficulty = new_diff
+                st.rerun()
+
+            if st.button("🎲 Wilayah Acak", use_container_width=True):
+                st.session_state.puzzle_target_region = random.choice(wilayah_list)
+                st.rerun()
+
+            # Info wilayah
+            st.markdown("---")
+            info = get_wilayah_info(new_region)
+            with st.expander(f"ℹ️ Info {new_region}"):
+                st.markdown(f"**📍 Geografis:** {info['geografis']}")
+                st.markdown(f"**🛍️ Oleh-oleh:** {info['oleh_oleh']}")
+
+    else:
+        # PUZZLE IS ACTIVE
+        target_region = st.session_state.puzzle_target_region or wilayah_list[0]
+        difficulty = st.session_state.puzzle_difficulty
+        piece_count = level_data[difficulty]["pieces"]
+
+        # Header info
+        h1, h2, h3 = st.columns(3)
+        with h1:
+            st.markdown(
+                f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);padding:10px;border-radius:10px;text-align:center;color:white;'>"
+                f"<strong>🗺️ {target_region}</strong></div>",
+                unsafe_allow_html=True
+            )
+        with h2:
+            st.markdown(
+                f"<div style='background:linear-gradient(135deg,{level_data[difficulty]['color']},{level_data[difficulty]['color']}bb);padding:10px;border-radius:10px;text-align:center;color:white;'>"
+                f"<strong>{level_data[difficulty]['icon']} {difficulty} — {piece_count} keping</strong></div>",
+                unsafe_allow_html=True
+            )
+        with h3:
+            if st.button("⛔ Keluar Puzzle", use_container_width=True):
+                st.session_state.puzzle_started = False
+                st.rerun()
+
+        st.markdown("")
+
+        # Render the puzzle HTML component
+        puzzle_html = get_puzzle_html(
+            jatim_geojson,
+            target_region,
+            difficulty,
+            piece_count,
+            int(st.session_state.puzzle_start_time * 1000) if st.session_state.puzzle_start_time else 0
+        )
+        st.components.v1.html(puzzle_html, height=780, scrolling=True)
+
+        st.markdown("---")
+        tip_col1, tip_col2 = st.columns(2)
+        with tip_col1:
+            st.info(
+                "💡 **Cara Bermain:**\n"
+                "1. Seret kepingan dari panel kanan ke area peta\n"
+                "2. Tempatkan di posisi yang tepat\n"
+                "3. Kepingan akan 'snap' otomatis jika dekat posisi yang benar\n"
+                "4. Susun semua kepingan untuk menyelesaikan puzzle!"
+            )
+        with tip_col2:
+            info = get_wilayah_info(target_region)
+            st.success(
+                f"📖 **{target_region}**\n\n"
+                f"{info['geografis'][:120]}..."
+            )
 
 # --- HALAMAN BELAJAR ---
 elif "Belajar" in selected_menu:
@@ -1753,7 +2885,6 @@ elif "Papan Skor" in selected_menu:
 
     if st.session_state.score > 0 and not st.session_state.score_saved:
         if st.button("💾 Simpan Skor ke Papan Skor", use_container_width=True, type="primary"):
-            # Pastikan game_end_time sudah ada sebelum simpan
             if not st.session_state.game_end_time:
                 st.session_state.game_end_time = time.time()
             end_game_timer()
@@ -1783,10 +2914,8 @@ elif "Statistik" in selected_menu:
         st.metric("Durasi Sesi", format_duration(get_session_duration()))
     with c2:
         if st.session_state.total_game_duration > 0:
-            # Durasi sudah tersimpan dari game yang telah selesai
             st.metric("Durasi Game", format_duration(st.session_state.total_game_duration))
         elif st.session_state.game_start_time and not st.session_state.game_end_time:
-            # Game sedang berlangsung — tampilkan waktu berjalan
             dur = time.time() - st.session_state.game_start_time
             st.metric("Durasi Game", format_duration(dur))
         else:
@@ -1849,7 +2978,7 @@ elif "Pengaturan" in selected_menu:
             value=st.session_state.music_volume,
             step=5,
             key="settings_music_volume",
-            help="Geser untuk mengatur volume musik latar. Klik Simpan & Terapkan untuk menerapkan."
+            help="Geser untuk mengatur volume musik latar."
         )
         if new_vol != st.session_state.music_volume:
             st.session_state.music_volume = new_vol
@@ -1895,6 +3024,7 @@ elif "Tentang" in selected_menu:
         **Fitur:**
         - 🧩 Tebak bentuk kota & wilayah dari peta
         - 📚 Mode belajar dengan info wilayah
+        - 🧩 **Puzzle Drag & Drop** — 4 tingkat kesulitan (Pemula/Mudah/Normal/Sulit)
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
         - 🏆 Papan skor sesi
@@ -1905,13 +3035,14 @@ elif "Tentang" in selected_menu:
         **Teknologi:**
         - Streamlit, Folium, streamlit-folium
         - GeoJSON data wilayah
+        - HTML5 Canvas Puzzle Engine
         - Sketchfab embed 3D (Bromo)
         - CesiumJS 3D Geospatial (Balaikota)
         - YouTube IFrame API (backsound)
         """)
     with c2:
         st.image("https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg")
-        st.markdown("**Versi:** 2.7.1")
+        st.markdown("**Versi:** 2.8.0")
         st.markdown("**Musik:** 🎵 Aktif (YouTube)")
 
     st.markdown("---")
@@ -2050,7 +3181,7 @@ elif "Tentang" in selected_menu:
 
 # ==================== PETA (GAME & BELAJAR) ====================
 
-if "Game" in selected_menu or "Belajar" in selected_menu:
+if ("Game" in selected_menu and "Puzzle" not in selected_menu) or "Belajar" in selected_menu:
     if "Belajar" in selected_menu:
         col_map, col_info = st.columns([2, 1])
     else:
@@ -2156,11 +3287,10 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                             st.rerun()
 
     # ==================== AREA GAME ====================
-    if "Game" in selected_menu:
+    if "Game" in selected_menu and "Puzzle" not in selected_menu:
         st.markdown("---")
 
         if st.session_state.game_over:
-            # Hitung durasi final — game_end_time sudah di-set saat jawaban terakhir
             end_game_timer()
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
@@ -2258,10 +3388,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     )
                 st.session_state.answered = True
 
-                # ============================================================
-                # PERBAIKAN: game_end_time di-set TEPAT saat jawaban terakhir.
-                # Guard None ditambahkan agar tidak TypeError saat kalkulasi.
-                # ============================================================
                 if st.session_state.total_questions >= st.session_state.max_questions:
                     st.session_state.game_over = True
                     st.session_state.game_end_time = time.time()
@@ -2270,7 +3396,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                             st.session_state.game_end_time - st.session_state.game_start_time
                         )
                     else:
-                        # Fallback: jumlahkan durasi tiap soal
                         st.session_state.total_game_duration = sum(
                             q["duration"] for q in st.session_state.question_times
                         )
@@ -2290,7 +3415,7 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                             st.rerun()
 
     # Progress bar
-    if "Game" in selected_menu and st.session_state.game_started and not st.session_state.game_over:
+    if "Game" in selected_menu and "Puzzle" not in selected_menu and st.session_state.game_started and not st.session_state.game_over:
         st.markdown("---")
         cp1, cp2, cp3, cp4 = st.columns([2, 1, 1, 1])
         with cp1:
@@ -2312,6 +3437,7 @@ menu_key = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_
 footer_texts = {
     "Game": f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
     "Belajar": f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
+    "Puzzle": f"🧩 Puzzle Drag & Drop | Tingkat: {st.session_state.puzzle_difficulty} | Wilayah: {st.session_state.puzzle_target_region or '-'}",
     "Bromo 3D": "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D": "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
     "Papan Skor": "🏆 Papan Skor Tebak Jawa Timur",
