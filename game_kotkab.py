@@ -721,7 +721,7 @@ if error or result is None:
 
 jatim_geojson, wilayah_list = result
 kota_list = [w for w in wilayah_list if w.startswith("Kota ")]
-kab_list  = [w for w in wilayah_list if w.startswith("Kabupaten ")]
+kab_list  = [w for w in wilayah_list if not w.startswith("Kota ")]
 
 
 # ==================== FUNGSI WAKTU ====================
