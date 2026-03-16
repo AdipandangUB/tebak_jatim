@@ -808,15 +808,19 @@ def end_game_timer():
     """
     Hitung total durasi game.
     game_end_time di-set tepat saat jawaban terakhir dikirim (bukan saat render halaman).
-    Fungsi ini hanya menghitung durasi dari nilai yang sudah tersimpan.
+    Guard None ditambahkan agar tidak TypeError.
     """
-    if st.session_state.game_start_time:
-        # Jangan overwrite game_end_time jika sudah di-set saat jawaban terakhir
+    if st.session_state.game_start_time is not None:
         if not st.session_state.game_end_time:
             st.session_state.game_end_time = time.time()
-        st.session_state.total_game_duration = (
-            st.session_state.game_end_time - st.session_state.game_start_time
-        )
+        # Pastikan keduanya bukan None sebelum dikurangi
+        if st.session_state.game_end_time is not None:
+            st.session_state.total_game_duration = (
+                st.session_state.game_end_time - st.session_state.game_start_time
+            )
+        return st.session_state.total_game_duration
+    elif st.session_state.total_game_duration > 0:
+        # Durasi sudah tersimpan sebelumnya, kembalikan nilainya
         return st.session_state.total_game_duration
     return 0
 
@@ -852,6 +856,8 @@ def pilih_wilayah():
 
 
 def reset_game():
+    # Simpan game_start_time yang sudah di-set oleh start_game_timer() sebelumnya
+    _saved_start = st.session_state.game_start_time
     st.session_state.score = 0
     st.session_state.total_questions = 0
     st.session_state.game_over = False
@@ -861,7 +867,8 @@ def reset_game():
     st.session_state.answered = False
     st.session_state.game_started = False
     st.session_state.score_saved = False
-    st.session_state.game_start_time = None
+    # Kembalikan game_start_time yang sudah di-set agar tidak tertimpa None
+    st.session_state.game_start_time = _saved_start
     st.session_state.game_end_time = None
     st.session_state.total_game_duration = 0
     st.session_state.question_times = []
@@ -2255,16 +2262,21 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                 st.session_state.answered = True
 
                 # ============================================================
-                # PERBAIKAN UTAMA: game_end_time di-set TEPAT saat jawaban
-                # terakhir dikirim — BUKAN saat halaman game over dirender.
-                # Ini memastikan durasi = waktu aktif bermain yang sesungguhnya.
+                # PERBAIKAN: game_end_time di-set TEPAT saat jawaban terakhir.
+                # Guard None ditambahkan agar tidak TypeError saat kalkulasi.
                 # ============================================================
                 if st.session_state.total_questions >= st.session_state.max_questions:
                     st.session_state.game_over = True
-                    st.session_state.game_end_time = time.time()   # ← catat tepat di sini
-                    st.session_state.total_game_duration = (
-                        st.session_state.game_end_time - st.session_state.game_start_time
-                    )
+                    st.session_state.game_end_time = time.time()
+                    if st.session_state.game_start_time is not None:
+                        st.session_state.total_game_duration = (
+                            st.session_state.game_end_time - st.session_state.game_start_time
+                        )
+                    else:
+                        # Fallback: jumlahkan durasi tiap soal
+                        st.session_state.total_game_duration = sum(
+                            q["duration"] for q in st.session_state.question_times
+                        )
                     if st.session_state.score == st.session_state.max_questions:
                         st.session_state.show_perfect_balloon = True
 
