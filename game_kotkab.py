@@ -856,8 +856,9 @@ def pilih_wilayah():
 
 
 def reset_game():
-    # Simpan game_start_time yang sudah di-set oleh start_game_timer() sebelumnya
-    _saved_start = st.session_state.game_start_time
+    # Catat waktu mulai game SEKARANG — sebelum apapun di-reset
+    # Ini memastikan game_start_time selalu valid saat game dimulai
+    _new_start = time.time()
     st.session_state.score = 0
     st.session_state.total_questions = 0
     st.session_state.game_over = False
@@ -867,8 +868,8 @@ def reset_game():
     st.session_state.answered = False
     st.session_state.game_started = False
     st.session_state.score_saved = False
-    # Kembalikan game_start_time yang sudah di-set agar tidak tertimpa None
-    st.session_state.game_start_time = _saved_start
+    # Set game_start_time dengan nilai baru yang sudah dicatat di atas
+    st.session_state.game_start_time = _new_start
     st.session_state.game_end_time = None
     st.session_state.total_game_duration = 0
     st.session_state.question_times = []
@@ -1399,12 +1400,10 @@ with st.sidebar:
         st.header("🎮 Kontrol Game")
         if not st.session_state.game_started or st.session_state.game_over:
             if st.button("🎲 Mulai Game Baru", use_container_width=True, type="primary"):
-                start_game_timer()
                 reset_game()
                 st.rerun()
         else:
             if st.button("🔄 Reset Game", use_container_width=True):
-                start_game_timer()
                 reset_game()
                 st.rerun()
 
@@ -2117,8 +2116,7 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
 
         if "Game" in selected_menu and not st.session_state.game_started and not st.session_state.game_over:
             if st.button("🎮 Mulai Game", use_container_width=True, type="primary"):
-                start_game_timer()
-                pilih_wilayah()
+                reset_game()
                 st.rerun()
 
     # Panel info wilayah (mode Belajar)
@@ -2214,7 +2212,6 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     st.success("✅ Skor sudah disimpan!")
 
                 if st.button("🔄 Main Lagi", use_container_width=True, type="primary"):
-                    start_game_timer()
                     reset_game()
                     st.rerun()
 
