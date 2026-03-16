@@ -343,18 +343,9 @@ def get_balloon_effect_html():
     """
 
 
-# ==================== FUNGSI BACKSOUND (PERBAIKAN) ====================
-# PERUBAHAN: Tombol musik sekarang dirender di dalam sidebar dengan height=58
-# sehingga tombol terlihat dan tidak ter-clip oleh iframe height=0.
+# ==================== FUNGSI BACKSOUND ====================
 
 def get_backsound_html(volume=30):
-    """
-    PERBAIKAN v2.7:
-    - Hapus position:fixed (tidak berfungsi di dalam iframe Streamlit)
-    - Render tombol sebagai elemen in-flow biasa
-    - height=58 di st.components memberi ruang cukup untuk tombol
-    - Tombol ditempatkan di sidebar agar selalu terlihat di semua halaman
-    """
     return f"""
     <style>
     * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -429,7 +420,6 @@ def get_backsound_html(volume=30):
     }}
     </style>
 
-    <!-- Hidden YouTube Audio Player -->
     <iframe
         id="yt-iframe-hidden"
         src="https://www.youtube.com/embed/{MUSIC_VIDEO_ID}?autoplay=1&loop=1&playlist={MUSIC_VIDEO_ID}&enablejsapi=1&controls=0&rel=0&modestbranding=1"
@@ -437,7 +427,6 @@ def get_backsound_html(volume=30):
         allowfullscreen
     ></iframe>
 
-    <!-- Tombol Musik Visible -->
     <div id="backsound-btn" onclick="toggleMusic()" title="Klik untuk play / pause musik latar">
         <div id="music-visualizer">
             <div class="music-bar"></div>
@@ -455,7 +444,6 @@ def get_backsound_html(volume=30):
         var ytPlayer = null;
         var initVolume = {volume};
 
-        /* Load YouTube IFrame API sekali saja */
         if (!window._ytApiLoaded) {{
             window._ytApiLoaded = true;
             var tag = document.createElement('script');
@@ -463,7 +451,6 @@ def get_backsound_html(volume=30):
             document.head.appendChild(tag);
         }}
 
-        /* Callback dipanggil oleh YouTube API setelah siap */
         window.onYouTubeIframeAPIReady = function() {{
             ytPlayer = new YT.Player('yt-iframe-hidden', {{
                 events: {{
@@ -472,7 +459,6 @@ def get_backsound_html(volume=30):
                         event.target.playVideo();
                     }},
                     'onStateChange': function(event) {{
-                        /* Auto-replay jika selesai */
                         if (event.data === YT.PlayerState.ENDED) {{
                             event.target.playVideo();
                         }}
@@ -720,6 +706,7 @@ if error or result is None:
     st.stop()
 
 jatim_geojson, wilayah_list = result
+# PERBAIKAN: kab_list menggunakan logika "bukan Kota" agar menghitung 29 kabupaten dengan benar
 kota_list = [w for w in wilayah_list if w.startswith("Kota ")]
 kab_list  = [w for w in wilayah_list if not w.startswith("Kota ")]
 
@@ -790,8 +777,9 @@ for key, val in _defaults.items():
 # ==================== FUNGSI TIMER ====================
 
 def start_game_timer():
+    """Mulai timer game — dicatat tepat saat tombol Mulai Game ditekan."""
     st.session_state.game_start_time = time.time()
-    st.session_state.game_end_time = None
+    st.session_state.game_end_time = None          # reset waktu selesai
     st.session_state.total_game_duration = 0
     st.session_state.question_times = []
     st.session_state.average_answer_time = 0
@@ -815,9 +803,17 @@ def end_question_timer(is_correct=False):
     return 0
 
 
+# PERBAIKAN UTAMA: end_game_timer tidak overwrite game_end_time jika sudah di-set
 def end_game_timer():
+    """
+    Hitung total durasi game.
+    game_end_time di-set tepat saat jawaban terakhir dikirim (bukan saat render halaman).
+    Fungsi ini hanya menghitung durasi dari nilai yang sudah tersimpan.
+    """
     if st.session_state.game_start_time:
-        st.session_state.game_end_time = time.time()
+        # Jangan overwrite game_end_time jika sudah di-set saat jawaban terakhir
+        if not st.session_state.game_end_time:
+            st.session_state.game_end_time = time.time()
         st.session_state.total_game_duration = (
             st.session_state.game_end_time - st.session_state.game_start_time
         )
@@ -1204,8 +1200,6 @@ def get_background_image_html(image_url):
     }}
     [data-testid="stSidebar"] .stSlider label {{ color: white !important; }}
     [data-testid="stSidebar"] hr {{ border-color: rgba(255,255,255,0.3); }}
-
-    /* Hapus padding default iframe komponen di sidebar agar tombol musik rapat */
     [data-testid="stSidebar"] iframe {{
         display: block;
     }}
@@ -1266,7 +1260,7 @@ def create_footer(footer_text, image_url, brightness=0.7):
         <div class="footer-content">
             <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten Jawa Timur</div>
             <p>{footer_text}</p>
-            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.7.0</p>
+            <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Geospasial Tentang Jawa Timur Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform "Pengetahuan Jatim" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.7.1</p>
             <p>Game Tebak Wilayah | Mode Belajar | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
@@ -1371,12 +1365,6 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    # ============================================================
-    # ✅ PERBAIKAN TOMBOL MUSIK — dirender di sidebar dengan height=58
-    # Ini menggantikan render lama yang menggunakan height=0 di luar sidebar.
-    # position:fixed tidak berfungsi di dalam iframe Streamlit, sehingga
-    # tombol harus dirender sebagai elemen in-flow di dalam sidebar.
-    # ============================================================
     st.markdown(
         "<p style='color:rgba(255,255,255,0.7);font-size:11px;margin-bottom:2px;'>🎵 Kontrol Musik</p>",
         unsafe_allow_html=True
@@ -1517,7 +1505,7 @@ with st.sidebar:
 
     elif "Tentang" in selected_menu:
         st.header("ℹ️ Tentang")
-        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.7.0\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
+        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.7.1\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
 
 
 # ==================== KONTEN UTAMA ====================
@@ -1759,8 +1747,10 @@ elif "Papan Skor" in selected_menu:
 
     if st.session_state.score > 0 and not st.session_state.score_saved:
         if st.button("💾 Simpan Skor ke Papan Skor", use_container_width=True, type="primary"):
-            if st.session_state.game_start_time and not st.session_state.game_end_time:
-                end_game_timer()
+            # Pastikan game_end_time sudah ada sebelum simpan
+            if not st.session_state.game_end_time:
+                st.session_state.game_end_time = time.time()
+            end_game_timer()
             if add_score(st.session_state.user_name, st.session_state.score,
                          st.session_state.difficulty, st.session_state.max_questions,
                          st.session_state.game_start_time, st.session_state.game_end_time):
@@ -1912,7 +1902,7 @@ elif "Tentang" in selected_menu:
         """)
     with c2:
         st.image("https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg")
-        st.markdown("**Versi:** 2.7.0")
+        st.markdown("**Versi:** 2.7.1")
         st.markdown("**Musik:** 🎵 Aktif (YouTube)")
 
     st.markdown("---")
@@ -2162,6 +2152,7 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
         st.markdown("---")
 
         if st.session_state.game_over:
+            # Hitung durasi final — game_end_time sudah di-set saat jawaban terakhir
             end_game_timer()
             c1, c2, c3 = st.columns([1, 2, 1])
             with c2:
@@ -2260,9 +2251,17 @@ if "Game" in selected_menu or "Belajar" in selected_menu:
                     )
                 st.session_state.answered = True
 
+                # ============================================================
+                # PERBAIKAN UTAMA: game_end_time di-set TEPAT saat jawaban
+                # terakhir dikirim — BUKAN saat halaman game over dirender.
+                # Ini memastikan durasi = waktu aktif bermain yang sesungguhnya.
+                # ============================================================
                 if st.session_state.total_questions >= st.session_state.max_questions:
                     st.session_state.game_over = True
-                    end_game_timer()
+                    st.session_state.game_end_time = time.time()   # ← catat tepat di sini
+                    st.session_state.total_game_duration = (
+                        st.session_state.game_end_time - st.session_state.game_start_time
+                    )
                     if st.session_state.score == st.session_state.max_questions:
                         st.session_state.show_perfect_balloon = True
 
