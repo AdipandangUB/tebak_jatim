@@ -2088,7 +2088,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    menu_options = ["🎮 Game", "📚 Belajar", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
+    menu_options = ["📚 Belajar","🎮 Game", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
                     "🏆 Papan Skor", "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
     selected_menu = st.radio("Menu", menu_options, index=0,
                              label_visibility="collapsed", key="main_navigation")
