@@ -768,12 +768,9 @@ _defaults = {
     "music_enabled": True,
     "show_perfect_balloon": False,
     # Puzzle state
-    "puzzle_difficulty": "Normal",
     "puzzle_started": False,
-    "puzzle_target_region": None,
     "puzzle_start_time": None,
     "puzzle_completed": False,
-    "puzzle_best_times": {},
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
@@ -1269,44 +1266,22 @@ def create_footer(footer_text, image_url, brightness=0.7):
     """
 
 
-# ==================== PUZZLE DRAG & DROP FEATURE (FIXED v2.9) ====================
+# ==================== PUZZLE DRAG & DROP FEATURE (v3.0 — JAWA TIMUR UTUH) ====================
 
-def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_time_ms):
+def get_puzzle_html(geojson_data, start_time_ms):
     """
-    Puzzle menggunakan bentuk POLYGON ASLI dari GeoJSON administrasi.
-    Setiap kepingan adalah sub-polygon wilayah yang sesungguhnya,
-    bukan kotak-kotak grid.
+    Puzzle peta JAWA TIMUR UTUH:
+    - 1 wilayah provinsi (seluruh Jawa Timur)
+    - Setiap kepingan = 1 kabupaten/kota (bentuk polygon asli GeoJSON)
+    - Level Normal saja (semua kab/kota = kepingan)
+    - Drag & drop ke posisi geografis yang tepat
     """
-    # Cari target feature
-    target_feature = None
     all_features = geojson_data.get("features", [])
-    for feat in all_features:
-        if feat["properties"]["name"] == target_region:
-            target_feature = feat
-            break
-
-    if not target_feature:
+    if not all_features:
         return "<p>❌ Data wilayah tidak ditemukan.</p>"
 
-    # Build context GeoJSON (semua wilayah untuk latar belakang)
-    context_features = []
-    for feat in all_features:
-        context_features.append({
-            "type": "Feature",
-            "properties": {"name": feat["properties"]["name"]},
-            "geometry": feat["geometry"]
-        })
-
-    geojson_str = json.dumps({"type": "FeatureCollection", "features": context_features})
-    target_str = json.dumps(target_feature)
-
-    level_config = {
-        "Pemula":  {"pieces": 4,  "color": "#4CAF50", "label": "🌱 Pemula",  "snap_dist": 45},
-        "Mudah":   {"pieces": 8,  "color": "#2196F3", "label": "😊 Mudah",   "snap_dist": 35},
-        "Normal":  {"pieces": 16, "color": "#FF9800", "label": "⚡ Normal",  "snap_dist": 25},
-        "Sulit":   {"pieces": 28, "color": "#f44336", "label": "🔥 Sulit",   "snap_dist": 18},
-    }
-    cfg = level_config.get(difficulty, level_config["Normal"])
+    geojson_str = json.dumps(geojson_data)
+    SNAP_DIST   = 22   # piksel toleransi snap (level Normal)
 
     html = f"""<!DOCTYPE html>
 <html lang="id">
@@ -1323,39 +1298,35 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     color: white;
     padding: 10px;
   }}
-  #puzzle-header {{ text-align:center; padding:8px 0 12px 0; }}
+  #puzzle-header {{ text-align:center; padding:6px 0 10px 0; }}
   #puzzle-header h2 {{
-    font-size:1.5em; font-weight:900;
+    font-size:1.4em; font-weight:900;
     background: linear-gradient(90deg,#ffd700,#ff6b35,#ffd700);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     letter-spacing:1px;
   }}
-  #puzzle-header .subtitle {{ font-size:0.85em; color:rgba(255,255,255,0.7); margin-top:2px; }}
+  #puzzle-header .subtitle {{ font-size:0.82em; color:rgba(255,255,255,0.7); margin-top:2px; }}
   #stats-bar {{
-    display:flex; justify-content:center; gap:20px; margin:8px 0; flex-wrap:wrap;
+    display:flex; justify-content:center; gap:16px; margin:6px 0; flex-wrap:wrap;
   }}
   .stat-pill {{
     background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2);
-    border-radius:30px; padding:5px 16px; font-size:0.82em; font-weight:700;
-    display:flex; align-items:center; gap:6px;
+    border-radius:30px; padding:5px 14px; font-size:0.80em; font-weight:700;
+    display:flex; align-items:center; gap:5px;
   }}
-  .stat-pill span {{ color:#ffd700; font-size:1.1em; }}
-  #level-badge {{
-    display:inline-block; background:{cfg['color']}; color:white;
-    padding:3px 14px; border-radius:20px; font-weight:700; font-size:0.82em; margin-bottom:6px;
-  }}
+  .stat-pill span {{ color:#ffd700; }}
   #main-layout {{
-    display:flex; gap:12px; align-items:flex-start; justify-content:center; flex-wrap:wrap;
+    display:flex; gap:10px; align-items:flex-start; justify-content:center; flex-wrap:wrap;
   }}
   #canvas-wrapper {{
-    position:relative; background:rgba(255,255,255,0.05);
-    border:2px solid rgba(255,255,255,0.15); border-radius:16px;
-    overflow:hidden; flex:1 1 520px; max-width:640px;
+    position:relative; background:rgba(255,255,255,0.04);
+    border:2px solid rgba(255,255,255,0.15); border-radius:14px;
+    overflow:hidden; flex:1 1 560px; max-width:700px;
   }}
   #canvas-label {{
-    position:absolute; top:8px; left:12px; font-size:0.72em;
-    color:rgba(255,255,255,0.5); font-weight:700; letter-spacing:1px; text-transform:uppercase;
-    pointer-events:none; z-index:10;
+    position:absolute; top:7px; left:10px; font-size:0.68em;
+    color:rgba(255,255,255,0.45); font-weight:700; letter-spacing:1px;
+    text-transform:uppercase; pointer-events:none; z-index:10;
   }}
   #puzzle-canvas {{
     display:block; width:100%; touch-action:none; user-select:none; cursor:grab;
@@ -1363,63 +1334,65 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
   #puzzle-canvas:active {{ cursor:grabbing; }}
   #pieces-panel {{
     background:rgba(255,255,255,0.06); border:2px dashed rgba(255,255,255,0.2);
-    border-radius:16px; padding:12px; flex:0 0 200px;
-    max-height:600px; overflow-y:auto; min-width:160px;
+    border-radius:14px; padding:10px; flex:0 0 190px;
+    max-height:640px; overflow-y:auto; min-width:155px;
   }}
   #pieces-panel h4 {{
-    font-size:0.8em; color:rgba(255,255,255,0.6); text-transform:uppercase;
-    letter-spacing:1px; margin-bottom:8px; text-align:center;
+    font-size:0.78em; color:rgba(255,255,255,0.6); text-transform:uppercase;
+    letter-spacing:1px; margin-bottom:6px; text-align:center;
   }}
-  #pieces-container {{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }}
+  #pieces-container {{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }}
   .piece-thumb {{
     background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.2);
-    border-radius:8px; cursor:grab; transition:all 0.2s; overflow:hidden;
+    border-radius:7px; cursor:grab; transition:all 0.2s; overflow:hidden;
     display:flex; align-items:center; justify-content:center;
+    position:relative;
   }}
   .piece-thumb:hover {{
     background:rgba(255,215,0,0.15); border-color:#ffd700;
-    transform:scale(1.08); box-shadow:0 4px 14px rgba(255,215,0,0.3);
+    transform:scale(1.07); box-shadow:0 3px 12px rgba(255,215,0,0.3);
   }}
   .piece-thumb.placed {{
-    opacity:0.3; cursor:default; pointer-events:none;
-    border-color:#4CAF50; background:rgba(76,175,80,0.1);
+    opacity:0.28; cursor:default; pointer-events:none;
+    border-color:#4CAF50; background:rgba(76,175,80,0.08);
+  }}
+  .piece-label {{
+    position:absolute; bottom:1px; left:0; right:0;
+    font-size:7px; text-align:center; color:rgba(255,255,255,0.7);
+    line-height:1.1; padding:0 2px;
+    pointer-events:none;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }}
   #progress-bar-wrap {{
-    margin:10px 0 6px 0; background:rgba(255,255,255,0.1);
-    border-radius:10px; height:10px; overflow:hidden;
+    margin:8px 0 4px 0; background:rgba(255,255,255,0.1);
+    border-radius:10px; height:9px; overflow:hidden;
   }}
   #progress-bar-fill {{
     height:100%; background:linear-gradient(90deg,#4CAF50,#8BC34A);
     border-radius:10px; transition:width 0.4s ease; width:0%;
   }}
-  #progress-text {{ text-align:center; font-size:0.78em; color:rgba(255,255,255,0.6); margin-bottom:8px; }}
+  #progress-text {{ text-align:center; font-size:0.76em; color:rgba(255,255,255,0.6); margin-bottom:6px; }}
   #btn-row {{
-    display:flex; gap:8px; justify-content:center; margin:10px 0 6px 0; flex-wrap:wrap;
+    display:flex; gap:7px; justify-content:center; margin:8px 0 5px 0; flex-wrap:wrap;
   }}
   .puzzle-btn {{
     background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none;
-    border-radius:20px; padding:8px 20px; font-size:0.85em; font-weight:700;
+    border-radius:18px; padding:7px 18px; font-size:0.82em; font-weight:700;
     font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s;
-    box-shadow:0 4px 12px rgba(102,126,234,0.4);
+    box-shadow:0 3px 10px rgba(102,126,234,0.4);
   }}
-  .puzzle-btn:hover {{ transform:translateY(-2px); box-shadow:0 6px 18px rgba(102,126,234,0.6); }}
-  .puzzle-btn.danger {{
-    background:linear-gradient(135deg,#f44336,#c62828);
-    box-shadow:0 4px 12px rgba(244,67,54,0.4);
-  }}
-  .puzzle-btn.success {{
-    background:linear-gradient(135deg,#4CAF50,#2E7D32);
-    box-shadow:0 4px 12px rgba(76,175,80,0.4);
-  }}
+  .puzzle-btn:hover {{ transform:translateY(-2px); box-shadow:0 5px 16px rgba(102,126,234,0.6); }}
+  .puzzle-btn.danger {{ background:linear-gradient(135deg,#f44336,#c62828); }}
+  .puzzle-btn.success {{ background:linear-gradient(135deg,#4CAF50,#2E7D32); }}
   #win-overlay {{
     display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.85); z-index:999; justify-content:center;
+    background:rgba(0,0,0,0.88); z-index:999; justify-content:center;
     align-items:center; flex-direction:column; text-align:center; padding:20px;
   }}
   #win-overlay.show {{ display:flex; }}
   #win-box {{
     background:linear-gradient(135deg,#1a1a2e,#16213e);
-    border:3px solid #ffd700; border-radius:24px; padding:36px 40px; max-width:420px;
+    border:3px solid #ffd700; border-radius:22px; padding:32px 36px; max-width:420px;
     box-shadow:0 0 60px rgba(255,215,0,0.4);
     animation:popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
   }}
@@ -1428,23 +1401,23 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     to   {{ transform:scale(1);   opacity:1; }}
   }}
   #win-box h1 {{
-    font-size:2.2em; font-weight:900;
+    font-size:2em; font-weight:900;
     background:linear-gradient(90deg,#ffd700,#ff6b35);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px;
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;
   }}
-  #win-box p {{ color:rgba(255,255,255,0.85); font-size:1.05em; margin:8px 0; }}
-  #win-time {{ font-size:1.8em; font-weight:900; color:#ffd700; margin:12px 0; }}
+  #win-box p {{ color:rgba(255,255,255,0.85); font-size:1em; margin:6px 0; }}
+  #win-time {{ font-size:1.7em; font-weight:900; color:#ffd700; margin:10px 0; }}
   #snap-feedback {{
-    position:absolute; pointer-events:none; font-size:1.8em;
+    position:absolute; pointer-events:none; font-size:1.7em;
     z-index:200; display:none;
   }}
   @keyframes floatUp {{
     0%   {{ opacity:1; transform:translateY(0) scale(1); }}
-    100% {{ opacity:0; transform:translateY(-60px) scale(1.5); }}
+    100% {{ opacity:0; transform:translateY(-55px) scale(1.4); }}
   }}
   #tooltip {{
-    position:absolute; background:rgba(0,0,0,0.85); color:#ffd700;
-    padding:4px 10px; border-radius:8px; font-size:0.75em; font-weight:700;
+    position:absolute; background:rgba(0,0,0,0.88); color:#ffd700;
+    padding:4px 10px; border-radius:8px; font-size:0.74em; font-weight:700;
     pointer-events:none; display:none; white-space:nowrap; z-index:100;
     border:1px solid rgba(255,215,0,0.3);
   }}
@@ -1453,19 +1426,22 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
 <body>
 
 <div id="puzzle-header">
-  <div id="level-badge">{cfg['label']}</div>
-  <h2>🧩 PUZZLE: {target_region.upper()}</h2>
-  <div class="subtitle">Susun kepingan bentuk wilayah administrasi yang sesungguhnya!</div>
+  <div style="display:inline-block;background:#FF9800;color:white;padding:3px 14px;
+    border-radius:20px;font-weight:700;font-size:0.80em;margin-bottom:5px;">
+    ⚡ Normal — {len(all_features)} Kepingan
+  </div>
+  <h2>🧩 PUZZLE PETA JAWA TIMUR</h2>
+  <div class="subtitle">Susun {len(all_features)} kepingan kabupaten/kota menjadi peta Jawa Timur yang utuh!</div>
 </div>
 
 <div id="stats-bar">
   <div class="stat-pill">⏱️ Waktu <span id="timer-display">00:00</span></div>
-  <div class="stat-pill">🧩 Keping <span id="placed-count">0</span>/<span id="total-count">?</span></div>
+  <div class="stat-pill">🧩 Terpasang <span id="placed-count">0</span>/<span id="total-count">{len(all_features)}</span></div>
   <div class="stat-pill">🎯 Akurasi <span id="accuracy-display">100%</span></div>
 </div>
 
 <div id="progress-bar-wrap"><div id="progress-bar-fill"></div></div>
-<div id="progress-text">Seret kepingan bentuk wilayah ke posisi yang tepat di peta!</div>
+<div id="progress-text">Seret kepingan kab/kota ke posisi yang tepat di peta!</div>
 
 <div id="btn-row">
   <button class="puzzle-btn" onclick="shufflePieces()">🔀 Acak Ulang</button>
@@ -1476,16 +1452,16 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
 
 <div id="main-layout">
   <div id="canvas-wrapper">
-    <div id="canvas-label">PETA JAWA TIMUR — AREA PUZZLE</div>
+    <div id="canvas-label">PETA JAWA TIMUR — DRAG KEPINGAN KE SINI</div>
     <canvas id="puzzle-canvas"></canvas>
     <div id="tooltip"></div>
     <div id="snap-feedback">✅</div>
   </div>
   <div id="pieces-panel">
-    <h4 id="panel-title">📦 Kepingan</h4>
-    <div id="progress-bar-wrap" style="margin:6px 0 10px 0;">
+    <h4 id="panel-title">📦 Kepingan ({len(all_features)})</h4>
+    <div id="progress-bar-wrap" style="margin:4px 0 8px 0;">
       <div id="progress-bar-fill2"
-        style="height:8px;background:linear-gradient(90deg,#4CAF50,#8BC34A);
+        style="height:7px;background:linear-gradient(90deg,#4CAF50,#8BC34A);
                border-radius:10px;width:0%;transition:width 0.4s;">
       </div>
     </div>
@@ -1495,35 +1471,31 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
 
 <div id="win-overlay">
   <div id="win-box">
-    <div style="font-size:3em;margin-bottom:8px;">🏆</div>
+    <div style="font-size:3em;margin-bottom:6px;">🏆</div>
     <h1>PUZZLE SELESAI!</h1>
-    <p>Wilayah: <strong>{target_region}</strong></p>
-    <p>Tingkat: <strong>{cfg['label']}</strong></p>
+    <p>Peta <strong>Jawa Timur</strong> berhasil disusun!</p>
+    <p>Semua <strong>{len(all_features)} kabupaten/kota</strong> terpasang!</p>
     <div id="win-time">00:00</div>
     <p id="win-moves">0 kesalahan</p>
-    <p style="color:#ffd700;font-size:0.9em;margin-top:10px;">
-      🎉 Kamu berhasil menyusun bentuk wilayah administrasinya!
+    <p style="color:#ffd700;font-size:0.88em;margin-top:8px;">
+      🎉 Luar biasa! Kamu mengenal semua wilayah Jawa Timur!
     </p>
     <button class="puzzle-btn success"
-      style="margin-top:18px;font-size:1em;padding:12px 32px;"
+      style="margin-top:16px;font-size:1em;padding:10px 30px;"
       onclick="location.reload()">🔄 Main Lagi</button>
   </div>
 </div>
 
 <script>
 (function() {{
-  // ===== DATA =====
-  const GEOJSON      = {geojson_str};
-  const TARGET_FEAT  = {target_str};
-  const TARGET_NAME  = "{target_region}";
-  const MAX_PIECES   = {cfg['pieces']};
-  const SNAP_DIST    = {cfg['snap_dist']};
-  const START_TIME   = Date.now();
+  const GEOJSON    = {geojson_str};
+  const SNAP_DIST  = {SNAP_DIST};
+  const START_TIME = Date.now();
 
   // ===== CANVAS =====
   const canvas = document.getElementById('puzzle-canvas');
   const ctx    = canvas.getContext('2d');
-  const W = 640, H = 540;
+  const W = 680, H = 560;
   canvas.width = W; canvas.height = H;
 
   // ===== PROYEKSI — fit seluruh Jawa Timur =====
@@ -1542,7 +1514,7 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     if(lat<minLat) minLat=lat; if(lat>maxLat) maxLat=lat;
   }}));
 
-  const PAD    = 42;
+  const PAD    = 38;
   const scaleX = (W - PAD*2) / (maxLon - minLon);
   const scaleY = (H - PAD*2) / (maxLat - minLat);
   const SCALE  = Math.min(scaleX, scaleY);
@@ -1554,7 +1526,7 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     ];
   }}
 
-  // ===== BUILD Path2D untuk geometry apapun =====
+  // ===== BUILD Path2D =====
   function buildPath(geometry) {{
     const p = new Path2D();
     function addRing(ring) {{
@@ -1572,30 +1544,17 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     return p;
   }}
 
-  // ===== EKSTRAK polygon individual dari target =====
-  function extractPolygons(geometry) {{
-    const polys = [];
-    if(geometry.type === 'Polygon') {{
-      polys.push({{ type:'Polygon', coordinates: geometry.coordinates }});
-    }} else if(geometry.type === 'MultiPolygon') {{
-      geometry.coordinates.forEach(pc =>
-        polys.push({{ type:'Polygon', coordinates: pc }})
-      );
-    }}
-    return polys;
-  }}
-
-  // Centroid (projected) dari polygon
-  function polyCentroid(polyGeom) {{
+  // Centroid proyeksi dari geometry
+  function geomCentroid(geom) {{
     let sx=0, sy=0, n=0;
-    polyGeom.coordinates[0].forEach(c => {{
-      const [x,y] = project(c[0],c[1]);
+    iterGeom(geom, (lon,lat) => {{
+      const [x,y] = project(lon,lat);
       sx+=x; sy+=y; n++;
     }});
     return [sx/n, sy/n];
   }}
 
-  // Bounding box (projected) dari geometry apapun
+  // Bounding box proyeksi
   function geomBBox(geom) {{
     let x1=W, x2=0, y1=H, y2=0;
     iterGeom(geom, (lon,lat) => {{
@@ -1606,93 +1565,33 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     return {{ x1,x2,y1,y2, w:x2-x1, h:y2-y1 }};
   }}
 
-  // Subdivide polygon besar menjadi N irisan radial (pie-slice)
-  // agar jumlah kepingan mencukupi MAX_PIECES
-  function subdivide(polyGeom, n) {{
-    const ring = polyGeom.coordinates[0];
-    const N = ring.length - 1;
-    if(n <= 1 || N < n*2) return [polyGeom];
-
-    // Centroid geografis
-    let cLon=0, cLat=0;
-    ring.forEach(c => {{ cLon+=c[0]; cLat+=c[1]; }});
-    cLon /= ring.length; cLat /= ring.length;
-
-    const parts = [];
-    const seg = Math.floor(N / n);
-    for(let i=0; i<n; i++) {{
-      const s = i * seg;
-      const e = (i===n-1) ? N : (i+1)*seg;
-      const arc = ring.slice(s, e+1);
-      // Bentuk irisan: arc + centroid
-      const slice = [
-        [...arc[0]],
-        ...arc.slice(1).map(c=>[...c]),
-        [cLon, cLat],
-        [...arc[0]]
-      ];
-      parts.push({{ type:'Polygon', coordinates:[slice] }});
-    }}
-    return parts;
-  }}
-
-  // ===== BUAT KEPINGAN dari polygon asli + subdivisi jika perlu =====
-  let rawPolys = extractPolygons(TARGET_FEAT.geometry);
-
-  // Urutkan dari terbesar (berdasarkan area bbox proyeksi)
-  rawPolys.sort((a,b) => {{
-    const ba=geomBBox(a), bb=geomBBox(b);
-    return (bb.w*bb.h) - (ba.w*ba.h);
-  }});
-
-  let allPolys = [...rawPolys];
-  let tries = 0;
-  while(allPolys.length < MAX_PIECES && tries < 60) {{
-    tries++;
-    allPolys.sort((a,b) => {{
-      const ba=geomBBox(a), bb=geomBBox(b);
-      return (bb.w*bb.h) - (ba.w*ba.h);
-    }});
-    const big = allPolys.shift();
-    const bb  = geomBBox(big);
-    if(bb.w * bb.h < 5) {{ allPolys.unshift(big); break; }}
-    const need = MAX_PIECES - allPolys.length;
-    const nsplit = Math.min(Math.max(2, need+1), 7);
-    allPolys.push(...subdivide(big, nsplit));
-  }}
-
-  if(allPolys.length > MAX_PIECES) allPolys = allPolys.slice(0, MAX_PIECES);
-
-  // Build piece objects
-  const pieces = allPolys.map((polyGeom, i) => {{
-    const centroid = polyCentroid(polyGeom);
-    const bbox     = geomBBox(polyGeom);
+  // ===== BUILD PIECES — setiap feature = 1 kepingan =====
+  const pieces = GEOJSON.features.map((feat, i) => {{
+    const name     = feat.properties.name;
+    const centroid = geomCentroid(feat.geometry);
+    const bbox     = geomBBox(feat.geometry);
+    const path     = buildPath(feat.geometry);
     return {{
       id:       i,
-      geometry: polyGeom,
-      path:     buildPath(polyGeom),
-      centroid: centroid,   // posisi target di canvas
+      name:     name,
+      geometry: feat.geometry,
+      path:     path,
+      centroid: centroid,   // posisi target di canvas (dx=0 = terpasang)
       bbox:     bbox,
-      dx:       0,          // offset dari posisi target (dx=0 berarti terpasang)
+      dx:       0,          // offset drag dari posisi target
       dy:       0,
       placed:   false,
       inPanel:  true,
       dragOffX: 0,
       dragOffY: 0,
-      hue:      (i * 43 + 160) % 360,
+      hue:      (i * 31 + 120) % 360,
     }};
   }});
 
   const totalPieces = pieces.length;
-  document.getElementById('total-count').textContent  = totalPieces;
-  document.getElementById('panel-title').textContent  = '📦 Kepingan (' + totalPieces + ')';
-
-  // Path penuh wilayah target (untuk outline)
-  const targetFullPath = buildPath(TARGET_FEAT.geometry);
-  const targetBBox     = geomBBox(TARGET_FEAT.geometry);
 
   // ===== THUMBNAIL DI PANEL =====
-  const THUMB_W = 72, THUMB_H = 62;
+  const THUMB_W = 68, THUMB_H = 58;
   const piecesContainer = document.getElementById('pieces-container');
 
   function buildThumbnails() {{
@@ -1700,15 +1599,23 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     pieces.forEach(p => {{
       const div = document.createElement('div');
       div.className = 'piece-thumb' + (p.placed ? ' placed' : '');
-      div.id = 'thumb-' + p.id;
+      div.id  = 'thumb-' + p.id;
       div.style.width  = THUMB_W + 'px';
       div.style.height = THUMB_H + 'px';
+      div.title = p.name;
 
       const tc  = document.createElement('canvas');
       tc.width  = THUMB_W;
       tc.height = THUMB_H;
       drawThumb(p, tc.getContext('2d'));
       div.appendChild(tc);
+
+      // Label nama singkat
+      const lbl = document.createElement('div');
+      lbl.className = 'piece-label';
+      // Singkat: hapus "Kabupaten " / "Kota "
+      lbl.textContent = p.name.replace('Kabupaten ','').replace('Kota ','');
+      div.appendChild(lbl);
 
       div.addEventListener('mousedown', e => startDragPanel(e, p));
       div.addEventListener('touchstart', e => startDragPanelTouch(e, p), {{passive:false}});
@@ -1720,15 +1627,14 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     tctx.clearRect(0, 0, THUMB_W, THUMB_H);
     const bb = piece.bbox;
     if(bb.w < 0.5 || bb.h < 0.5) return;
-    const tpad = 6;
-    const ts   = Math.min((THUMB_W-tpad*2)/bb.w, (THUMB_H-tpad*2)/bb.h);
+    const tpad = 5;
+    const ts   = Math.min((THUMB_W-tpad*2)/bb.w, (THUMB_H-tpad*2-10)/bb.h);
     const offX = tpad + (THUMB_W-tpad*2 - bb.w*ts)/2 - bb.x1*ts;
-    const offY = tpad + (THUMB_H-tpad*2 - bb.h*ts)/2 - bb.y1*ts;
+    const offY = tpad + (THUMB_H-tpad*2-10 - bb.h*ts)/2 - bb.y1*ts;
 
     tctx.save();
     tctx.setTransform(ts, 0, 0, ts, offX, offY);
 
-    // Buat path lokal
     const lp = new Path2D();
     function addRingLocal(ring) {{
       ring.forEach((c,i) => {{
@@ -1737,14 +1643,18 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
       }});
       lp.closePath();
     }}
-    piece.geometry.coordinates.forEach(addRingLocal);
+    piece.geometry.coordinates.forEach ? 
+      (piece.geometry.type === 'MultiPolygon' 
+        ? piece.geometry.coordinates.forEach(poly => poly.forEach(addRingLocal))
+        : piece.geometry.coordinates.forEach(addRingLocal))
+      : null;
 
     tctx.shadowColor = 'rgba(0,0,0,0.5)';
-    tctx.shadowBlur  = 5/ts;
-    tctx.fillStyle   = `hsla(${{piece.hue}},70%,58%,0.92)`;
+    tctx.shadowBlur  = 4/ts;
+    tctx.fillStyle   = `hsla(${{piece.hue}},68%,56%,0.92)`;
     tctx.fill(lp);
     tctx.shadowBlur  = 0;
-    tctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    tctx.strokeStyle = 'rgba(255,255,255,0.8)';
     tctx.lineWidth   = 1.5/ts;
     tctx.stroke(lp);
     tctx.restore();
@@ -1753,9 +1663,9 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
   buildThumbnails();
 
   // ===== DRAG STATE =====
-  let dragging    = null;
+  let dragging = null;
   let mouseX = 0, mouseY = 0;
-  let mistakes    = 0;
+  let mistakes = 0;
 
   function canvasPos(e) {{
     const rect = canvas.getBoundingClientRect();
@@ -1801,12 +1711,12 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     for(let i=pieces.length-1; i>=0; i--) {{
       const p = pieces[i];
       if(p.placed || p.inPanel) continue;
-      const pcx = p.centroid[0] + p.dx;
-      const pcy = p.centroid[1] + p.dy;
-      const bb  = p.bbox;
+      const bb = p.bbox;
       if(mx >= bb.x1+p.dx-4 && mx <= bb.x2+p.dx+4 &&
          my >= bb.y1+p.dy-4 && my <= bb.y2+p.dy+4) {{
         dragging = p;
+        const pcx = p.centroid[0] + p.dx;
+        const pcy = p.centroid[1] + p.dy;
         p.dragOffX = mx - pcx;
         p.dragOffY = my - pcy;
         mouseX=mx; mouseY=my;
@@ -1823,9 +1733,17 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
     dragging.dx = mx - dragging.centroid[0] - dragging.dragOffX;
     dragging.dy = my - dragging.centroid[1] - dragging.dragOffY;
     render();
+
+    // Tooltip: tunjukkan nama wilayah yang sedang di-drag
+    const tt = document.getElementById('tooltip');
+    tt.textContent = dragging.name;
+    tt.style.left  = Math.min(mx+12, W-120) + 'px';
+    tt.style.top   = Math.max(my-28, 5) + 'px';
+    tt.style.display = 'block';
   }});
 
   document.addEventListener('mouseup', () => {{
+    document.getElementById('tooltip').style.display = 'none';
     if(dragging) {{
       trySnap(dragging, mouseX, mouseY);
       dragging = null;
@@ -1853,23 +1771,27 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
 
   // ===== SNAP =====
   function trySnap(piece, dropX, dropY) {{
-    const tx = piece.centroid[0];
-    const ty = piece.centroid[1];
+    const tx   = piece.centroid[0];
+    const ty   = piece.centroid[1];
     const dist = Math.hypot(dropX - tx, dropY - ty);
-    const snapThr = SNAP_DIST * (W / 640);
+    // Snap threshold: makin kecil wilayah, makin toleran
+    const bb   = piece.bbox;
+    const size = Math.min(bb.w, bb.h);
+    const thr  = Math.max(SNAP_DIST, Math.min(size * 0.55, 50)) * (W / 680);
 
-    if(dist <= snapThr * 2.8) {{
+    if(dist <= thr) {{
       piece.dx = 0; piece.dy = 0;
       piece.placed = true; piece.inPanel = false;
       showFB(dropX, dropY, true);
-      document.getElementById('thumb-'+piece.id).classList.add('placed');
+      const el = document.getElementById('thumb-'+piece.id);
+      if(el) el.classList.add('placed');
       updateProgress();
       checkWin();
     }} else {{
       mistakes++;
       showFB(dropX, dropY, false);
       updateAccuracy();
-      // Biarkan mengambang di canvas
+      // Kepingan tetap mengambang di posisi drop (tidak kembali ke panel)
     }}
   }}
 
@@ -1888,18 +1810,18 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
   function updateProgress() {{
     const pl  = pieces.filter(p=>p.placed).length;
     const pct = Math.round((pl/totalPieces)*100);
-    document.getElementById('placed-count').textContent         = pl;
-    document.getElementById('progress-bar-fill').style.width   = pct+'%';
-    document.getElementById('progress-bar-fill2').style.width  = pct+'%';
+    document.getElementById('placed-count').textContent        = pl;
+    document.getElementById('progress-bar-fill').style.width  = pct+'%';
+    document.getElementById('progress-bar-fill2').style.width = pct+'%';
     document.getElementById('progress-text').textContent =
-      pl===totalPieces ? '🎉 Semua kepingan terpasang!' : pl+'/'+totalPieces+' kepingan terpasang';
+      pl===totalPieces ? '🎉 Peta Jawa Timur lengkap!' : pl+'/'+totalPieces+' kepingan terpasang';
   }}
 
   function updateAccuracy() {{
-    const pl   = pieces.filter(p=>p.placed).length;
-    const tot  = pl + mistakes;
-    const acc  = tot > 0 ? Math.round((pl/tot)*100) : 100;
-    document.getElementById('accuracy-display').textContent = acc+'%';
+    const pl  = pieces.filter(p=>p.placed).length;
+    const tot = pl + mistakes;
+    document.getElementById('accuracy-display').textContent =
+      tot > 0 ? Math.round((pl/tot)*100)+'%' : '100%';
   }}
 
   function checkWin() {{
@@ -1908,7 +1830,7 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
       document.getElementById('win-time').textContent =
         String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
       document.getElementById('win-moves').textContent = mistakes+' kesalahan';
-      setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 500);
+      setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 600);
     }}
   }}
 
@@ -1920,34 +1842,37 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
   }}, 1000);
 
   // ===== RENDER =====
-  function drawPieceAt(piece, dx, dy, isDrag) {{
+  function drawPiece(piece, dx, dy, isDrag) {{
     ctx.save();
     ctx.translate(dx, dy);
 
-    ctx.shadowColor = isDrag ? 'rgba(255,215,0,0.9)' : 'rgba(0,0,0,0.45)';
-    ctx.shadowBlur  = isDrag ? 20 : 9;
-
-    ctx.fillStyle   = `hsla(${{piece.hue}}, ${{isDrag?80:65}}%, ${{isDrag?65:55}}%, ${{isDrag?0.95:0.85}})`;
+    ctx.shadowColor = isDrag ? 'rgba(255,215,0,0.9)' : 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur  = isDrag ? 22 : 8;
+    ctx.fillStyle   = `hsla(${{piece.hue}}, ${{isDrag?82:66}}%, ${{isDrag?66:54}}%, ${{isDrag?0.96:0.82}})`;
     ctx.fill(piece.path);
 
     ctx.shadowBlur  = 0;
-    ctx.strokeStyle = isDrag ? '#ffd700' : 'rgba(255,255,255,0.75)';
-    ctx.lineWidth   = isDrag ? 2.5 : 1.5;
+    ctx.strokeStyle = isDrag ? '#ffd700' : 'rgba(255,255,255,0.65)';
+    ctx.lineWidth   = isDrag ? 2.5 : 1.2;
     ctx.stroke(piece.path);
 
-    // Nomor kepingan
-    const bb  = piece.bbox;
-    const cx_ = (bb.x1+bb.x2)/2;
-    const cy_ = (bb.y1+bb.y2)/2;
-    if(bb.w > 10 && bb.h > 10) {{
-      ctx.fillStyle    = 'rgba(255,255,255,0.9)';
-      ctx.font         = 'bold 10px Nunito,sans-serif';
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor  = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur   = 3;
-      ctx.fillText(piece.id+1, cx_, cy_);
-      ctx.shadowBlur   = 0;
+    // Label nama wilayah di peta (hanya jika tidak di-drag & wilayah cukup besar)
+    if(!isDrag) {{
+      const bb = piece.bbox;
+      if(bb.w > 18 && bb.h > 10) {{
+        const cx_ = (bb.x1+bb.x2)/2;
+        const cy_ = (bb.y1+bb.y2)/2;
+        ctx.fillStyle    = 'rgba(255,255,255,0.92)';
+        ctx.font         = 'bold 7.5px Nunito,sans-serif';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor  = 'rgba(0,0,0,0.9)';
+        ctx.shadowBlur   = 3;
+        // Singkat nama
+        const short = piece.name.replace('Kabupaten ','').replace('Kota ','★');
+        ctx.fillText(short, cx_, cy_);
+        ctx.shadowBlur = 0;
+      }}
     }}
     ctx.restore();
   }}
@@ -1955,83 +1880,67 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
   function render() {{
     ctx.clearRect(0, 0, W, H);
 
-    // 1. Latar: semua wilayah lain (redup)
-    GEOJSON.features.forEach(f => {{
-      if(f.properties.name === TARGET_NAME) return;
-      const p = buildPath(f.geometry);
-      ctx.fillStyle   = 'rgba(65,85,125,0.22)';
-      ctx.fill(p);
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-      ctx.lineWidth   = 0.7;
-      ctx.stroke(p);
+    // 1. Ghost outline semua wilayah (panduan posisi)
+    pieces.forEach(p => {{
+      if(p.placed) return;
+      ctx.save();
+      ctx.setLineDash([4,3]);
+      ctx.strokeStyle = 'rgba(255,215,0,0.18)';
+      ctx.lineWidth   = 1;
+      ctx.stroke(p.path);
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      ctx.fill(p.path);
+      ctx.restore();
     }});
 
-    // 2. Outline wilayah target (garis putus-putus emas)
-    ctx.save();
-    ctx.setLineDash([5,4]);
-    ctx.strokeStyle = 'rgba(255,215,0,0.5)';
-    ctx.lineWidth   = 2.5;
-    ctx.stroke(targetFullPath);
-    ctx.fillStyle   = 'rgba(255,215,0,0.04)';
-    ctx.fill(targetFullPath);
-    ctx.setLineDash([]);
-    ctx.restore();
-
-    // 3. Kepingan yang sudah terpasang (dx=dy=0)
+    // 2. Kepingan terpasang
     pieces.forEach(p => {{
       if(!p.placed) return;
-      drawPieceAt(p, 0, 0, false);
+      drawPiece(p, 0, 0, false);
     }});
 
-    // 4. Kepingan mengambang (belum terpasang, tidak di panel, bukan yang sedang di-drag)
+    // 3. Kepingan mengambang (tidak di panel, bukan yang di-drag)
     pieces.forEach(p => {{
       if(p.placed || p.inPanel || p === dragging) return;
-      drawPieceAt(p, p.dx, p.dy, false);
+      drawPiece(p, p.dx, p.dy, false);
     }});
 
-    // 5. Kepingan yang sedang di-drag (paling atas)
+    // 4. Kepingan sedang di-drag (paling atas)
     if(dragging && !dragging.placed) {{
-      drawPieceAt(dragging, dragging.dx, dragging.dy, true);
+      drawPiece(dragging, dragging.dx, dragging.dy, true);
     }}
-
-    // 6. Label nama wilayah
-    const lx = (targetBBox.x1+targetBBox.x2)/2;
-    const ly = targetBBox.y1 - 10;
-    ctx.fillStyle    = 'rgba(255,215,0,0.95)';
-    ctx.font         = 'bold 13px Nunito,sans-serif';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.shadowColor  = 'rgba(0,0,0,0.9)';
-    ctx.shadowBlur   = 7;
-    if(ly > 15) ctx.fillText(TARGET_NAME, lx, ly);
-    ctx.shadowBlur   = 0;
   }}
 
   render();
 
   // ===== KONTROL =====
   window.shufflePieces = function() {{
-    const spreadX = W * 0.82;
-    const spreadY = H * 0.78;
+    const margin = 30;
     pieces.forEach(p => {{
       if(p.placed) return;
       p.inPanel = false;
-      p.dx = (Math.random() * spreadX + PAD/2) - p.centroid[0];
-      p.dy = (Math.random() * spreadY + PAD/2) - p.centroid[1];
+      // Scatter acak di seluruh area canvas
+      const bb = p.bbox;
+      p.dx = (Math.random() * (W - margin*2 - bb.w) + margin) - bb.x1;
+      p.dy = (Math.random() * (H - margin*2 - bb.h) + margin) - bb.y1;
     }});
     render();
   }};
 
   window.showHint = function() {{
+    // Flash outline seluruh Jawa Timur
     let n=0;
     const iv = setInterval(() => {{
       if(++n > 8) {{ clearInterval(iv); render(); return; }}
       ctx.save();
-      ctx.strokeStyle = n%2===0 ? '#ffd700' : 'rgba(255,215,0,0.1)';
-      ctx.lineWidth   = 4;
-      ctx.stroke(targetFullPath);
+      pieces.forEach(p => {{
+        ctx.strokeStyle = n%2===0 ? `hsla(${{p.hue}},80%,60%,0.8)` : 'rgba(255,255,255,0.05)';
+        ctx.lineWidth   = 2.5;
+        ctx.stroke(p.path);
+      }});
       ctx.restore();
-    }}, 220);
+    }}, 200);
   }};
 
   window.resetPuzzle = function() {{
@@ -2052,9 +1961,10 @@ def get_puzzle_html(geojson_data, target_region, difficulty, piece_count, start_
       if(i>=unplaced.length) {{ clearInterval(iv); checkWin(); return; }}
       const p = unplaced[i++];
       p.dx=0; p.dy=0; p.placed=true; p.inPanel=false;
-      document.getElementById('thumb-'+p.id).classList.add('placed');
+      const el = document.getElementById('thumb-'+p.id);
+      if(el) el.classList.add('placed');
       updateProgress(); render();
-    }}, 100);
+    }}, 80);
   }};
 
   // Scatter awal
@@ -2226,50 +2136,30 @@ with st.sidebar:
 
     elif PAGE == "Puzzle":
         st.header("🧩 Puzzle Kontrol")
-        st.markdown("**Pilih tingkat kesulitan:**")
-        puzzle_diff = st.radio(
-            "Kesulitan Puzzle",
-            ["Pemula", "Mudah", "Normal", "Sulit"],
-            index=["Pemula", "Mudah", "Normal", "Sulit"].index(st.session_state.puzzle_difficulty),
-            key="puzzle_diff_radio",
-            label_visibility="collapsed"
+        total_kab = len(jatim_geojson.get("features", []))
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,#FF9800,#f57c00);"
+            f"padding:12px;border-radius:10px;text-align:center;color:white;margin-bottom:10px;'>"
+            f"<div style='font-size:1.6em;'>⚡</div>"
+            f"<div style='font-weight:900;font-size:1.1em;'>Level Normal</div>"
+            f"<div style='font-size:0.85em;opacity:0.9;'>{total_kab} kepingan kab/kota</div>"
+            f"</div>",
+            unsafe_allow_html=True
         )
-        if puzzle_diff != st.session_state.puzzle_difficulty:
-            st.session_state.puzzle_difficulty = puzzle_diff
-            st.session_state.puzzle_started = False
-            st.rerun()
-
-        st.markdown("---")
-        pieces_info = {"Pemula": "4 keping", "Mudah": "8 keping", "Normal": "16 keping", "Sulit": "28 keping"}
-        desc_info = {
-            "Pemula":  "🌱 Cocok untuk pemula, bentuk wilayah besar",
-            "Mudah":   "😊 Beberapa irisan, mudah disusun",
-            "Normal":  "⚡ Tantangan standar",
-            "Sulit":   "🔥 Banyak irisan, butuh ketelitian"
-        }
-        st.info(f"**{puzzle_diff}** — {pieces_info[puzzle_diff]}\n\n{desc_info[puzzle_diff]}")
-
-        st.markdown("---")
-        st.markdown("**Pilih Wilayah:**")
-        selected_region = st.selectbox(
-            "Wilayah",
-            wilayah_list,
-            index=wilayah_list.index(st.session_state.puzzle_target_region)
-                  if st.session_state.puzzle_target_region in wilayah_list else 0,
-            key="puzzle_region_select",
-            label_visibility="collapsed"
+        st.info(
+            f"🗺️ **Puzzle Peta Jawa Timur**\n\n"
+            f"Susun **{total_kab} kepingan** kabupaten/kota\n"
+            f"menjadi peta Jawa Timur yang utuh!"
         )
-        st.session_state.puzzle_target_region = selected_region
-
-        if st.button("🎲 Wilayah Acak", use_container_width=True):
-            st.session_state.puzzle_target_region = random.choice(wilayah_list)
-            st.session_state.puzzle_started = False
-            st.rerun()
-
+        st.markdown("---")
         if st.button("▶️ Mulai Puzzle", use_container_width=True, type="primary"):
             st.session_state.puzzle_started = True
             st.session_state.puzzle_start_time = time.time()
             st.rerun()
+        if st.session_state.puzzle_started:
+            if st.button("⛔ Keluar Puzzle", use_container_width=True):
+                st.session_state.puzzle_started = False
+                st.rerun()
 
     elif PAGE == "Belajar":
         st.header("📚 Mode Belajar")
@@ -2384,133 +2274,104 @@ if PAGE == "Game":
 
 # --- HALAMAN PUZZLE ---
 elif PAGE == "Puzzle":
-    st.title("🧩 Puzzle Peta Jawa Timur — Bentuk Wilayah Asli")
+    st.title("🧩 Puzzle Peta Jawa Timur")
 
-    # Info cards
-    col_info1, col_info2, col_info3, col_info4 = st.columns(4)
-    level_data = {
-        "Pemula":  {"pieces": 4,  "color": "#4CAF50", "icon": "🌱"},
-        "Mudah":   {"pieces": 8,  "color": "#2196F3", "icon": "😊"},
-        "Normal":  {"pieces": 16, "color": "#FF9800", "icon": "⚡"},
-        "Sulit":   {"pieces": 28, "color": "#f44336", "icon": "🔥"},
-    }
-    for i, (lvl, info) in enumerate(level_data.items()):
-        col = [col_info1, col_info2, col_info3, col_info4][i]
-        with col:
-            is_selected = (lvl == st.session_state.puzzle_difficulty)
-            border = f"3px solid {info['color']}" if is_selected else "1px solid #ddd"
-            bg = f"linear-gradient(135deg, {info['color']}22, {info['color']}11)" if is_selected else "#f8f9fa"
-            st.markdown(
-                f"""<div style='background:{bg};border:{border};border-radius:12px;
-                padding:14px;text-align:center;'>
-                <div style='font-size:1.8em;'>{info['icon']}</div>
-                <div style='font-weight:900;font-size:1.1em;color:{"#333" if not is_selected else info["color"]};'>{lvl}</div>
-                <div style='color:#666;font-size:0.85em;'>{info['pieces']} keping</div>
-                {"<div style='color:"+info['color']+";font-size:0.75em;font-weight:700;'>▲ AKTIF</div>" if is_selected else ""}
-                </div>""",
-                unsafe_allow_html=True
-            )
+    total_kab = len(jatim_geojson.get("features", []))
 
-    st.markdown("---")
+    # Info banner
+    st.markdown(
+        f"""
+        <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
+            border-radius:14px;padding:16px 20px;margin-bottom:16px;
+            display:flex;align-items:center;gap:16px;flex-wrap:wrap;'>
+          <div style='font-size:2.5em;'>🧩</div>
+          <div>
+            <div style='color:white;font-size:1.2em;font-weight:900;'>
+              Puzzle Peta Jawa Timur — Level Normal
+            </div>
+            <div style='color:rgba(255,255,255,0.9);font-size:0.9em;margin-top:3px;'>
+              Susun <strong>{total_kab} kepingan</strong> kabupaten/kota
+              menjadi peta Jawa Timur yang utuh!
+            </div>
+          </div>
+          <div style='margin-left:auto;background:rgba(255,255,255,0.2);
+            border-radius:10px;padding:8px 14px;text-align:center;color:white;'>
+            <div style='font-size:1.5em;font-weight:900;'>{total_kab}</div>
+            <div style='font-size:0.75em;'>Kab/Kota</div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     if not st.session_state.puzzle_started:
-        st.markdown("### 🗺️ Pilih Wilayah & Mulai Puzzle")
+        # Preview peta + tombol mulai
+        st.markdown("### 🗺️ Pratinjau Peta Jawa Timur")
 
-        sel_col1, sel_col2 = st.columns([2, 1])
-        with sel_col1:
+        col_prev, col_info = st.columns([3, 1])
+        with col_prev:
             m_prev = folium.Map(location=[-7.5, 112.3], zoom_start=7, tiles=None)
             folium.TileLayer(
                 tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
                 attr="Esri", name="Satellite"
             ).add_to(m_prev)
-
-            target = st.session_state.puzzle_target_region or wilayah_list[0]
-
-            def puzzle_style(feature):
-                name = feature["properties"]["name"]
-                if name == target:
-                    return {"fillColor": "#FF6B35", "color": "#FF6B35", "weight": 3, "fillOpacity": 0.7}
-                return {"fillColor": "#3388ff", "color": "#ffffff", "weight": 1, "fillOpacity": 0.2}
-
             folium.GeoJson(
                 jatim_geojson,
-                style_function=puzzle_style,
+                style_function=lambda f: {
+                    "fillColor": "#FF9800", "color": "#ffffff",
+                    "weight": 1.5, "fillOpacity": 0.55
+                },
                 tooltip=folium.GeoJsonTooltip(fields=["name"], aliases=["Wilayah:"]),
             ).add_to(m_prev)
-            st_folium(m_prev, width=None, height=400, use_container_width=True, key="puzzle_preview_map")
+            st_folium(m_prev, width=None, height=380, use_container_width=True, key="puzzle_preview_map")
 
-        with sel_col2:
-            st.markdown("#### ⚙️ Pengaturan Puzzle")
-
-            new_diff = st.selectbox(
-                "Tingkat Kesulitan",
-                ["Pemula", "Mudah", "Normal", "Sulit"],
-                index=["Pemula", "Mudah", "Normal", "Sulit"].index(st.session_state.puzzle_difficulty),
-                key="puzzle_diff_main"
-            )
-            if new_diff != st.session_state.puzzle_difficulty:
-                st.session_state.puzzle_difficulty = new_diff
-
-            new_region = st.selectbox(
-                "Pilih Wilayah",
-                wilayah_list,
-                index=wilayah_list.index(st.session_state.puzzle_target_region)
-                      if st.session_state.puzzle_target_region in wilayah_list else 0,
-                key="puzzle_region_main"
-            )
-            st.session_state.puzzle_target_region = new_region
-
-            cfg_sel = level_data[new_diff]
+        with col_info:
             st.markdown(
-                f"""<div style='background:linear-gradient(135deg,{cfg_sel["color"]}33,{cfg_sel["color"]}11);
-                border:2px solid {cfg_sel["color"]};border-radius:12px;padding:14px;margin:12px 0;text-align:center;'>
-                <div style='font-size:2em;'>{cfg_sel["icon"]}</div>
-                <div style='font-weight:900;font-size:1.2em;color:{cfg_sel["color"]};'>{new_diff}</div>
-                <div style='color:#555;'>{cfg_sel["pieces"]} keping (bentuk polygon asli)</div>
-                </div>""",
+                f"""
+                <div style='background:linear-gradient(135deg,#1a1a2e,#16213e);
+                    border:2px solid #FF9800;border-radius:14px;padding:18px;
+                    text-align:center;color:white;'>
+                  <div style='font-size:2.2em;margin-bottom:8px;'>⚡</div>
+                  <div style='font-size:1em;font-weight:900;color:#FF9800;margin-bottom:6px;'>
+                    Level Normal
+                  </div>
+                  <div style='font-size:2em;font-weight:900;color:#ffd700;'>{total_kab}</div>
+                  <div style='font-size:0.82em;color:rgba(255,255,255,0.7);'>kepingan kab/kota</div>
+                  <hr style='border-color:rgba(255,255,255,0.15);margin:12px 0;'>
+                  <div style='font-size:0.78em;color:rgba(255,255,255,0.65);line-height:1.5;'>
+                    Setiap kepingan adalah<br>bentuk asli wilayah<br>administrasi GeoJSON
+                  </div>
+                </div>
+                """,
                 unsafe_allow_html=True
             )
-
+            st.markdown("")
             if st.button("▶️ MULAI PUZZLE!", use_container_width=True, type="primary"):
                 st.session_state.puzzle_started = True
                 st.session_state.puzzle_start_time = time.time()
-                st.session_state.puzzle_target_region = new_region
-                st.session_state.puzzle_difficulty = new_diff
                 st.rerun()
 
-            if st.button("🎲 Wilayah Acak", use_container_width=True):
-                st.session_state.puzzle_target_region = random.choice(wilayah_list)
-                st.rerun()
-
-            st.markdown("---")
-            info = get_wilayah_info(new_region)
-            with st.expander(f"ℹ️ Info {new_region}"):
-                st.markdown(f"**📍 Geografis:** {info['geografis']}")
-                st.markdown(f"**🛍️ Oleh-oleh:** {info['oleh_oleh']}")
+        st.markdown("---")
+        st.info(
+            "💡 **Cara Bermain:**\n"
+            "1. Klik **MULAI PUZZLE!** untuk memulai\n"
+            "2. Seret kepingan dari panel kanan ke area peta\n"
+            "3. Setiap kepingan adalah bentuk asli kabupaten/kota\n"
+            "4. Kepingan akan *snap* otomatis jika ditempatkan di posisi yang benar\n"
+            "5. Susun semua kepingan untuk melengkapi peta Jawa Timur!"
+        )
 
     else:
         # PUZZLE AKTIF
-        target_region = st.session_state.puzzle_target_region or wilayah_list[0]
-        difficulty    = st.session_state.puzzle_difficulty
-        piece_count   = level_data[difficulty]["pieces"]
-
-        h1, h2, h3 = st.columns(3)
+        h1, h2 = st.columns([3, 1])
         with h1:
             st.markdown(
-                f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);padding:10px;"
-                f"border-radius:10px;text-align:center;color:white;'>"
-                f"<strong>🗺️ {target_region}</strong></div>",
+                f"<div style='background:linear-gradient(135deg,#FF9800,#f57c00);"
+                f"padding:10px 16px;border-radius:10px;color:white;'>"
+                f"<strong>⚡ Puzzle Peta Jawa Timur — {total_kab} kepingan kab/kota</strong></div>",
                 unsafe_allow_html=True
             )
         with h2:
-            st.markdown(
-                f"<div style='background:linear-gradient(135deg,{level_data[difficulty]['color']},"
-                f"{level_data[difficulty]['color']}bb);padding:10px;border-radius:10px;"
-                f"text-align:center;color:white;'>"
-                f"<strong>{level_data[difficulty]['icon']} {difficulty} — {piece_count} keping</strong></div>",
-                unsafe_allow_html=True
-            )
-        with h3:
             if st.button("⛔ Keluar Puzzle", use_container_width=True):
                 st.session_state.puzzle_started = False
                 st.rerun()
@@ -2519,29 +2380,17 @@ elif PAGE == "Puzzle":
 
         puzzle_html = get_puzzle_html(
             jatim_geojson,
-            target_region,
-            difficulty,
-            piece_count,
             int(st.session_state.puzzle_start_time * 1000) if st.session_state.puzzle_start_time else 0
         )
-        st.components.v1.html(puzzle_html, height=800, scrolling=True)
+        st.components.v1.html(puzzle_html, height=820, scrolling=True)
 
         st.markdown("---")
-        tip_col1, tip_col2 = st.columns(2)
-        with tip_col1:
-            st.info(
-                "💡 **Cara Bermain:**\n"
-                "1. Seret kepingan dari panel kanan ke area peta\n"
-                "2. Setiap kepingan adalah bentuk geografis asli wilayah\n"
-                "3. Kepingan akan 'snap' otomatis jika dekat posisi yang benar\n"
-                "4. Susun semua kepingan untuk menyelesaikan puzzle!"
-            )
-        with tip_col2:
-            info = get_wilayah_info(target_region)
-            st.success(
-                f"📖 **{target_region}**\n\n"
-                f"{info['geografis'][:120]}..."
-            )
+        st.info(
+            "💡 Seret kepingan dari panel kanan → lepas di posisi yang tepat → "
+            "kepingan *snap* otomatis jika benar. "
+            "Klik **💡 Petunjuk** untuk melihat outline panduan."
+        )
+
 
 # --- HALAMAN BELAJAR ---
 elif PAGE == "Belajar":
@@ -3311,7 +3160,7 @@ menu_key = PAGE
 footer_texts = {
     "Game":             f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
     "Belajar":          f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
-    "Puzzle":           f"🧩 Puzzle Bentuk Wilayah Asli | Tingkat: {st.session_state.puzzle_difficulty} | Wilayah: {st.session_state.puzzle_target_region or '-'}",
+    "Puzzle":           f"🧩 Puzzle Peta Jawa Timur — {len(jatim_geojson.get('features', []))} Kepingan Kab/Kota | Level Normal",
     "Bromo 3D":         "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D":     "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
     "Papan Skor":       "🏆 Papan Skor Tebak Jawa Timur",
