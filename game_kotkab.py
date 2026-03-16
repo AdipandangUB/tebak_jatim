@@ -1266,22 +1266,29 @@ def create_footer(footer_text, image_url, brightness=0.7):
     """
 
 
-# ==================== PUZZLE DRAG & DROP FEATURE (v3.0 — JAWA TIMUR UTUH) ====================
+# ==================== PUZZLE DRAG & DROP FEATURE (v4.0 — RAMAH ANAK) ====================
 
 def get_puzzle_html(geojson_data, start_time_ms):
     """
-    Puzzle peta JAWA TIMUR UTUH:
-    - 1 wilayah provinsi (seluruh Jawa Timur)
-    - Setiap kepingan = 1 kabupaten/kota (bentuk polygon asli GeoJSON)
-    - Level Normal saja (semua kab/kota = kepingan)
-    - Drag & drop ke posisi geografis yang tepat
+    Puzzle peta JAWA TIMUR UTUH - Versi Ramah Anak (Usia 6+):
+    - Toleransi snap lebih besar (mudah menempel)
+    - Panduan visual dengan warna-warna cerah
+    - Efek suara visual (tanpa audio) untuk feedback
+    - Tooltip yang selalu muncul
+    - Highlight area target saat mendekat
     """
     all_features = geojson_data.get("features", [])
     if not all_features:
         return "<p>❌ Data wilayah tidak ditemukan.</p>"
 
     geojson_str = json.dumps(geojson_data)
-    SNAP_DIST   = 22   # piksel toleransi snap (level Normal)
+    
+    # TOLERANSI SNAP DIPERBESAR untuk anak-anak
+    SNAP_DIST   = 45   # dari 22 menjadi 45 piksel (lebih mudah menempel)
+    
+    # UKURAN THUMBNAIL DIPERBESAR
+    THUMB_W = 80       # dari 68 menjadi 80
+    THUMB_H = 70       # dari 58 menjadi 70
 
     html = f"""<!DOCTYPE html>
 <html lang="id">
@@ -1289,111 +1296,236 @@ def get_puzzle_html(geojson_data, start_time_ms):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Nunito:wght@400;700;900&display=swap');
   * {{ margin:0; padding:0; box-sizing:border-box; }}
   body {{
-    font-family: 'Nunito', sans-serif;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    font-family: 'Comic Neue', 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
     min-height: 100vh;
     color: white;
     padding: 10px;
   }}
   #puzzle-header {{ text-align:center; padding:6px 0 10px 0; }}
   #puzzle-header h2 {{
-    font-size:1.4em; font-weight:900;
+    font-size:1.8em; font-weight:900;
     background: linear-gradient(90deg,#ffd700,#ff6b35,#ffd700);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    letter-spacing:1px;
+    letter-spacing:2px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   }}
-  #puzzle-header .subtitle {{ font-size:0.82em; color:rgba(255,255,255,0.7); margin-top:2px; }}
+  #puzzle-header .subtitle {{ 
+    font-size:1.1em; 
+    color:rgba(255,255,255,0.9); 
+    margin-top:5px;
+    background: rgba(255,255,255,0.2);
+    display: inline-block;
+    padding: 5px 20px;
+    border-radius: 30px;
+  }}
   #stats-bar {{
-    display:flex; justify-content:center; gap:16px; margin:6px 0; flex-wrap:wrap;
+    display:flex; justify-content:center; gap:20px; margin:10px 0; flex-wrap:wrap;
   }}
   .stat-pill {{
-    background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2);
-    border-radius:30px; padding:5px 14px; font-size:0.80em; font-weight:700;
-    display:flex; align-items:center; gap:5px;
+    background:rgba(255,255,255,0.15); 
+    border:2px solid rgba(255,215,0,0.3);
+    border-radius:40px; 
+    padding:8px 20px; 
+    font-size:1em; 
+    font-weight:700;
+    display:flex; 
+    align-items:center; 
+    gap:8px;
+    backdrop-filter: blur(5px);
   }}
-  .stat-pill span {{ color:#ffd700; }}
+  .stat-pill span {{ color:#ffd700; font-size:1.2em; }}
   #main-layout {{
-    display:flex; gap:10px; align-items:flex-start; justify-content:center; flex-wrap:wrap;
+    display:flex; 
+    gap:15px; 
+    align-items:flex-start; 
+    justify-content:center; 
+    flex-wrap:wrap;
   }}
   #canvas-wrapper {{
-    position:relative; background:rgba(255,255,255,0.04);
-    border:2px solid rgba(255,255,255,0.15); border-radius:14px;
-    overflow:hidden; flex:1 1 560px; max-width:700px;
+    position:relative; 
+    background:rgba(255,255,255,0.1);
+    border:3px solid rgba(255,215,0,0.3); 
+    border-radius:20px;
+    overflow:hidden; 
+    flex:1 1 600px; 
+    max-width:750px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }}
   #canvas-label {{
-    position:absolute; top:7px; left:10px; font-size:0.68em;
-    color:rgba(255,255,255,0.45); font-weight:700; letter-spacing:1px;
-    text-transform:uppercase; pointer-events:none; z-index:10;
+    position:absolute; 
+    top:10px; 
+    left:15px; 
+    font-size:0.9em;
+    color:rgba(255,255,255,0.8); 
+    font-weight:700; 
+    letter-spacing:1px;
+    text-transform:uppercase; 
+    pointer-events:none; 
+    z-index:10;
+    background: rgba(0,0,0,0.5);
+    padding: 4px 12px;
+    border-radius: 20px;
   }}
   #puzzle-canvas {{
-    display:block; width:100%; touch-action:none; user-select:none; cursor:grab;
+    display:block; 
+    width:100%; 
+    touch-action:none; 
+    user-select:none; 
+    cursor:grab;
   }}
   #puzzle-canvas:active {{ cursor:grabbing; }}
   #pieces-panel {{
-    background:rgba(255,255,255,0.06); border:2px dashed rgba(255,255,255,0.2);
-    border-radius:14px; padding:10px; flex:0 0 190px;
-    max-height:640px; overflow-y:auto; min-width:155px;
+    background:rgba(255,255,255,0.1); 
+    border:3px solid rgba(255,215,0,0.3);
+    border-radius:20px; 
+    padding:15px; 
+    flex:0 0 220px;
+    max-height:650px; 
+    overflow-y:auto; 
+    min-width:180px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }}
   #pieces-panel h4 {{
-    font-size:0.78em; color:rgba(255,255,255,0.6); text-transform:uppercase;
-    letter-spacing:1px; margin-bottom:6px; text-align:center;
+    font-size:1.1em; 
+    color:#ffd700; 
+    text-transform:uppercase;
+    letter-spacing:2px; 
+    margin-bottom:10px; 
+    text-align:center;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   }}
-  #pieces-container {{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }}
+  #pieces-container {{ 
+    display:flex; 
+    flex-wrap:wrap; 
+    gap:8px; 
+    justify-content:center; 
+  }}
   .piece-thumb {{
-    background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.2);
-    border-radius:7px; cursor:grab; transition:all 0.2s; overflow:hidden;
-    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.15); 
+    border:3px solid rgba(255,215,0,0.5);
+    border-radius:12px; 
+    cursor:grab; 
+    transition:all 0.2s; 
+    overflow:hidden;
+    display:flex; 
+    align-items:center; 
+    justify-content:center;
     position:relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
   }}
   .piece-thumb:hover {{
-    background:rgba(255,215,0,0.15); border-color:#ffd700;
-    transform:scale(1.07); box-shadow:0 3px 12px rgba(255,215,0,0.3);
+    background:rgba(255,215,0,0.25); 
+    border-color:#ffd700;
+    transform:scale(1.1); 
+    box-shadow:0 8px 20px rgba(255,215,0,0.5);
   }}
   .piece-thumb.placed {{
-    opacity:0.28; cursor:default; pointer-events:none;
-    border-color:#4CAF50; background:rgba(76,175,80,0.08);
+    opacity:0.3; 
+    cursor:default; 
+    pointer-events:none;
+    border-color:#4CAF50; 
+    background:rgba(76,175,80,0.2);
+    filter: grayscale(0.5);
   }}
   .piece-label {{
-    position:absolute; bottom:1px; left:0; right:0;
-    font-size:7px; text-align:center; color:rgba(255,255,255,0.7);
-    line-height:1.1; padding:0 2px;
+    position:absolute; 
+    bottom:2px; 
+    left:0; 
+    right:0;
+    font-size:8px; 
+    text-align:center; 
+    color:white;
+    font-weight:bold;
+    line-height:1.2; 
+    padding:2px 4px;
     pointer-events:none;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; 
+    overflow:hidden; 
+    text-overflow:ellipsis;
+    background: rgba(0,0,0,0.5);
+    border-radius: 4px;
+    margin: 0 2px;
   }}
   #progress-bar-wrap {{
-    margin:8px 0 4px 0; background:rgba(255,255,255,0.1);
-    border-radius:10px; height:9px; overflow:hidden;
+    margin:12px 0 8px 0; 
+    background:rgba(255,255,255,0.2);
+    border-radius:15px; 
+    height:12px; 
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,0.3);
   }}
   #progress-bar-fill {{
-    height:100%; background:linear-gradient(90deg,#4CAF50,#8BC34A);
-    border-radius:10px; transition:width 0.4s ease; width:0%;
+    height:100%; 
+    background:linear-gradient(90deg,#4CAF50,#8BC34A);
+    border-radius:15px; 
+    transition:width 0.4s ease; 
+    width:0%;
+    box-shadow: 0 0 10px #4CAF50;
   }}
-  #progress-text {{ text-align:center; font-size:0.76em; color:rgba(255,255,255,0.6); margin-bottom:6px; }}
+  #progress-text {{ 
+    text-align:center; 
+    font-size:0.9em; 
+    color:white; 
+    margin-bottom:10px;
+    background: rgba(255,255,255,0.2);
+    padding: 5px;
+    border-radius: 20px;
+  }}
   #btn-row {{
-    display:flex; gap:7px; justify-content:center; margin:8px 0 5px 0; flex-wrap:wrap;
+    display:flex; 
+    gap:8px; 
+    justify-content:center; 
+    margin:12px 0 8px 0; 
+    flex-wrap:wrap;
   }}
   .puzzle-btn {{
-    background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none;
-    border-radius:18px; padding:7px 18px; font-size:0.82em; font-weight:700;
-    font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s;
-    box-shadow:0 3px 10px rgba(102,126,234,0.4);
+    background:linear-gradient(135deg,#667eea,#764ba2); 
+    color:white; 
+    border:none;
+    border-radius:25px; 
+    padding:10px 20px; 
+    font-size:0.9em; 
+    font-weight:700;
+    font-family:'Comic Neue', sans-serif; 
+    cursor:pointer; 
+    transition:all 0.2s;
+    box-shadow:0 5px 15px rgba(102,126,234,0.5);
+    border: 2px solid rgba(255,255,255,0.3);
   }}
-  .puzzle-btn:hover {{ transform:translateY(-2px); box-shadow:0 5px 16px rgba(102,126,234,0.6); }}
+  .puzzle-btn:hover {{ 
+    transform:translateY(-3px); 
+    box-shadow:0 8px 25px rgba(102,126,234,0.8);
+  }}
   .puzzle-btn.danger {{ background:linear-gradient(135deg,#f44336,#c62828); }}
   .puzzle-btn.success {{ background:linear-gradient(135deg,#4CAF50,#2E7D32); }}
   #win-overlay {{
-    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.88); z-index:999; justify-content:center;
-    align-items:center; flex-direction:column; text-align:center; padding:20px;
+    display:none; 
+    position:fixed; 
+    top:0; 
+    left:0; 
+    width:100%; 
+    height:100%;
+    background:rgba(0,0,0,0.9); 
+    z-index:999; 
+    justify-content:center;
+    align-items:center; 
+    flex-direction:column; 
+    text-align:center; 
+    padding:20px;
   }}
   #win-overlay.show {{ display:flex; }}
   #win-box {{
     background:linear-gradient(135deg,#1a1a2e,#16213e);
-    border:3px solid #ffd700; border-radius:22px; padding:32px 36px; max-width:420px;
-    box-shadow:0 0 60px rgba(255,215,0,0.4);
+    border:4px solid #ffd700; 
+    border-radius:30px; 
+    padding:40px 50px; 
+    max-width:500px;
+    box-shadow:0 0 80px rgba(255,215,0,0.6);
     animation:popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
   }}
   @keyframes popIn {{
@@ -1401,87 +1533,123 @@ def get_puzzle_html(geojson_data, start_time_ms):
     to   {{ transform:scale(1);   opacity:1; }}
   }}
   #win-box h1 {{
-    font-size:2em; font-weight:900;
+    font-size:2.5em; 
+    font-weight:900;
     background:linear-gradient(90deg,#ffd700,#ff6b35);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;
+    -webkit-background-clip:text; 
+    -webkit-text-fill-color:transparent; 
+    margin-bottom:10px;
   }}
-  #win-box p {{ color:rgba(255,255,255,0.85); font-size:1em; margin:6px 0; }}
-  #win-time {{ font-size:1.7em; font-weight:900; color:#ffd700; margin:10px 0; }}
+  #win-box p {{ color:rgba(255,255,255,0.9); font-size:1.2em; margin:8px 0; }}
+  #win-time {{ font-size:2em; font-weight:900; color:#ffd700; margin:15px 0; }}
   #snap-feedback {{
-    position:absolute; pointer-events:none; font-size:1.7em;
-    z-index:200; display:none;
+    position:absolute; 
+    pointer-events:none; 
+    font-size:2.5em;
+    z-index:200; 
+    display:none;
+    filter: drop-shadow(0 0 10px gold);
   }}
   @keyframes floatUp {{
     0%   {{ opacity:1; transform:translateY(0) scale(1); }}
-    100% {{ opacity:0; transform:translateY(-55px) scale(1.4); }}
+    100% {{ opacity:0; transform:translateY(-80px) scale(1.5); }}
   }}
   #tooltip {{
-    position:absolute; background:rgba(0,0,0,0.88); color:#ffd700;
-    padding:4px 10px; border-radius:8px; font-size:0.74em; font-weight:700;
-    pointer-events:none; display:none; white-space:nowrap; z-index:100;
-    border:1px solid rgba(255,215,0,0.3);
+    position:absolute; 
+    background:rgba(0,0,0,0.9); 
+    color:#ffd700;
+    padding:8px 15px; 
+    border-radius:30px; 
+    font-size:1em; 
+    font-weight:700;
+    pointer-events:none; 
+    display:none; 
+    white-space:nowrap; 
+    z-index:100;
+    border:2px solid gold;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  }}
+  .target-highlight {{
+    animation: pulse 1s infinite;
+  }}
+  @keyframes pulse {{
+    0% {{ filter: brightness(1); }}
+    50% {{ filter: brightness(1.3) drop-shadow(0 0 10px gold); }}
+    100% {{ filter: brightness(1); }}
+  }}
+  .happy-emoji {{
+    font-size: 1.5em;
+    animation: bounce 0.5s infinite;
+  }}
+  @keyframes bounce {{
+    0%, 100% {{ transform: translateY(0); }}
+    50% {{ transform: translateY(-5px); }}
   }}
 </style>
 </head>
 <body>
 
 <div id="puzzle-header">
-  <div style="display:inline-block;background:#FF9800;color:white;padding:3px 14px;
-    border-radius:20px;font-weight:700;font-size:0.80em;margin-bottom:5px;">
-    ⚡ Normal — {len(all_features)} Kepingan
+  <div style="display:inline-block;background:#FF9800;color:white;padding:5px 20px;
+    border-radius:30px;font-weight:700;font-size:1em;margin-bottom:8px;
+    box-shadow:0 5px 15px rgba(255,152,0,0.5);">
+    ⭐ MUDAH — {len(all_features)} Kepingan Warna-warni ⭐
   </div>
   <h2>🧩 PUZZLE PETA JAWA TIMUR</h2>
-  <div class="subtitle">Susun {len(all_features)} kepingan kabupaten/kota menjadi peta Jawa Timur yang utuh!</div>
+  <div class="subtitle">✨ Seret kepingan ke tempatnya yang benar! ✨</div>
 </div>
 
 <div id="stats-bar">
-  <div class="stat-pill">⏱️ Waktu <span id="timer-display">00:00</span></div>
-  <div class="stat-pill">🧩 Terpasang <span id="placed-count">0</span>/<span id="total-count">{len(all_features)}</span></div>
-  <div class="stat-pill">🎯 Akurasi <span id="accuracy-display">100%</span></div>
+  <div class="stat-pill">⏱️ <span id="timer-display">00:00</span></div>
+  <div class="stat-pill">🧩 <span id="placed-count">0</span>/<span id="total-count">{len(all_features)}</span></div>
+  <div class="stat-pill">⭐ <span id="accuracy-display">100%</span></div>
 </div>
 
 <div id="progress-bar-wrap"><div id="progress-bar-fill"></div></div>
-<div id="progress-text">Seret kepingan kab/kota ke posisi yang tepat di peta!</div>
+<div id="progress-text">🎯 Ayo, seret kepingan ke tempatnya!</div>
 
 <div id="btn-row">
-  <button class="puzzle-btn" onclick="shufflePieces()">🔀 Acak Ulang</button>
+  <button class="puzzle-btn" onclick="shufflePieces()">🔀 Acak</button>
   <button class="puzzle-btn" onclick="showHint()">💡 Petunjuk</button>
   <button class="puzzle-btn danger" onclick="resetPuzzle()">🔄 Reset</button>
-  <button class="puzzle-btn success" onclick="autoSolve()">✨ Selesaikan</button>
+  <button class="puzzle-btn success" onclick="autoSolve()">✨ Selesai</button>
 </div>
 
 <div id="main-layout">
   <div id="canvas-wrapper">
-    <div id="canvas-label">PETA JAWA TIMUR — DRAG KEPINGAN KE SINI</div>
+    <div id="canvas-label">🗺️ TEMPATKAN KEPINGAN DI SINI</div>
     <canvas id="puzzle-canvas"></canvas>
     <div id="tooltip"></div>
     <div id="snap-feedback">✅</div>
   </div>
   <div id="pieces-panel">
-    <h4 id="panel-title">📦 Kepingan ({len(all_features)})</h4>
-    <div id="progress-bar-wrap" style="margin:4px 0 8px 0;">
+    <h4 id="panel-title">📦 Kepingan Tersedia ({len(all_features)})</h4>
+    <div id="progress-bar-wrap" style="margin:8px 0 12px 0;">
       <div id="progress-bar-fill2"
-        style="height:7px;background:linear-gradient(90deg,#4CAF50,#8BC34A);
+        style="height:10px;background:linear-gradient(90deg,#4CAF50,#8BC34A);
                border-radius:10px;width:0%;transition:width 0.4s;">
       </div>
     </div>
     <div id="pieces-container"></div>
+    <div style="text-align:center; margin-top:10px; font-size:0.9em; color:rgba(255,255,255,0.8);">
+      👆 Klik & seret kepingan!
+    </div>
   </div>
 </div>
 
 <div id="win-overlay">
   <div id="win-box">
-    <div style="font-size:3em;margin-bottom:6px;">🏆</div>
-    <h1>PUZZLE SELESAI!</h1>
-    <p>Peta <strong>Jawa Timur</strong> berhasil disusun!</p>
-    <p>Semua <strong>{len(all_features)} kabupaten/kota</strong> terpasang!</p>
+    <div style="font-size:4em;margin-bottom:10px; animation: bounce 1s infinite;">🏆</div>
+    <h1>SELESAI! 🎉</h1>
+    <p>Kamu hebat! Semua kepingan</p>
+    <p><strong>{len(all_features)} kabupaten/kota</strong> terpasang!</p>
     <div id="win-time">00:00</div>
-    <p id="win-moves">0 kesalahan</p>
-    <p style="color:#ffd700;font-size:0.88em;margin-top:8px;">
-      🎉 Luar biasa! Kamu mengenal semua wilayah Jawa Timur!
+    <p id="win-moves" style="font-size:1.1em;">0 kesalahan</p>
+    <p style="color:#ffd700;font-size:1.2em;margin-top:15px;">
+      ⭐⭐⭐ LUAR BIASA! ⭐⭐⭐
     </p>
     <button class="puzzle-btn success"
-      style="margin-top:16px;font-size:1em;padding:10px 30px;"
+      style="margin-top:20px;font-size:1.2em;padding:12px 40px;"
       onclick="location.reload()">🔄 Main Lagi</button>
   </div>
 </div>
@@ -1489,7 +1657,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
 <script>
 (function() {{
   const GEOJSON    = {geojson_str};
-  const SNAP_DIST  = {SNAP_DIST};
+  const SNAP_DIST  = {SNAP_DIST};  // Lebih besar untuk anak-anak
   const START_TIME = Date.now();
 
   // ===== CANVAS =====
@@ -1498,7 +1666,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
   const W = 680, H = 560;
   canvas.width = W; canvas.height = H;
 
-  // ===== PROYEKSI — fit seluruh Jawa Timur =====
+  // ===== PROYEKSI =====
   let minLon=180, maxLon=-180, minLat=90, maxLat=-90;
 
   function iterGeom(geom, cb) {{
@@ -1544,7 +1712,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return p;
   }}
 
-  // Centroid proyeksi dari geometry
   function geomCentroid(geom) {{
     let sx=0, sy=0, n=0;
     iterGeom(geom, (lon,lat) => {{
@@ -1554,7 +1721,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return [sx/n, sy/n];
   }}
 
-  // Bounding box proyeksi
   function geomBBox(geom) {{
     let x1=W, x2=0, y1=H, y2=0;
     iterGeom(geom, (lon,lat) => {{
@@ -1565,33 +1731,38 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return {{ x1,x2,y1,y2, w:x2-x1, h:y2-y1 }};
   }}
 
-  // ===== BUILD PIECES — setiap feature = 1 kepingan =====
+  // ===== BUILD PIECES =====
   const pieces = GEOJSON.features.map((feat, i) => {{
     const name     = feat.properties.name;
     const centroid = geomCentroid(feat.geometry);
     const bbox     = geomBBox(feat.geometry);
     const path     = buildPath(feat.geometry);
+    // WARNA LEBIH CERAH untuk anak-anak
+    const hue      = (i * 37 + 180) % 360;  // Warna lebih bervariasi
     return {{
       id:       i,
       name:     name,
       geometry: feat.geometry,
       path:     path,
-      centroid: centroid,   // posisi target di canvas (dx=0 = terpasang)
+      centroid: centroid,
       bbox:     bbox,
-      dx:       0,          // offset drag dari posisi target
+      dx:       0,
       dy:       0,
       placed:   false,
       inPanel:  true,
       dragOffX: 0,
       dragOffY: 0,
-      hue:      (i * 31 + 120) % 360,
+      hue:      hue,
+      // Simpan warna untuk digunakan nanti
+      fillColor: `hsla(${{hue}}, 80%, 65%, 0.9)`,
+      strokeColor: `hsl(${{hue}}, 90%, 70%)`,
     }};
   }});
 
   const totalPieces = pieces.length;
 
-  // ===== THUMBNAIL DI PANEL =====
-  const THUMB_W = 68, THUMB_H = 58;
+  // ===== THUMBNAIL =====
+  const THUMB_W = {THUMB_W}, THUMB_H = {THUMB_H};
   const piecesContainer = document.getElementById('pieces-container');
 
   function buildThumbnails() {{
@@ -1610,11 +1781,12 @@ def get_puzzle_html(geojson_data, start_time_ms):
       drawThumb(p, tc.getContext('2d'));
       div.appendChild(tc);
 
-      // Label nama singkat
+      // Label nama (lebih besar)
       const lbl = document.createElement('div');
       lbl.className = 'piece-label';
-      // Singkat: hapus "Kabupaten " / "Kota "
-      lbl.textContent = p.name.replace('Kabupaten ','').replace('Kota ','');
+      let shortName = p.name.replace('Kabupaten ','').replace('Kota ','');
+      if(shortName.length > 10) shortName = shortName.substring(0,8) + '...';
+      lbl.textContent = shortName;
       div.appendChild(lbl);
 
       div.addEventListener('mousedown', e => startDragPanel(e, p));
@@ -1628,9 +1800,9 @@ def get_puzzle_html(geojson_data, start_time_ms):
     const bb = piece.bbox;
     if(bb.w < 0.5 || bb.h < 0.5) return;
     const tpad = 5;
-    const ts   = Math.min((THUMB_W-tpad*2)/bb.w, (THUMB_H-tpad*2-10)/bb.h);
+    const ts   = Math.min((THUMB_W-tpad*2)/bb.w, (THUMB_H-tpad*2-15)/bb.h);
     const offX = tpad + (THUMB_W-tpad*2 - bb.w*ts)/2 - bb.x1*ts;
-    const offY = tpad + (THUMB_H-tpad*2-10 - bb.h*ts)/2 - bb.y1*ts;
+    const offY = tpad + (THUMB_H-tpad*2-15 - bb.h*ts)/2 - bb.y1*ts;
 
     tctx.save();
     tctx.setTransform(ts, 0, 0, ts, offX, offY);
@@ -1650,12 +1822,12 @@ def get_puzzle_html(geojson_data, start_time_ms):
       : null;
 
     tctx.shadowColor = 'rgba(0,0,0,0.5)';
-    tctx.shadowBlur  = 4/ts;
-    tctx.fillStyle   = `hsla(${{piece.hue}},68%,56%,0.92)`;
+    tctx.shadowBlur  = 8/ts;
+    tctx.fillStyle   = piece.fillColor;
     tctx.fill(lp);
     tctx.shadowBlur  = 0;
-    tctx.strokeStyle = 'rgba(255,255,255,0.8)';
-    tctx.lineWidth   = 1.5/ts;
+    tctx.strokeStyle = 'white';
+    tctx.lineWidth   = 2/ts;
     tctx.stroke(lp);
     tctx.restore();
   }}
@@ -1666,6 +1838,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
   let dragging = null;
   let mouseX = 0, mouseY = 0;
   let mistakes = 0;
+  let snapAssist = null; // Untuk highlight area target
 
   function canvasPos(e) {{
     const rect = canvas.getBoundingClientRect();
@@ -1712,8 +1885,8 @@ def get_puzzle_html(geojson_data, start_time_ms):
       const p = pieces[i];
       if(p.placed || p.inPanel) continue;
       const bb = p.bbox;
-      if(mx >= bb.x1+p.dx-4 && mx <= bb.x2+p.dx+4 &&
-         my >= bb.y1+p.dy-4 && my <= bb.y2+p.dy+4) {{
+      if(mx >= bb.x1+p.dx-8 && mx <= bb.x2+p.dx+8 &&
+         my >= bb.y1+p.dy-8 && my <= bb.y2+p.dy+8) {{
         dragging = p;
         const pcx = p.centroid[0] + p.dx;
         const pcy = p.centroid[1] + p.dy;
@@ -1732,18 +1905,28 @@ def get_puzzle_html(geojson_data, start_time_ms):
     mouseX=mx; mouseY=my;
     dragging.dx = mx - dragging.centroid[0] - dragging.dragOffX;
     dragging.dy = my - dragging.centroid[1] - dragging.dragOffY;
+    
+    // Cek apakah sudah dekat dengan target
+    const dist = Math.hypot(mx - dragging.centroid[0], my - dragging.centroid[1]);
+    if(dist <= SNAP_DIST * 1.5) {{
+      snapAssist = dragging;
+    }} else {{
+      snapAssist = null;
+    }}
+    
     render();
 
-    // Tooltip: tunjukkan nama wilayah yang sedang di-drag
+    // Tooltip besar
     const tt = document.getElementById('tooltip');
-    tt.textContent = dragging.name;
-    tt.style.left  = Math.min(mx+12, W-120) + 'px';
-    tt.style.top   = Math.max(my-28, 5) + 'px';
+    tt.textContent = '📍 ' + dragging.name;
+    tt.style.left  = Math.min(mx+15, W-150) + 'px';
+    tt.style.top   = Math.max(my-35, 5) + 'px';
     tt.style.display = 'block';
   }});
 
   document.addEventListener('mouseup', () => {{
     document.getElementById('tooltip').style.display = 'none';
+    snapAssist = null;
     if(dragging) {{
       trySnap(dragging, mouseX, mouseY);
       dragging = null;
@@ -1769,15 +1952,17 @@ def get_puzzle_html(geojson_data, start_time_ms):
     }}
   }});
 
-  // ===== SNAP =====
+  // ===== SNAP dengan toleransi besar =====
   function trySnap(piece, dropX, dropY) {{
     const tx   = piece.centroid[0];
     const ty   = piece.centroid[1];
     const dist = Math.hypot(dropX - tx, dropY - ty);
-    // Snap threshold: makin kecil wilayah, makin toleran
+    
+    // Toleransi snap SANGAT BESAR untuk anak-anak
     const bb   = piece.bbox;
     const size = Math.min(bb.w, bb.h);
-    const thr  = Math.max(SNAP_DIST, Math.min(size * 0.55, 50)) * (W / 680);
+    // Gunakan SNAP_DIST yang sudah diperbesar (45) sebagai basis
+    const thr  = Math.max(SNAP_DIST, Math.min(size * 0.8, 70));
 
     if(dist <= thr) {{
       piece.dx = 0; piece.dy = 0;
@@ -1791,20 +1976,20 @@ def get_puzzle_html(geojson_data, start_time_ms):
       mistakes++;
       showFB(dropX, dropY, false);
       updateAccuracy();
-      // Kepingan tetap mengambang di posisi drop (tidak kembali ke panel)
+      // Kepingan tetap di posisi drop
     }}
   }}
 
   function showFB(x, y, ok) {{
     const fb = document.getElementById('snap-feedback');
-    fb.textContent = ok ? '✅' : '❌';
-    fb.style.left = Math.min(x, W-50)+'px';
-    fb.style.top  = Math.max(y-35, 5)+'px';
+    fb.textContent = ok ? '✅' : '❌ Coba lagi!';
+    fb.style.left = Math.min(x, W-100)+'px';
+    fb.style.top  = Math.max(y-50, 5)+'px';
     fb.style.display = 'block';
     fb.style.animation = 'none';
     fb.offsetHeight;
-    fb.style.animation = 'floatUp 0.8s ease-out forwards';
-    setTimeout(() => {{ fb.style.display='none'; }}, 800);
+    fb.style.animation = 'floatUp 1s ease-out forwards';
+    setTimeout(() => {{ fb.style.display='none'; }}, 1000);
   }}
 
   function updateProgress() {{
@@ -1814,7 +1999,8 @@ def get_puzzle_html(geojson_data, start_time_ms):
     document.getElementById('progress-bar-fill').style.width  = pct+'%';
     document.getElementById('progress-bar-fill2').style.width = pct+'%';
     document.getElementById('progress-text').textContent =
-      pl===totalPieces ? '🎉 Peta Jawa Timur lengkap!' : pl+'/'+totalPieces+' kepingan terpasang';
+      pl===totalPieces ? '🎉 YAY! PETA JAWA TIMUR LENGKAP! 🎉' : 
+      `🎯 Sudah ${pl} dari ${totalPieces} kepingan terpasang!`;
   }}
 
   function updateAccuracy() {{
@@ -1829,7 +2015,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
       const e = Math.floor((Date.now()-START_TIME)/1000);
       document.getElementById('win-time').textContent =
         String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
-      document.getElementById('win-moves').textContent = mistakes+' kesalahan';
+      document.getElementById('win-moves').textContent = '✨ ' + mistakes + ' kali salah';
       setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 600);
     }}
   }}
@@ -1841,35 +2027,47 @@ def get_puzzle_html(geojson_data, start_time_ms):
       String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
   }}, 1000);
 
-  // ===== RENDER =====
+  // ===== RENDER dengan gaya ramah anak =====
   function drawPiece(piece, dx, dy, isDrag) {{
     ctx.save();
     ctx.translate(dx, dy);
 
-    ctx.shadowColor = isDrag ? 'rgba(255,215,0,0.9)' : 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur  = isDrag ? 22 : 8;
-    ctx.fillStyle   = `hsla(${{piece.hue}}, ${{isDrag?82:66}}%, ${{isDrag?66:54}}%, ${{isDrag?0.96:0.82}})`;
+    // Efek glow saat di-drag atau dekat target
+    if(isDrag) {{
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur  = 25;
+      ctx.fillStyle   = `hsla(${{piece.hue}}, 90%, 70%, 0.95)`;
+    }} else if(snapAssist && snapAssist.id === piece.id) {{
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur  = 20;
+      ctx.fillStyle   = `hsla(${{piece.hue}}, 85%, 68%, 0.9)`;
+    }} else {{
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur  = 10;
+      ctx.fillStyle   = piece.fillColor;
+    }}
+    
     ctx.fill(piece.path);
 
     ctx.shadowBlur  = 0;
-    ctx.strokeStyle = isDrag ? '#ffd700' : 'rgba(255,255,255,0.65)';
-    ctx.lineWidth   = isDrag ? 2.5 : 1.2;
+    ctx.strokeStyle = isDrag ? '#ffd700' : 'white';
+    ctx.lineWidth   = isDrag ? 4 : 2;
     ctx.stroke(piece.path);
 
-    // Label nama wilayah di peta (hanya jika tidak di-drag & wilayah cukup besar)
-    if(!isDrag) {{
+    // Label nama lebih besar
+    if(!isDrag && !piece.placed) {{
       const bb = piece.bbox;
-      if(bb.w > 18 && bb.h > 10) {{
+      if(bb.w > 15 && bb.h > 10) {{
         const cx_ = (bb.x1+bb.x2)/2;
         const cy_ = (bb.y1+bb.y2)/2;
-        ctx.fillStyle    = 'rgba(255,255,255,0.92)';
-        ctx.font         = 'bold 7.5px Nunito,sans-serif';
+        ctx.fillStyle    = 'white';
+        ctx.font         = 'bold 10px Comic Neue, Nunito, sans-serif';
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowColor  = 'rgba(0,0,0,0.9)';
-        ctx.shadowBlur   = 3;
-        // Singkat nama
-        const short = piece.name.replace('Kabupaten ','').replace('Kota ','★');
+        ctx.shadowBlur   = 5;
+        let short = piece.name.replace('Kabupaten ','').replace('Kota ','');
+        if(short.length > 8) short = short.substring(0,6) + '..';
         ctx.fillText(short, cx_, cy_);
         ctx.shadowBlur = 0;
       }}
@@ -1880,16 +2078,16 @@ def get_puzzle_html(geojson_data, start_time_ms):
   function render() {{
     ctx.clearRect(0, 0, W, H);
 
-    // 1. Ghost outline semua wilayah (panduan posisi)
+    // 1. Ghost outline (lebih terang)
     pieces.forEach(p => {{
       if(p.placed) return;
       ctx.save();
-      ctx.setLineDash([4,3]);
-      ctx.strokeStyle = 'rgba(255,215,0,0.18)';
-      ctx.lineWidth   = 1;
+      ctx.setLineDash([6,4]);
+      ctx.strokeStyle = 'rgba(255,215,0,0.3)';
+      ctx.lineWidth   = 2;
       ctx.stroke(p.path);
       ctx.setLineDash([]);
-      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
       ctx.fill(p.path);
       ctx.restore();
     }});
@@ -1900,13 +2098,23 @@ def get_puzzle_html(geojson_data, start_time_ms):
       drawPiece(p, 0, 0, false);
     }});
 
-    // 3. Kepingan mengambang (tidak di panel, bukan yang di-drag)
+    // 3. Kepingan mengambang
     pieces.forEach(p => {{
       if(p.placed || p.inPanel || p === dragging) return;
       drawPiece(p, p.dx, p.dy, false);
     }});
 
-    // 4. Kepingan sedang di-drag (paling atas)
+    // 4. Highlight area target jika dekat
+    if(snapAssist && !snapAssist.placed && dragging) {{
+      ctx.save();
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([10,5]);
+      ctx.stroke(snapAssist.path);
+      ctx.restore();
+    }}
+
+    // 5. Kepingan sedang di-drag
     if(dragging && !dragging.placed) {{
       drawPiece(dragging, dragging.dx, dragging.dy, true);
     }}
@@ -1914,14 +2122,14 @@ def get_puzzle_html(geojson_data, start_time_ms):
 
   render();
 
-  // ===== KONTROL =====
+  // ===== KONTROL yang lebih ramah =====
   window.shufflePieces = function() {{
-    const margin = 30;
+    const margin = 40;
     pieces.forEach(p => {{
       if(p.placed) return;
       p.inPanel = false;
-      // Scatter acak di seluruh area canvas
       const bb = p.bbox;
+      // Acak tapi tetap dalam canvas
       p.dx = (Math.random() * (W - margin*2 - bb.w) + margin) - bb.x1;
       p.dy = (Math.random() * (H - margin*2 - bb.h) + margin) - bb.y1;
     }});
@@ -1929,18 +2137,20 @@ def get_puzzle_html(geojson_data, start_time_ms):
   }};
 
   window.showHint = function() {{
-    // Flash outline seluruh Jawa Timur
+    // Animasi petunjuk yang lebih jelas
     let n=0;
     const iv = setInterval(() => {{
-      if(++n > 8) {{ clearInterval(iv); render(); return; }}
+      if(++n > 6) {{ clearInterval(iv); render(); return; }}
       ctx.save();
       pieces.forEach(p => {{
-        ctx.strokeStyle = n%2===0 ? `hsla(${{p.hue}},80%,60%,0.8)` : 'rgba(255,255,255,0.05)';
-        ctx.lineWidth   = 2.5;
-        ctx.stroke(p.path);
+        if(!p.placed) {{
+          ctx.strokeStyle = n%2===0 ? '#ffd700' : 'white';
+          ctx.lineWidth   = 4;
+          ctx.stroke(p.path);
+        }}
       }});
       ctx.restore();
-    }}, 200);
+    }}, 300);
   }};
 
   window.resetPuzzle = function() {{
@@ -1951,7 +2161,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
     document.getElementById('accuracy-display').textContent = '100%';
     buildThumbnails();
     updateProgress();
-    render();
+    shufflePieces(); // Acak ulang posisi
   }};
 
   window.autoSolve = function() {{
@@ -1964,10 +2174,10 @@ def get_puzzle_html(geojson_data, start_time_ms):
       const el = document.getElementById('thumb-'+p.id);
       if(el) el.classList.add('placed');
       updateProgress(); render();
-    }}, 80);
+    }}, 100);
   }};
 
-  // Scatter awal
+  // Mulai dengan kepingan tersebar
   shufflePieces();
 
 }})();
