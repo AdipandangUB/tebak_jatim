@@ -1294,7 +1294,7 @@ if not st.session_state.name_submitted:
             unsafe_allow_html=True
         )
         st.markdown(
-            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Sepiro mudenge soal kutha karo kabupaten ning Jawa Timur? </h1>"
+            "<div style='text-align:center;margin:20px 0;'><h1>🧩 Sepiro Jawa Timur, sampeyan? </h1>"
             "<p style='font-size:18px;color:#666;'>Game interaktif pembelajaran wilayah Jawa Timur!</p></div>",
             unsafe_allow_html=True
         )
