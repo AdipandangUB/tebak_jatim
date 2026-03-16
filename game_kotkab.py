@@ -1266,23 +1266,22 @@ def create_footer(footer_text, image_url, brightness=0.7):
     """
 
 
-# ==================== PUZZLE DRAG & DROP FEATURE (v3.1 — ZOOM & PAN) ====================
+# ==================== PUZZLE DRAG & DROP FEATURE (v3.0 — JAWA TIMUR UTUH) ====================
 
 def get_puzzle_html(geojson_data, start_time_ms):
     """
-    Puzzle peta JAWA TIMUR UTUH dengan fitur:
-    - Zoom in/out (scroll mouse / tombol +/-)
-    - Pan (klik tengah / klik kanan drag / space+drag)
+    Puzzle peta JAWA TIMUR UTUH:
+    - 1 wilayah provinsi (seluruh Jawa Timur)
     - Setiap kepingan = 1 kabupaten/kota (bentuk polygon asli GeoJSON)
-    - Level Normal (semua kab/kota)
+    - Level Normal saja (semua kab/kota = kepingan)
+    - Drag & drop ke posisi geografis yang tepat
     """
     all_features = geojson_data.get("features", [])
     if not all_features:
         return "<p>❌ Data wilayah tidak ditemukan.</p>"
 
     geojson_str = json.dumps(geojson_data)
-    n_pieces    = len(all_features)
-    SNAP_DIST   = 24
+    SNAP_DIST   = 22   # piksel toleransi snap (level Normal)
 
     html = f"""<!DOCTYPE html>
 <html lang="id">
@@ -1297,167 +1296,94 @@ def get_puzzle_html(geojson_data, start_time_ms):
     background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     min-height: 100vh;
     color: white;
-    padding: 8px;
+    padding: 10px;
   }}
-
-  /* ── HEADER ── */
-  #puzzle-header {{ text-align:center; padding:5px 0 8px; }}
+  #puzzle-header {{ text-align:center; padding:6px 0 10px 0; }}
   #puzzle-header h2 {{
     font-size:1.4em; font-weight:900;
-    background:linear-gradient(90deg,#ffd700,#ff6b35,#ffd700);
+    background: linear-gradient(90deg,#ffd700,#ff6b35,#ffd700);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     letter-spacing:1px;
   }}
-  .subtitle {{ font-size:0.80em; color:rgba(255,255,255,0.65); margin-top:1px; }}
-
-  /* ── STATS BAR ── */
+  #puzzle-header .subtitle {{ font-size:0.82em; color:rgba(255,255,255,0.7); margin-top:2px; }}
   #stats-bar {{
-    display:flex; justify-content:center; gap:14px; margin:5px 0; flex-wrap:wrap;
+    display:flex; justify-content:center; gap:16px; margin:6px 0; flex-wrap:wrap;
   }}
   .stat-pill {{
-    background:rgba(255,255,255,0.11); border:1px solid rgba(255,255,255,0.18);
-    border-radius:30px; padding:4px 13px; font-size:0.78em; font-weight:700;
+    background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2);
+    border-radius:30px; padding:5px 14px; font-size:0.80em; font-weight:700;
     display:flex; align-items:center; gap:5px;
   }}
   .stat-pill span {{ color:#ffd700; }}
-
-  /* ── PROGRESS ── */
-  #progress-bar-wrap {{
-    margin:6px auto 3px; background:rgba(255,255,255,0.1);
-    border-radius:10px; height:8px; overflow:hidden; max-width:700px;
-  }}
-  #progress-bar-fill {{
-    height:100%; background:linear-gradient(90deg,#4CAF50,#8BC34A);
-    border-radius:10px; transition:width 0.4s; width:0%;
-  }}
-  #progress-text {{
-    text-align:center; font-size:0.74em; color:rgba(255,255,255,0.55); margin-bottom:5px;
-  }}
-
-  /* ── BUTTON ROW ── */
-  #btn-row {{
-    display:flex; gap:6px; justify-content:center; margin:6px 0 5px; flex-wrap:wrap;
-  }}
-  .puzzle-btn {{
-    background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none;
-    border-radius:18px; padding:6px 16px; font-size:0.80em; font-weight:700;
-    font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s;
-    box-shadow:0 3px 10px rgba(102,126,234,0.4);
-  }}
-  .puzzle-btn:hover {{ transform:translateY(-2px); box-shadow:0 5px 14px rgba(102,126,234,0.6); }}
-  .puzzle-btn.danger  {{ background:linear-gradient(135deg,#f44336,#c62828); box-shadow:0 3px 10px rgba(244,67,54,0.4); }}
-  .puzzle-btn.success {{ background:linear-gradient(135deg,#4CAF50,#2E7D32); box-shadow:0 3px 10px rgba(76,175,80,0.4); }}
-  .puzzle-btn.zoom    {{ background:linear-gradient(135deg,#0288d1,#01579b); box-shadow:0 3px 10px rgba(2,136,209,0.4);
-                         padding:6px 12px; font-size:1em; min-width:38px; }}
-
-  /* ── ZOOM CONTROLS (overlay di canvas) ── */
-  #zoom-controls {{
-    position:absolute; top:8px; right:10px; z-index:20;
-    display:flex; flex-direction:column; gap:4px;
-  }}
-  #zoom-info {{
-    position:absolute; bottom:7px; right:10px; z-index:20;
-    background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.7);
-    font-size:0.68em; font-weight:700; padding:3px 8px; border-radius:8px;
-    pointer-events:none;
-  }}
-  #pan-hint {{
-    position:absolute; bottom:7px; left:10px; z-index:20;
-    background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.55);
-    font-size:0.65em; padding:3px 8px; border-radius:8px;
-    pointer-events:none;
-  }}
-
-  /* ── MAIN LAYOUT ── */
   #main-layout {{
-    display:flex; gap:8px; align-items:flex-start; justify-content:center;
+    display:flex; gap:10px; align-items:flex-start; justify-content:center; flex-wrap:wrap;
   }}
-
-  /* ── CANVAS WRAPPER ── */
   #canvas-wrapper {{
-    position:relative;
-    background:rgba(255,255,255,0.04);
-    border:2px solid rgba(255,255,255,0.14);
-    border-radius:14px; overflow:hidden;
-    flex:1 1 0; min-width:0;
-    /* Take up remaining space */
-    height: calc(100vh - 220px);
-    min-height: 480px;
-    max-height: 700px;
+    position:relative; background:rgba(255,255,255,0.04);
+    border:2px solid rgba(255,255,255,0.15); border-radius:14px;
+    overflow:hidden; flex:1 1 560px; max-width:700px;
   }}
   #canvas-label {{
-    position:absolute; top:7px; left:10px; font-size:0.67em;
-    color:rgba(255,255,255,0.4); font-weight:700; letter-spacing:1px;
+    position:absolute; top:7px; left:10px; font-size:0.68em;
+    color:rgba(255,255,255,0.45); font-weight:700; letter-spacing:1px;
     text-transform:uppercase; pointer-events:none; z-index:10;
   }}
   #puzzle-canvas {{
-    display:block; width:100%; height:100%;
-    touch-action:none; user-select:none;
+    display:block; width:100%; touch-action:none; user-select:none; cursor:grab;
   }}
-  /* cursor states */
-  #puzzle-canvas.cur-grab    {{ cursor:grab; }}
-  #puzzle-canvas.cur-grabbing {{ cursor:grabbing; }}
-  #puzzle-canvas.cur-pan     {{ cursor:move; }}
-
-  /* ── PIECES PANEL ── */
+  #puzzle-canvas:active {{ cursor:grabbing; }}
   #pieces-panel {{
-    background:rgba(255,255,255,0.05);
-    border:2px dashed rgba(255,255,255,0.18);
-    border-radius:14px; padding:8px;
-    width:185px; flex-shrink:0;
-    height: calc(100vh - 220px);
-    min-height:480px; max-height:700px;
-    overflow-y:auto;
-    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.2) transparent;
+    background:rgba(255,255,255,0.06); border:2px dashed rgba(255,255,255,0.2);
+    border-radius:14px; padding:10px; flex:0 0 190px;
+    max-height:640px; overflow-y:auto; min-width:155px;
   }}
-  #pieces-panel::-webkit-scrollbar {{ width:4px; }}
-  #pieces-panel::-webkit-scrollbar-thumb {{ background:rgba(255,255,255,0.2); border-radius:4px; }}
   #pieces-panel h4 {{
-    font-size:0.75em; color:rgba(255,255,255,0.55); text-transform:uppercase;
-    letter-spacing:1px; margin-bottom:5px; text-align:center; position:sticky; top:0;
-    background:rgba(15,12,41,0.9); padding:4px 0; z-index:5;
+    font-size:0.78em; color:rgba(255,255,255,0.6); text-transform:uppercase;
+    letter-spacing:1px; margin-bottom:6px; text-align:center;
   }}
-  #pieces-container {{ display:flex; flex-wrap:wrap; gap:4px; justify-content:center; }}
-
+  #pieces-container {{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }}
   .piece-thumb {{
-    background:rgba(255,255,255,0.07);
-    border:1.5px solid rgba(255,255,255,0.18);
-    border-radius:7px; cursor:grab; transition:all 0.18s; overflow:hidden;
+    background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.2);
+    border-radius:7px; cursor:grab; transition:all 0.2s; overflow:hidden;
     display:flex; align-items:center; justify-content:center;
-    position:relative; flex-shrink:0;
+    position:relative;
   }}
   .piece-thumb:hover {{
-    background:rgba(255,215,0,0.13); border-color:#ffd700;
+    background:rgba(255,215,0,0.15); border-color:#ffd700;
     transform:scale(1.07); box-shadow:0 3px 12px rgba(255,215,0,0.3);
   }}
   .piece-thumb.placed {{
-    opacity:0.25; cursor:default; pointer-events:none;
-    border-color:#4CAF50; background:rgba(76,175,80,0.07);
+    opacity:0.28; cursor:default; pointer-events:none;
+    border-color:#4CAF50; background:rgba(76,175,80,0.08);
   }}
   .piece-label {{
     position:absolute; bottom:1px; left:0; right:0;
-    font-size:6.5px; text-align:center; color:rgba(255,255,255,0.75);
+    font-size:7px; text-align:center; color:rgba(255,255,255,0.7);
     line-height:1.1; padding:0 2px;
-    pointer-events:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    pointer-events:none;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }}
-
-  /* ── FEEDBACK & TOOLTIP ── */
-  #snap-feedback {{
-    position:absolute; pointer-events:none; font-size:1.6em;
-    z-index:200; display:none;
+  #progress-bar-wrap {{
+    margin:8px 0 4px 0; background:rgba(255,255,255,0.1);
+    border-radius:10px; height:9px; overflow:hidden;
   }}
-  @keyframes floatUp {{
-    0%   {{ opacity:1; transform:translateY(0) scale(1); }}
-    100% {{ opacity:0; transform:translateY(-50px) scale(1.4); }}
+  #progress-bar-fill {{
+    height:100%; background:linear-gradient(90deg,#4CAF50,#8BC34A);
+    border-radius:10px; transition:width 0.4s ease; width:0%;
   }}
-  #tooltip {{
-    position:absolute; background:rgba(0,0,0,0.88); color:#ffd700;
-    padding:3px 9px; border-radius:7px; font-size:0.72em; font-weight:700;
-    pointer-events:none; display:none; white-space:nowrap; z-index:100;
-    border:1px solid rgba(255,215,0,0.3);
+  #progress-text {{ text-align:center; font-size:0.76em; color:rgba(255,255,255,0.6); margin-bottom:6px; }}
+  #btn-row {{
+    display:flex; gap:7px; justify-content:center; margin:8px 0 5px 0; flex-wrap:wrap;
   }}
-
-  /* ── WIN OVERLAY ── */
+  .puzzle-btn {{
+    background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none;
+    border-radius:18px; padding:7px 18px; font-size:0.82em; font-weight:700;
+    font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s;
+    box-shadow:0 3px 10px rgba(102,126,234,0.4);
+  }}
+  .puzzle-btn:hover {{ transform:translateY(-2px); box-shadow:0 5px 16px rgba(102,126,234,0.6); }}
+  .puzzle-btn.danger {{ background:linear-gradient(135deg,#f44336,#c62828); }}
+  .puzzle-btn.success {{ background:linear-gradient(135deg,#4CAF50,#2E7D32); }}
   #win-overlay {{
     display:none; position:fixed; top:0; left:0; width:100%; height:100%;
     background:rgba(0,0,0,0.88); z-index:999; justify-content:center;
@@ -1466,39 +1392,52 @@ def get_puzzle_html(geojson_data, start_time_ms):
   #win-overlay.show {{ display:flex; }}
   #win-box {{
     background:linear-gradient(135deg,#1a1a2e,#16213e);
-    border:3px solid #ffd700; border-radius:22px; padding:30px 36px; max-width:420px;
+    border:3px solid #ffd700; border-radius:22px; padding:32px 36px; max-width:420px;
     box-shadow:0 0 60px rgba(255,215,0,0.4);
     animation:popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
   }}
   @keyframes popIn {{
     from {{ transform:scale(0.4); opacity:0; }}
-    to   {{ transform:scale(1); opacity:1; }}
+    to   {{ transform:scale(1);   opacity:1; }}
   }}
   #win-box h1 {{
     font-size:2em; font-weight:900;
     background:linear-gradient(90deg,#ffd700,#ff6b35);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;
   }}
-  #win-box p  {{ color:rgba(255,255,255,0.85); font-size:1em; margin:5px 0; }}
-  #win-time   {{ font-size:1.7em; font-weight:900; color:#ffd700; margin:10px 0; }}
+  #win-box p {{ color:rgba(255,255,255,0.85); font-size:1em; margin:6px 0; }}
+  #win-time {{ font-size:1.7em; font-weight:900; color:#ffd700; margin:10px 0; }}
+  #snap-feedback {{
+    position:absolute; pointer-events:none; font-size:1.7em;
+    z-index:200; display:none;
+  }}
+  @keyframes floatUp {{
+    0%   {{ opacity:1; transform:translateY(0) scale(1); }}
+    100% {{ opacity:0; transform:translateY(-55px) scale(1.4); }}
+  }}
+  #tooltip {{
+    position:absolute; background:rgba(0,0,0,0.88); color:#ffd700;
+    padding:4px 10px; border-radius:8px; font-size:0.74em; font-weight:700;
+    pointer-events:none; display:none; white-space:nowrap; z-index:100;
+    border:1px solid rgba(255,215,0,0.3);
+  }}
 </style>
 </head>
 <body>
 
 <div id="puzzle-header">
-  <div style="display:inline-block;background:#FF9800;color:white;padding:2px 13px;
-    border-radius:18px;font-weight:700;font-size:0.78em;margin-bottom:4px;">
-    ⚡ Normal — {n_pieces} Kepingan
+  <div style="display:inline-block;background:#FF9800;color:white;padding:3px 14px;
+    border-radius:20px;font-weight:700;font-size:0.80em;margin-bottom:5px;">
+    ⚡ Normal — {len(all_features)} Kepingan
   </div>
   <h2>🧩 PUZZLE PETA JAWA TIMUR</h2>
-  <div class="subtitle">Susun {n_pieces} kepingan kab/kota — Scroll untuk zoom · Klik kanan drag untuk geser peta</div>
+  <div class="subtitle">Susun {len(all_features)} kepingan kabupaten/kota menjadi peta Jawa Timur yang utuh!</div>
 </div>
 
 <div id="stats-bar">
   <div class="stat-pill">⏱️ Waktu <span id="timer-display">00:00</span></div>
-  <div class="stat-pill">🧩 Terpasang <span id="placed-count">0</span>/<span id="total-count">{n_pieces}</span></div>
+  <div class="stat-pill">🧩 Terpasang <span id="placed-count">0</span>/<span id="total-count">{len(all_features)}</span></div>
   <div class="stat-pill">🎯 Akurasi <span id="accuracy-display">100%</span></div>
-  <div class="stat-pill">🔍 Zoom <span id="zoom-display">100%</span></div>
 </div>
 
 <div id="progress-bar-wrap"><div id="progress-bar-fill"></div></div>
@@ -1507,33 +1446,22 @@ def get_puzzle_html(geojson_data, start_time_ms):
 <div id="btn-row">
   <button class="puzzle-btn" onclick="shufflePieces()">🔀 Acak Ulang</button>
   <button class="puzzle-btn" onclick="showHint()">💡 Petunjuk</button>
-  <button class="puzzle-btn danger"  onclick="resetPuzzle()">🔄 Reset</button>
+  <button class="puzzle-btn danger" onclick="resetPuzzle()">🔄 Reset</button>
   <button class="puzzle-btn success" onclick="autoSolve()">✨ Selesaikan</button>
-  <button class="puzzle-btn zoom" onclick="zoomIn()"  title="Zoom In">＋</button>
-  <button class="puzzle-btn zoom" onclick="zoomOut()" title="Zoom Out">－</button>
-  <button class="puzzle-btn zoom" onclick="resetView()" title="Reset View" style="font-size:0.72em;padding:6px 10px;">⌂ Fit</button>
 </div>
 
 <div id="main-layout">
   <div id="canvas-wrapper">
     <div id="canvas-label">PETA JAWA TIMUR — DRAG KEPINGAN KE SINI</div>
-    <canvas id="puzzle-canvas" class="cur-grab"></canvas>
-    <div id="zoom-controls">
-      <button class="puzzle-btn zoom" onclick="zoomIn()"  title="Zoom In"  style="width:34px;height:34px;padding:0;font-size:1.1em;border-radius:50%;">＋</button>
-      <button class="puzzle-btn zoom" onclick="zoomOut()" title="Zoom Out" style="width:34px;height:34px;padding:0;font-size:1.1em;border-radius:50%;">－</button>
-      <button class="puzzle-btn zoom" onclick="resetView()" title="Fit All" style="width:34px;height:34px;padding:0;font-size:0.65em;border-radius:50%;">FIT</button>
-    </div>
-    <div id="zoom-info">100%</div>
-    <div id="pan-hint">🖱 Klik-kanan drag / Space+drag = Geser peta</div>
+    <canvas id="puzzle-canvas"></canvas>
     <div id="tooltip"></div>
     <div id="snap-feedback">✅</div>
   </div>
-
   <div id="pieces-panel">
-    <h4>📦 Kepingan ({n_pieces})</h4>
-    <div id="progress-bar-wrap" style="margin:2px 0 6px;height:6px;">
+    <h4 id="panel-title">📦 Kepingan ({len(all_features)})</h4>
+    <div id="progress-bar-wrap" style="margin:4px 0 8px 0;">
       <div id="progress-bar-fill2"
-        style="height:6px;background:linear-gradient(90deg,#4CAF50,#8BC34A);
+        style="height:7px;background:linear-gradient(90deg,#4CAF50,#8BC34A);
                border-radius:10px;width:0%;transition:width 0.4s;">
       </div>
     </div>
@@ -1546,14 +1474,14 @@ def get_puzzle_html(geojson_data, start_time_ms):
     <div style="font-size:3em;margin-bottom:6px;">🏆</div>
     <h1>PUZZLE SELESAI!</h1>
     <p>Peta <strong>Jawa Timur</strong> berhasil disusun!</p>
-    <p>Semua <strong>{n_pieces} kabupaten/kota</strong> terpasang!</p>
+    <p>Semua <strong>{len(all_features)} kabupaten/kota</strong> terpasang!</p>
     <div id="win-time">00:00</div>
     <p id="win-moves">0 kesalahan</p>
-    <p style="color:#ffd700;font-size:0.85em;margin-top:6px;">
+    <p style="color:#ffd700;font-size:0.88em;margin-top:8px;">
       🎉 Luar biasa! Kamu mengenal semua wilayah Jawa Timur!
     </p>
     <button class="puzzle-btn success"
-      style="margin-top:14px;font-size:1em;padding:10px 28px;"
+      style="margin-top:16px;font-size:1em;padding:10px 30px;"
       onclick="location.reload()">🔄 Main Lagi</button>
   </div>
 </div>
@@ -1561,25 +1489,16 @@ def get_puzzle_html(geojson_data, start_time_ms):
 <script>
 (function() {{
   const GEOJSON    = {geojson_str};
-  const SNAP_BASE  = {SNAP_DIST};
+  const SNAP_DIST  = {SNAP_DIST};
   const START_TIME = Date.now();
 
-  // ===== CANVAS SETUP =====
-  const canvas  = document.getElementById('puzzle-canvas');
-  const ctx     = canvas.getContext('2d');
-  const wrapper = document.getElementById('canvas-wrapper');
+  // ===== CANVAS =====
+  const canvas = document.getElementById('puzzle-canvas');
+  const ctx    = canvas.getContext('2d');
+  const W = 680, H = 560;
+  canvas.width = W; canvas.height = H;
 
-  function resizeCanvas() {{
-    canvas.width  = wrapper.clientWidth;
-    canvas.height = wrapper.clientHeight;
-    render();
-  }}
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  // ===== BASE PROJECTION (world → canvas-base coords) =====
-  // We project to a fixed "world" coordinate space, then apply
-  // the viewport transform (pan + zoom) on top.
+  // ===== PROYEKSI — fit seluruh Jawa Timur =====
   let minLon=180, maxLon=-180, minLat=90, maxLat=-90;
 
   function iterGeom(geom, cb) {{
@@ -1595,60 +1514,24 @@ def get_puzzle_html(geojson_data, start_time_ms):
     if(lat<minLat) minLat=lat; if(lat>maxLat) maxLat=lat;
   }}));
 
-  // World size: fixed 1000×820 virtual canvas
-  const WW = 1000, WH = 820;
-  const PAD = 40;
-  const baseScaleX = (WW - PAD*2) / (maxLon - minLon);
-  const baseScaleY = (WH - PAD*2) / (maxLat - minLat);
-  const BASE_SCALE = Math.min(baseScaleX, baseScaleY);
+  const PAD    = 38;
+  const scaleX = (W - PAD*2) / (maxLon - minLon);
+  const scaleY = (H - PAD*2) / (maxLat - minLat);
+  const SCALE  = Math.min(scaleX, scaleY);
 
-  // Project lon/lat → world coords
-  function projectWorld(lon, lat) {{
+  function project(lon, lat) {{
     return [
-      PAD + (lon - minLon) * BASE_SCALE,
-      WH - PAD - (lat - minLat) * BASE_SCALE
+      PAD + (lon - minLon) * SCALE,
+      H - PAD - (lat - minLat) * SCALE
     ];
   }}
 
-  // ===== VIEWPORT STATE (pan + zoom) =====
-  // World coords → screen:  sx = wx * zoom + panX
-  let zoom = 1.0;
-  let panX = 0, panY = 0;   // offset in screen pixels
-
-  const ZOOM_MIN = 0.35;
-  const ZOOM_MAX = 6.0;
-  const ZOOM_STEP = 0.18;
-
-  function worldToScreen(wx, wy) {{
-    return [wx * zoom + panX, wy * zoom + panY];
-  }}
-  function screenToWorld(sx, sy) {{
-    return [(sx - panX) / zoom, (sy - panY) / zoom];
-  }}
-
-  function fitToCanvas() {{
-    const cw = canvas.width, ch = canvas.height;
-    zoom = Math.min(cw / WW, ch / WH) * 0.92;
-    panX = (cw - WW * zoom) / 2;
-    panY = (ch - WH * zoom) / 2;
-    updateZoomDisplay();
-  }}
-
-  function updateZoomDisplay() {{
-    const pct = Math.round(zoom * 100) + '%';
-    document.getElementById('zoom-display').textContent = pct;
-    document.getElementById('zoom-info').textContent     = pct;
-  }}
-
-  // Initial fit
-  fitToCanvas();
-
-  // ===== BUILD Path2D IN WORLD COORDS =====
-  function buildPathWorld(geometry) {{
+  // ===== BUILD Path2D =====
+  function buildPath(geometry) {{
     const p = new Path2D();
     function addRing(ring) {{
       ring.forEach((c, i) => {{
-        const [x,y] = projectWorld(c[0], c[1]);
+        const [x,y] = project(c[0], c[1]);
         if(i===0) p.moveTo(x,y); else p.lineTo(x,y);
       }});
       p.closePath();
@@ -1661,70 +1544,82 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return p;
   }}
 
-  function geomCentroidWorld(geom) {{
+  // Centroid proyeksi dari geometry
+  function geomCentroid(geom) {{
     let sx=0, sy=0, n=0;
     iterGeom(geom, (lon,lat) => {{
-      const [x,y] = projectWorld(lon,lat);
+      const [x,y] = project(lon,lat);
       sx+=x; sy+=y; n++;
     }});
     return [sx/n, sy/n];
   }}
 
-  function geomBBoxWorld(geom) {{
-    let x1=WW, x2=0, y1=WH, y2=0;
+  // Bounding box proyeksi
+  function geomBBox(geom) {{
+    let x1=W, x2=0, y1=H, y2=0;
     iterGeom(geom, (lon,lat) => {{
-      const [x,y] = projectWorld(lon,lat);
-      if(x<x1)x1=x; if(x>x2)x2=x; if(y<y1)y1=y; if(y>y2)y2=y;
+      const [x,y] = project(lon,lat);
+      if(x<x1) x1=x; if(x>x2) x2=x;
+      if(y<y1) y1=y; if(y>y2) y2=y;
     }});
     return {{ x1,x2,y1,y2, w:x2-x1, h:y2-y1 }};
   }}
 
-  // ===== BUILD PIECES =====
+  // ===== BUILD PIECES — setiap feature = 1 kepingan =====
   const pieces = GEOJSON.features.map((feat, i) => {{
     const name     = feat.properties.name;
-    const centroid = geomCentroidWorld(feat.geometry);
-    const bbox     = geomBBoxWorld(feat.geometry);
-    const path     = buildPathWorld(feat.geometry);
+    const centroid = geomCentroid(feat.geometry);
+    const bbox     = geomBBox(feat.geometry);
+    const path     = buildPath(feat.geometry);
     return {{
-      id: i, name, geometry: feat.geometry,
-      path, centroid, bbox,
-      // dx/dy: offset from target world position (0 = snapped)
-      dx: 0, dy: 0,
-      placed: false, inPanel: true,
-      dragOffX: 0, dragOffY: 0,
-      hue: (i * 31 + 120) % 360,
+      id:       i,
+      name:     name,
+      geometry: feat.geometry,
+      path:     path,
+      centroid: centroid,   // posisi target di canvas (dx=0 = terpasang)
+      bbox:     bbox,
+      dx:       0,          // offset drag dari posisi target
+      dy:       0,
+      placed:   false,
+      inPanel:  true,
+      dragOffX: 0,
+      dragOffY: 0,
+      hue:      (i * 31 + 120) % 360,
     }};
   }});
 
   const totalPieces = pieces.length;
 
-  // ===== THUMBNAIL PANEL =====
-  const THUMB_W = 66, THUMB_H = 56;
-  const pContainer = document.getElementById('pieces-container');
+  // ===== THUMBNAIL DI PANEL =====
+  const THUMB_W = 68, THUMB_H = 58;
+  const piecesContainer = document.getElementById('pieces-container');
 
   function buildThumbnails() {{
-    pContainer.innerHTML = '';
+    piecesContainer.innerHTML = '';
     pieces.forEach(p => {{
       const div = document.createElement('div');
       div.className = 'piece-thumb' + (p.placed ? ' placed' : '');
-      div.id = 'thumb-' + p.id;
+      div.id  = 'thumb-' + p.id;
       div.style.width  = THUMB_W + 'px';
       div.style.height = THUMB_H + 'px';
       div.title = p.name;
 
-      const tc = document.createElement('canvas');
-      tc.width = THUMB_W; tc.height = THUMB_H;
+      const tc  = document.createElement('canvas');
+      tc.width  = THUMB_W;
+      tc.height = THUMB_H;
       drawThumb(p, tc.getContext('2d'));
       div.appendChild(tc);
 
+      // Label nama singkat
       const lbl = document.createElement('div');
       lbl.className = 'piece-label';
-      lbl.textContent = p.name.replace('Kabupaten ','').replace('Kota ','★');
+      // Singkat: hapus "Kabupaten " / "Kota "
+      lbl.textContent = p.name.replace('Kabupaten ','').replace('Kota ','');
       div.appendChild(lbl);
 
       div.addEventListener('mousedown', e => startDragPanel(e, p));
       div.addEventListener('touchstart', e => startDragPanelTouch(e, p), {{passive:false}});
-      pContainer.appendChild(div);
+      piecesContainer.appendChild(div);
     }});
   }}
 
@@ -1732,74 +1627,66 @@ def get_puzzle_html(geojson_data, start_time_ms):
     tctx.clearRect(0, 0, THUMB_W, THUMB_H);
     const bb = piece.bbox;
     if(bb.w < 0.5 || bb.h < 0.5) return;
-    const tp = 5;
-    const ts = Math.min((THUMB_W-tp*2)/bb.w, (THUMB_H-tp*2-9)/bb.h);
-    const ox = tp + (THUMB_W-tp*2-bb.w*ts)/2 - bb.x1*ts;
-    const oy = tp + (THUMB_H-tp*2-9-bb.h*ts)/2 - bb.y1*ts;
+    const tpad = 5;
+    const ts   = Math.min((THUMB_W-tpad*2)/bb.w, (THUMB_H-tpad*2-10)/bb.h);
+    const offX = tpad + (THUMB_W-tpad*2 - bb.w*ts)/2 - bb.x1*ts;
+    const offY = tpad + (THUMB_H-tpad*2-10 - bb.h*ts)/2 - bb.y1*ts;
+
     tctx.save();
-    tctx.setTransform(ts,0,0,ts,ox,oy);
+    tctx.setTransform(ts, 0, 0, ts, offX, offY);
+
     const lp = new Path2D();
-    function addRingL(ring) {{
+    function addRingLocal(ring) {{
       ring.forEach((c,i) => {{
-        const [x,y] = projectWorld(c[0],c[1]);
+        const [x,y] = project(c[0],c[1]);
         if(i===0) lp.moveTo(x,y); else lp.lineTo(x,y);
       }});
       lp.closePath();
     }}
-    if(piece.geometry.type==='MultiPolygon')
-      piece.geometry.coordinates.forEach(poly => poly.forEach(addRingL));
-    else
-      piece.geometry.coordinates.forEach(addRingL);
-    tctx.shadowColor='rgba(0,0,0,0.5)'; tctx.shadowBlur=4/ts;
-    tctx.fillStyle=`hsla(${{piece.hue}},68%,56%,0.93)`; tctx.fill(lp);
-    tctx.shadowBlur=0;
-    tctx.strokeStyle='rgba(255,255,255,0.8)'; tctx.lineWidth=1.5/ts; tctx.stroke(lp);
+    piece.geometry.coordinates.forEach ? 
+      (piece.geometry.type === 'MultiPolygon' 
+        ? piece.geometry.coordinates.forEach(poly => poly.forEach(addRingLocal))
+        : piece.geometry.coordinates.forEach(addRingLocal))
+      : null;
+
+    tctx.shadowColor = 'rgba(0,0,0,0.5)';
+    tctx.shadowBlur  = 4/ts;
+    tctx.fillStyle   = `hsla(${{piece.hue}},68%,56%,0.92)`;
+    tctx.fill(lp);
+    tctx.shadowBlur  = 0;
+    tctx.strokeStyle = 'rgba(255,255,255,0.8)';
+    tctx.lineWidth   = 1.5/ts;
+    tctx.stroke(lp);
     tctx.restore();
   }}
 
   buildThumbnails();
 
-  // ===== INTERACTION STATE =====
-  let dragging   = null;   // piece being dragged
-  let isPanning  = false;  // right-click/space pan mode
-  let panStart   = null;   // {{ x, y, panX, panY }}
-  let spaceDown  = false;
-  let mouseX = 0, mouseY = 0;  // last screen position
+  // ===== DRAG STATE =====
+  let dragging = null;
+  let mouseX = 0, mouseY = 0;
   let mistakes = 0;
 
-  // ===== COORDINATE HELPERS =====
-  function eventScreenPos(e) {{
+  function canvasPos(e) {{
     const rect = canvas.getBoundingClientRect();
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
-    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    const cx   = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy   = e.touches ? e.touches[0].clientY : e.clientY;
     return [
-      (cx - rect.left) * (canvas.width  / rect.width),
-      (cy - rect.top)  * (canvas.height / rect.height)
+      (cx - rect.left) * (W / rect.width),
+      (cy - rect.top)  * (H / rect.height)
     ];
   }}
 
-  // screen pos of piece centroid (target position)
-  function pieceCentroidScreen(piece) {{
-    const [wx,wy] = piece.centroid;
-    return worldToScreen(wx, wy);
-  }}
-
-  // ===== DRAG FROM PANEL =====
   function startDragPanel(e, piece) {{
     e.preventDefault();
     if(piece.placed) return;
     dragging = piece;
     piece.inPanel = false;
-
-    const [sx, sy] = eventScreenPos(e);
-    mouseX = sx; mouseY = sy;
-
-    // Place piece world-pos under the mouse
-    const [wx, wy] = screenToWorld(sx, sy);
-    piece.dx = wx - piece.centroid[0];
-    piece.dy = wy - piece.centroid[1];
+    const [mx,my] = canvasPos(e);
+    piece.dx = mx - piece.centroid[0];
+    piece.dy = my - piece.centroid[1];
     piece.dragOffX = 0; piece.dragOffY = 0;
-    canvas.className = 'cur-grabbing';
+    mouseX=mx; mouseY=my;
     render();
   }}
 
@@ -1810,229 +1697,120 @@ def get_puzzle_html(geojson_data, start_time_ms):
     piece.inPanel = false;
     const touch = e.touches[0];
     const rect  = canvas.getBoundingClientRect();
-    const sx = (touch.clientX-rect.left)*(canvas.width/rect.width);
-    const sy = (touch.clientY-rect.top)*(canvas.height/rect.height);
-    mouseX = sx; mouseY = sy;
-    const [wx, wy] = screenToWorld(sx, sy);
-    piece.dx = wx - piece.centroid[0];
-    piece.dy = wy - piece.centroid[1];
+    const mx = (touch.clientX-rect.left)*(W/rect.width);
+    const my = (touch.clientY-rect.top)*(H/rect.height);
+    piece.dx = mx - piece.centroid[0];
+    piece.dy = my - piece.centroid[1];
     piece.dragOffX = 0; piece.dragOffY = 0;
+    mouseX=mx; mouseY=my;
     render();
   }}
 
-  // ===== MOUSE DOWN ON CANVAS =====
   canvas.addEventListener('mousedown', e => {{
-    const [sx, sy] = eventScreenPos(e);
-    mouseX = sx; mouseY = sy;
-
-    // Right-click or middle-click = pan
-    if(e.button === 1 || e.button === 2) {{
-      e.preventDefault();
-      isPanning = true;
-      panStart  = {{ x:sx, y:sy, panX, panY }};
-      canvas.className = 'cur-pan';
-      return;
-    }}
-
-    // Space key held = pan
-    if(spaceDown) {{
-      isPanning = true;
-      panStart  = {{ x:sx, y:sy, panX, panY }};
-      canvas.className = 'cur-pan';
-      return;
-    }}
-
-    // Left-click = try pick floating piece
-    const [wx, wy] = screenToWorld(sx, sy);
+    const [mx,my] = canvasPos(e);
     for(let i=pieces.length-1; i>=0; i--) {{
       const p = pieces[i];
       if(p.placed || p.inPanel) continue;
-      // bbox hit test in world coords
       const bb = p.bbox;
-      const bx1 = bb.x1+p.dx, by1 = bb.y1+p.dy;
-      const bx2 = bb.x2+p.dx, by2 = bb.y2+p.dy;
-      if(wx>=bx1-3 && wx<=bx2+3 && wy>=by1-3 && wy<=by2+3) {{
+      if(mx >= bb.x1+p.dx-4 && mx <= bb.x2+p.dx+4 &&
+         my >= bb.y1+p.dy-4 && my <= bb.y2+p.dy+4) {{
         dragging = p;
-        const pcx = p.centroid[0]+p.dx;
-        const pcy = p.centroid[1]+p.dy;
-        p.dragOffX = wx - pcx;
-        p.dragOffY = wy - pcy;
-        canvas.className = 'cur-grabbing';
+        const pcx = p.centroid[0] + p.dx;
+        const pcy = p.centroid[1] + p.dy;
+        p.dragOffX = mx - pcx;
+        p.dragOffY = my - pcy;
+        mouseX=mx; mouseY=my;
         render();
         break;
       }}
     }}
   }});
 
-  canvas.addEventListener('contextmenu', e => e.preventDefault());
-
-  // ===== MOUSE MOVE =====
   document.addEventListener('mousemove', e => {{
-    const [sx, sy] = eventScreenPos(e);
-    mouseX = sx; mouseY = sy;
+    if(!dragging) return;
+    const [mx,my] = canvasPos(e);
+    mouseX=mx; mouseY=my;
+    dragging.dx = mx - dragging.centroid[0] - dragging.dragOffX;
+    dragging.dy = my - dragging.centroid[1] - dragging.dragOffY;
+    render();
 
-    if(isPanning && panStart) {{
-      panX = panStart.panX + (sx - panStart.x);
-      panY = panStart.panY + (sy - panStart.y);
-      render();
-      return;
-    }}
-
-    if(dragging) {{
-      const [wx, wy] = screenToWorld(sx, sy);
-      dragging.dx = wx - dragging.centroid[0] - dragging.dragOffX;
-      dragging.dy = wy - dragging.centroid[1] - dragging.dragOffY;
-      render();
-
-      // Tooltip
-      const tt = document.getElementById('tooltip');
-      tt.textContent    = dragging.name;
-      tt.style.left     = Math.min(sx+14, canvas.width-130) + 'px';
-      tt.style.top      = Math.max(sy-30, 5) + 'px';
-      tt.style.display  = 'block';
-    }}
+    // Tooltip: tunjukkan nama wilayah yang sedang di-drag
+    const tt = document.getElementById('tooltip');
+    tt.textContent = dragging.name;
+    tt.style.left  = Math.min(mx+12, W-120) + 'px';
+    tt.style.top   = Math.max(my-28, 5) + 'px';
+    tt.style.display = 'block';
   }});
 
-  // ===== MOUSE UP =====
-  document.addEventListener('mouseup', e => {{
+  document.addEventListener('mouseup', () => {{
     document.getElementById('tooltip').style.display = 'none';
-    if(isPanning) {{
-      isPanning = false; panStart = null;
-      canvas.className = spaceDown ? 'cur-pan' : 'cur-grab';
-    }}
     if(dragging) {{
       trySnap(dragging, mouseX, mouseY);
       dragging = null;
-      canvas.className = 'cur-grab';
       render();
     }}
   }});
 
-  // ===== TOUCH EVENTS =====
-  let lastTouchDist = null;
-
-  canvas.addEventListener('touchstart', e => {{
-    if(e.touches.length === 2) {{
-      // pinch start
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      lastTouchDist = Math.hypot(dx, dy);
-    }}
-  }}, {{passive:true}});
-
   canvas.addEventListener('touchmove', e => {{
     e.preventDefault();
-    if(e.touches.length === 2) {{
-      // pinch zoom
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.hypot(dx, dy);
-      if(lastTouchDist) {{
-        const mx = (e.touches[0].clientX + e.touches[1].clientX)/2;
-        const my = (e.touches[0].clientY + e.touches[1].clientY)/2;
-        const rect = canvas.getBoundingClientRect();
-        const cx = (mx-rect.left)*(canvas.width/rect.width);
-        const cy = (my-rect.top)*(canvas.height/rect.height);
-        applyZoom(dist/lastTouchDist, cx, cy);
-      }}
-      lastTouchDist = dist;
-      return;
-    }}
-    lastTouchDist = null;
     if(!dragging) return;
-    const [sx, sy] = eventScreenPos(e);
-    mouseX=sx; mouseY=sy;
-    const [wx,wy] = screenToWorld(sx, sy);
-    dragging.dx = wx - dragging.centroid[0] - dragging.dragOffX;
-    dragging.dy = wy - dragging.centroid[1] - dragging.dragOffY;
+    const [mx,my] = canvasPos(e);
+    mouseX=mx; mouseY=my;
+    dragging.dx = mx - dragging.centroid[0] - dragging.dragOffX;
+    dragging.dy = my - dragging.centroid[1] - dragging.dragOffY;
     render();
   }}, {{passive:false}});
 
   document.addEventListener('touchend', () => {{
-    lastTouchDist = null;
     if(dragging) {{
       trySnap(dragging, mouseX, mouseY);
-      dragging = null; render();
+      dragging = null;
+      render();
     }}
   }});
 
-  // ===== SCROLL ZOOM =====
-  canvas.addEventListener('wheel', e => {{
-    e.preventDefault();
-    const [sx, sy] = eventScreenPos(e);
-    const factor = e.deltaY < 0 ? (1 + ZOOM_STEP) : (1 - ZOOM_STEP);
-    applyZoom(factor, sx, sy);
-  }}, {{passive:false}});
-
-  function applyZoom(factor, cx, cy) {{
-    const newZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoom * factor));
-    // Keep point (cx,cy) fixed on screen
-    panX = cx - (cx - panX) * (newZoom / zoom);
-    panY = cy - (cy - panY) * (newZoom / zoom);
-    zoom = newZoom;
-    updateZoomDisplay();
-    render();
-  }}
-
-  // ===== KEYBOARD: SPACE for pan, +/- for zoom =====
-  document.addEventListener('keydown', e => {{
-    if(e.code === 'Space') {{ e.preventDefault(); spaceDown=true; if(!dragging) canvas.className='cur-pan'; }}
-    if(e.code === 'Equal' || e.code === 'NumpadAdd')    {{ e.preventDefault(); zoomIn(); }}
-    if(e.code === 'Minus'  || e.code === 'NumpadSubtract') {{ e.preventDefault(); zoomOut(); }}
-    if(e.code === 'Digit0' || e.code === 'Numpad0')     {{ e.preventDefault(); resetView(); }}
-  }});
-  document.addEventListener('keyup', e => {{
-    if(e.code === 'Space') {{ spaceDown=false; if(!dragging) canvas.className='cur-grab'; }}
-  }});
-
-  // ===== ZOOM BUTTONS =====
-  window.zoomIn  = () => applyZoom(1+ZOOM_STEP, canvas.width/2, canvas.height/2);
-  window.zoomOut = () => applyZoom(1-ZOOM_STEP, canvas.width/2, canvas.height/2);
-  window.resetView = () => {{ fitToCanvas(); render(); }};
-
   // ===== SNAP =====
-  function trySnap(piece, sx, sy) {{
-    // Convert drop screen pos to world
-    const [wx, wy] = screenToWorld(sx, sy);
-    const tx = piece.centroid[0], ty = piece.centroid[1];
-    const dist = Math.hypot(wx - tx, wy - ty);
-
-    // Snap threshold in world units — adaptive to piece size & zoom
-    const bb  = piece.bbox;
-    const minSide = Math.min(bb.w, bb.h);
-    // SNAP_BASE is in world units; be more generous for tiny pieces
-    const thr = Math.max(SNAP_BASE, minSide * 0.45);
+  function trySnap(piece, dropX, dropY) {{
+    const tx   = piece.centroid[0];
+    const ty   = piece.centroid[1];
+    const dist = Math.hypot(dropX - tx, dropY - ty);
+    // Snap threshold: makin kecil wilayah, makin toleran
+    const bb   = piece.bbox;
+    const size = Math.min(bb.w, bb.h);
+    const thr  = Math.max(SNAP_DIST, Math.min(size * 0.55, 50)) * (W / 680);
 
     if(dist <= thr) {{
-      piece.dx=0; piece.dy=0;
-      piece.placed=true; piece.inPanel=false;
-      showFB(sx, sy, true);
+      piece.dx = 0; piece.dy = 0;
+      piece.placed = true; piece.inPanel = false;
+      showFB(dropX, dropY, true);
       const el = document.getElementById('thumb-'+piece.id);
       if(el) el.classList.add('placed');
       updateProgress();
       checkWin();
     }} else {{
       mistakes++;
-      showFB(sx, sy, false);
+      showFB(dropX, dropY, false);
       updateAccuracy();
+      // Kepingan tetap mengambang di posisi drop (tidak kembali ke panel)
     }}
   }}
 
-  function showFB(sx, sy, ok) {{
+  function showFB(x, y, ok) {{
     const fb = document.getElementById('snap-feedback');
     fb.textContent = ok ? '✅' : '❌';
-    fb.style.left = Math.min(sx,canvas.width-50)+'px';
-    fb.style.top  = Math.max(sy-38,5)+'px';
-    fb.style.display='block';
-    fb.style.animation='none'; fb.offsetHeight;
-    fb.style.animation='floatUp 0.8s ease-out forwards';
-    setTimeout(()=>{{fb.style.display='none';}},800);
+    fb.style.left = Math.min(x, W-50)+'px';
+    fb.style.top  = Math.max(y-35, 5)+'px';
+    fb.style.display = 'block';
+    fb.style.animation = 'none';
+    fb.offsetHeight;
+    fb.style.animation = 'floatUp 0.8s ease-out forwards';
+    setTimeout(() => {{ fb.style.display='none'; }}, 800);
   }}
 
   function updateProgress() {{
     const pl  = pieces.filter(p=>p.placed).length;
     const pct = Math.round((pl/totalPieces)*100);
-    document.getElementById('placed-count').textContent = pl;
+    document.getElementById('placed-count').textContent        = pl;
     document.getElementById('progress-bar-fill').style.width  = pct+'%';
     document.getElementById('progress-bar-fill2').style.width = pct+'%';
     document.getElementById('progress-text').textContent =
@@ -2040,160 +1818,156 @@ def get_puzzle_html(geojson_data, start_time_ms):
   }}
 
   function updateAccuracy() {{
-    const pl=pieces.filter(p=>p.placed).length, tot=pl+mistakes;
+    const pl  = pieces.filter(p=>p.placed).length;
+    const tot = pl + mistakes;
     document.getElementById('accuracy-display').textContent =
-      tot>0 ? Math.round((pl/tot)*100)+'%' : '100%';
+      tot > 0 ? Math.round((pl/tot)*100)+'%' : '100%';
   }}
 
   function checkWin() {{
-    if(pieces.filter(p=>p.placed).length>=totalPieces) {{
-      const e=Math.floor((Date.now()-START_TIME)/1000);
-      document.getElementById('win-time').textContent=
+    if(pieces.filter(p=>p.placed).length >= totalPieces) {{
+      const e = Math.floor((Date.now()-START_TIME)/1000);
+      document.getElementById('win-time').textContent =
         String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
-      document.getElementById('win-moves').textContent=mistakes+' kesalahan';
-      setTimeout(()=>document.getElementById('win-overlay').classList.add('show'),600);
+      document.getElementById('win-moves').textContent = mistakes+' kesalahan';
+      setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 600);
     }}
   }}
 
   // ===== TIMER =====
-  setInterval(()=>{{
-    const e=Math.floor((Date.now()-START_TIME)/1000);
-    document.getElementById('timer-display').textContent=
+  setInterval(() => {{
+    const e = Math.floor((Date.now()-START_TIME)/1000);
+    document.getElementById('timer-display').textContent =
       String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
-  }},1000);
+  }}, 1000);
 
   // ===== RENDER =====
-  function render() {{
-    const cw=canvas.width, ch=canvas.height;
-    ctx.clearRect(0,0,cw,ch);
-
-    // Apply viewport transform
+  function drawPiece(piece, dx, dy, isDrag) {{
     ctx.save();
-    ctx.translate(panX, panY);
-    ctx.scale(zoom, zoom);
+    ctx.translate(dx, dy);
 
-    // 1. Ghost outlines (panduan posisi)
+    ctx.shadowColor = isDrag ? 'rgba(255,215,0,0.9)' : 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur  = isDrag ? 22 : 8;
+    ctx.fillStyle   = `hsla(${{piece.hue}}, ${{isDrag?82:66}}%, ${{isDrag?66:54}}%, ${{isDrag?0.96:0.82}})`;
+    ctx.fill(piece.path);
+
+    ctx.shadowBlur  = 0;
+    ctx.strokeStyle = isDrag ? '#ffd700' : 'rgba(255,255,255,0.65)';
+    ctx.lineWidth   = isDrag ? 2.5 : 1.2;
+    ctx.stroke(piece.path);
+
+    // Label nama wilayah di peta (hanya jika tidak di-drag & wilayah cukup besar)
+    if(!isDrag) {{
+      const bb = piece.bbox;
+      if(bb.w > 18 && bb.h > 10) {{
+        const cx_ = (bb.x1+bb.x2)/2;
+        const cy_ = (bb.y1+bb.y2)/2;
+        ctx.fillStyle    = 'rgba(255,255,255,0.92)';
+        ctx.font         = 'bold 7.5px Nunito,sans-serif';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor  = 'rgba(0,0,0,0.9)';
+        ctx.shadowBlur   = 3;
+        // Singkat nama
+        const short = piece.name.replace('Kabupaten ','').replace('Kota ','★');
+        ctx.fillText(short, cx_, cy_);
+        ctx.shadowBlur = 0;
+      }}
+    }}
+    ctx.restore();
+  }}
+
+  function render() {{
+    ctx.clearRect(0, 0, W, H);
+
+    // 1. Ghost outline semua wilayah (panduan posisi)
     pieces.forEach(p => {{
       if(p.placed) return;
       ctx.save();
-      ctx.setLineDash([3,3]);
-      ctx.strokeStyle='rgba(255,215,0,0.20)';
-      ctx.lineWidth=1/zoom;
+      ctx.setLineDash([4,3]);
+      ctx.strokeStyle = 'rgba(255,215,0,0.18)';
+      ctx.lineWidth   = 1;
       ctx.stroke(p.path);
       ctx.setLineDash([]);
-      ctx.fillStyle='rgba(255,255,255,0.025)';
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
       ctx.fill(p.path);
       ctx.restore();
     }});
 
-    // 2. Terpasang
+    // 2. Kepingan terpasang
     pieces.forEach(p => {{
       if(!p.placed) return;
       drawPiece(p, 0, 0, false);
     }});
 
-    // 3. Mengambang (tidak di panel, bukan yang di-drag)
+    // 3. Kepingan mengambang (tidak di panel, bukan yang di-drag)
     pieces.forEach(p => {{
-      if(p.placed || p.inPanel || p===dragging) return;
+      if(p.placed || p.inPanel || p === dragging) return;
       drawPiece(p, p.dx, p.dy, false);
     }});
 
-    // 4. Yang sedang di-drag (paling atas)
+    // 4. Kepingan sedang di-drag (paling atas)
     if(dragging && !dragging.placed) {{
       drawPiece(dragging, dragging.dx, dragging.dy, true);
     }}
-
-    ctx.restore();  // end viewport transform
   }}
 
-  function drawPiece(piece, dx, dy, isDrag) {{
-    ctx.save();
-    ctx.translate(dx, dy);
+  render();
 
-    const lw = Math.max(0.5, 1.2/zoom);
-    ctx.shadowColor = isDrag ? 'rgba(255,215,0,0.9)' : 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur  = isDrag ? 20/zoom : 7/zoom;
-    ctx.fillStyle   = `hsla(${{piece.hue}},${{isDrag?82:66}}%,${{isDrag?66:54}}%,${{isDrag?0.96:0.82}})`;
-    ctx.fill(piece.path);
-
-    ctx.shadowBlur  = 0;
-    ctx.strokeStyle = isDrag ? '#ffd700' : 'rgba(255,255,255,0.65)';
-    ctx.lineWidth   = isDrag ? lw*2 : lw;
-    ctx.stroke(piece.path);
-
-    // Nama label (hanya jika cukup besar di layar)
-    const bb      = piece.bbox;
-    const screenW = bb.w * zoom;
-    const screenH = bb.h * zoom;
-    if(screenW > 22 && screenH > 12) {{
-      const cx_ = (bb.x1+bb.x2)/2;
-      const cy_ = (bb.y1+bb.y2)/2;
-      const fs  = Math.max(5, Math.min(10, screenW*0.18)) / zoom;
-      ctx.fillStyle    = 'rgba(255,255,255,0.92)';
-      ctx.font         = `bold ${{fs}}px Nunito,sans-serif`;
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor  = 'rgba(0,0,0,0.9)';
-      ctx.shadowBlur   = 2/zoom;
-      const short = piece.name.replace('Kabupaten ','').replace('Kota ','★');
-      ctx.fillText(short, cx_, cy_);
-      ctx.shadowBlur = 0;
-    }}
-    ctx.restore();
-  }}
-
-  // ===== CONTROLS =====
+  // ===== KONTROL =====
   window.shufflePieces = function() {{
-    // Scatter in world coordinates, across entire map area
     const margin = 30;
     pieces.forEach(p => {{
       if(p.placed) return;
       p.inPanel = false;
+      // Scatter acak di seluruh area canvas
       const bb = p.bbox;
-      p.dx = (Math.random()*(WW-margin*2-bb.w)+margin) - bb.x1;
-      p.dy = (Math.random()*(WH-margin*2-bb.h)+margin) - bb.y1;
+      p.dx = (Math.random() * (W - margin*2 - bb.w) + margin) - bb.x1;
+      p.dy = (Math.random() * (H - margin*2 - bb.h) + margin) - bb.y1;
     }});
     render();
   }};
 
   window.showHint = function() {{
+    // Flash outline seluruh Jawa Timur
     let n=0;
-    const iv=setInterval(()=>{{
-      if(++n>8){{clearInterval(iv);render();return;}}
+    const iv = setInterval(() => {{
+      if(++n > 8) {{ clearInterval(iv); render(); return; }}
       ctx.save();
-      ctx.translate(panX,panY); ctx.scale(zoom,zoom);
-      pieces.forEach(p=>{{
-        ctx.strokeStyle=n%2===0?`hsla(${{p.hue}},80%,60%,0.85)`:'rgba(0,0,0,0)';
-        ctx.lineWidth=2.5/zoom;
+      pieces.forEach(p => {{
+        ctx.strokeStyle = n%2===0 ? `hsla(${{p.hue}},80%,60%,0.8)` : 'rgba(255,255,255,0.05)';
+        ctx.lineWidth   = 2.5;
         ctx.stroke(p.path);
       }});
       ctx.restore();
-    }},200);
+    }}, 200);
   }};
 
   window.resetPuzzle = function() {{
-    mistakes=0;
-    pieces.forEach(p=>{{p.placed=false;p.inPanel=true;p.dx=0;p.dy=0;}});
-    document.getElementById('accuracy-display').textContent='100%';
+    mistakes = 0;
+    pieces.forEach(p => {{
+      p.placed=false; p.inPanel=true; p.dx=0; p.dy=0;
+    }});
+    document.getElementById('accuracy-display').textContent = '100%';
     buildThumbnails();
     updateProgress();
     render();
   }};
 
   window.autoSolve = function() {{
-    const unplaced=pieces.filter(p=>!p.placed);
+    const unplaced = pieces.filter(p=>!p.placed);
     let i=0;
-    const iv=setInterval(()=>{{
-      if(i>=unplaced.length){{clearInterval(iv);checkWin();return;}}
-      const p=unplaced[i++];
-      p.dx=0;p.dy=0;p.placed=true;p.inPanel=false;
-      const el=document.getElementById('thumb-'+p.id);
-      if(el)el.classList.add('placed');
-      updateProgress();render();
-    }},70);
+    const iv = setInterval(() => {{
+      if(i>=unplaced.length) {{ clearInterval(iv); checkWin(); return; }}
+      const p = unplaced[i++];
+      p.dx=0; p.dy=0; p.placed=true; p.inPanel=false;
+      const el = document.getElementById('thumb-'+p.id);
+      if(el) el.classList.add('placed');
+      updateProgress(); render();
+    }}, 80);
   }};
 
-  // Initial scatter then render
+  // Scatter awal
   shufflePieces();
 
 }})();
@@ -2608,7 +2382,7 @@ elif PAGE == "Puzzle":
             jatim_geojson,
             int(st.session_state.puzzle_start_time * 1000) if st.session_state.puzzle_start_time else 0
         )
-        st.components.v1.html(puzzle_html, height=920, scrolling=False)
+        st.components.v1.html(puzzle_html, height=820, scrolling=True)
 
         st.markdown("---")
         st.info(
