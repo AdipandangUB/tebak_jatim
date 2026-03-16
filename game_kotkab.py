@@ -1776,9 +1776,12 @@ elif "Statistik" in selected_menu:
     with c1:
         st.metric("Durasi Sesi", format_duration(get_session_duration()))
     with c2:
-        if st.session_state.game_start_time:
-            dur = (st.session_state.total_game_duration if st.session_state.game_end_time
-                   else time.time() - st.session_state.game_start_time)
+        if st.session_state.total_game_duration > 0:
+            # Durasi sudah tersimpan dari game yang telah selesai
+            st.metric("Durasi Game", format_duration(st.session_state.total_game_duration))
+        elif st.session_state.game_start_time and not st.session_state.game_end_time:
+            # Game sedang berlangsung — tampilkan waktu berjalan
+            dur = time.time() - st.session_state.game_start_time
             st.metric("Durasi Game", format_duration(dur))
         else:
             st.metric("Durasi Game", "-")
