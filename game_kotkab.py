@@ -1591,7 +1591,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
   const totalPieces = pieces.length;
 
   // ===== THUMBNAIL DI PANEL =====
-  const THUMB_W = 68, THUMB_H = 58;
+  const THUMB_W = 80, THUMB_H = 70;
   const piecesContainer = document.getElementById('pieces-container');
 
   function buildThumbnails() {{
