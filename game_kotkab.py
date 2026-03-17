@@ -868,13 +868,7 @@ def reset_game():
     st.session_state.show_perfect_balloon = False
     pilih_wilayah()
 
-
-# ==================== DATABASE INFO WILAYAH ====================
-
-# ==================== DATABASE INFO WILAYAH ====================
-
 # ==================== DATABASE INFO WILAYAH LENGKAP ====================
-
 def get_wilayah_info(nama):
     db = {
         # ==================== KOTA ====================
@@ -1148,10 +1142,21 @@ def get_wilayah_info(nama):
         }
     }
 
+    # Debug: print nama wilayah yang dicari
+    print(f"Mencari info untuk wilayah: {nama}")
+    
     if nama in db:
+        print(f"Data ditemukan untuk {nama}")
         return db[nama]
-
-    # Default untuk wilayah yang tidak ada di database (tapi seharusnya semua sudah tercover)
+    
+    # Jika tidak ditemukan di database, coba cari dengan case insensitive
+    for key in db.keys():
+        if key.lower() == nama.lower():
+            print(f"Data ditemukan dengan case insensitive: {key}")
+            return db[key]
+    
+    # Default untuk wilayah yang tidak ada di database
+    print(f"Data tidak ditemukan, menggunakan default untuk {nama}")
     tipe = "Kota" if nama.startswith("Kota ") else "Kabupaten"
     return {
         "geografis": f"{tipe} {nama.replace(tipe + ' ', '')} di Provinsi Jawa Timur dengan berbagai potensi sumber daya alam.",
@@ -2912,110 +2917,84 @@ elif PAGE == "Tentang":
 
 # ==================== PETA (GAME & BELAJAR) ====================
 
-if (PAGE == "Game") or PAGE == "Belajar":
-    if PAGE == "Belajar":
-        col_map, col_info = st.columns([2, 1])
-    else:
-        col_map = st.container()
-        col_info = None
-
-    map_container = col_map if PAGE == "Belajar" else st.container()
-
-    with map_container:
-        m = folium.Map(location=[-7.5, 112.3], zoom_start=8,
-                       tiles=None, control_scale=True, prefer_canvas=True)
-        folium.TileLayer(
-            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            attr="Esri", name="Satellite", overlay=False, control=False
-        ).add_to(m)
-
-        def style_function(feature):
-            name = feature["properties"]["name"]
-            if PAGE == "Belajar":
-                return {"fillColor": "#33cc33", "color": "#ffffff",
-                        "weight": 1.5, "fillOpacity": 0.5}
-            if (st.session_state.game_started and not st.session_state.game_over
-                    and name == st.session_state.current_region):
-                return {"fillColor": "#ff0000", "color": "#ff0000",
-                        "weight": 3, "fillOpacity": 0.7}
-            return {
-                "fillColor": "#3388ff" if st.session_state.game_started else "#cccccc",
-                "color": "#ffffff", "weight": 1.5,
-                "fillOpacity": 0.3 if st.session_state.game_started else 0.1
-            }
-
-        if PAGE == "Belajar":
-            folium.GeoJson(
-                jatim_geojson,
-                name="Wilayah Jatim",
-                style_function=style_function,
-                tooltip=folium.GeoJsonTooltip(
-                    fields=["name"], aliases=["Wilayah:"],
-                    style="background-color:white;color:#333;font-weight:bold;padding:5px;"
-                ),
-                highlight_function=lambda x: {
-                    "fillColor": "#ffaa00", "color": "#ffaa00",
-                    "weight": 3, "fillOpacity": 0.7
-                }
-            ).add_to(m)
-        else:
-            folium.GeoJson(
-                jatim_geojson,
-                name="Wilayah Jatim",
-                style_function=style_function,
-            ).add_to(m)
-
-        map_data = st_folium(m, width=None, height=500, use_container_width=True,
-                             key="belajar_map" if PAGE == "Belajar" else "game_map")
-
-        if PAGE == "Belajar" and map_data:
-            clicked = map_data.get("last_active_drawing")
-            if clicked and "properties" in clicked and "name" in clicked["properties"]:
-                clicked_name = clicked["properties"]["name"]
-                if clicked_name != st.session_state.selected_wilayah_info:
-                    st.session_state.selected_wilayah_info = clicked_name
-                    st.rerun()
-
-        if PAGE == "Game" and not st.session_state.game_started and not st.session_state.game_over:
-            if st.button("🎮 Mulai Game", use_container_width=True, type="primary"):
-                reset_game()
+if PAGE == "Belajar" and col_info is not None:
+    with col_info:
+        st.markdown("## 📋 Info Wilayah")
+        
+        # Debug: tampilkan session state
+        if st.session_state.selected_wilayah_info:
+            wil = st.session_state.selected_wilayah_info
+            
+            # Tampilkan header wilayah
+            st.markdown(
+                f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);"
+                f"padding:15px;border-radius:10px;margin-bottom:15px;'>"
+                f"<h3 style='color:#ffd700;margin:0;text-align:center;'>📍 {wil}</h3>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+            
+            # Ambil info wilayah
+            info = get_wilayah_info(wil)
+            
+            # Tampilkan dalam expander untuk memastikan data terlihat
+            with st.expander("🗺️ Geografis", expanded=True):
+                st.write(info["geografis"])
+            
+            with st.expander("👥 Demografi", expanded=True):
+                st.write(info["demografi"])
+            
+            with st.expander("🎭 Budaya", expanded=True):
+                st.write(info["budaya"])
+            
+            with st.expander("✨ Keunikan", expanded=True):
+                st.write(info["keunikan"])
+            
+            with st.expander("🛍️ Oleh-oleh", expanded=True):
+                st.write(info["oleh_oleh"])
+            
+            # Tombol untuk reset
+            if st.button("🔄 Klik wilayah lain", use_container_width=True):
+                st.session_state.selected_wilayah_info = None
                 st.rerun()
-
-    # Panel info wilayah (mode Belajar)
-    if PAGE == "Belajar" and col_info is not None:
-        with col_info:
-            st.markdown("## 📋 Info Wilayah")
-            if st.session_state.selected_wilayah_info:
-                wil  = st.session_state.selected_wilayah_info
-                info = get_wilayah_info(wil)
-                st.markdown(
-                    f"<div style='background:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:15px;'>"
-                    f"<h3 style='color:#0066cc;margin-top:0;'>📍 {wil}</h3></div>",
-                    unsafe_allow_html=True
-                )
-                tabs = st.tabs(["🗺️ Geografis", "👥 Demografi", "🎭 Budaya", "✨ Keunikan", "🛍️ Oleh-oleh"])
-                with tabs[0]: st.markdown(info["geografis"])
-                with tabs[1]: st.markdown(info["demografi"])
-                with tabs[2]: st.markdown(info["budaya"])
-                with tabs[3]: st.markdown(info["keunikan"])
-                with tabs[4]: st.markdown(info["oleh_oleh"])
-                if st.button("🔄 Klik wilayah lain", use_container_width=True):
-                    st.session_state.selected_wilayah_info = None
-                    st.rerun()
-            else:
-                st.markdown(
-                    "<div style='background:#e8f4fd;padding:20px;border-radius:10px;text-align:center;"
-                    "border:2px dashed #0066cc;'>"
-                    "<h4 style='color:#0066cc;'>👆 Klik Wilayah di Peta</h4>"
-                    "<p style='color:#666;'>Klik wilayah untuk melihat informasi lengkap!</p></div>",
-                    unsafe_allow_html=True
-                )
-                with st.expander("📌 Atau pilih dari daftar"):
-                    for region in ["Kabupaten Banyuwangi", "Kabupaten Malang", "Kota Surabaya",
-                                   "Kota Batu", "Kota Mojokerto"]:
-                        if st.button(region, key=f"quick_{region}"):
-                            st.session_state.selected_wilayah_info = region
-                            st.rerun()
+        else:
+            st.markdown(
+                "<div style='background:linear-gradient(135deg,#f8f9fa,#e9ecef);"
+                "padding:30px 20px;border-radius:10px;text-align:center;"
+                "border:3px dashed #667eea;'>"
+                "<h4 style='color:#667eea;margin-bottom:15px;'>👆 Klik Wilayah di Peta</h4>"
+                "<p style='color:#666;font-size:16px;'>Klik wilayah pada peta untuk melihat:</p>"
+                "<div style='display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:15px;'>"
+                "<span style='background:#667eea;color:white;padding:5px 15px;border-radius:20px;'>🗺️ Geografis</span>"
+                "<span style='background:#764ba2;color:white;padding:5px 15px;border-radius:20px;'>👥 Demografi</span>"
+                "<span style='background:#43b89c;color:white;padding:5px 15px;border-radius:20px;'>🎭 Budaya</span>"
+                "<span style='background:#ff9800;color:white;padding:5px 15px;border-radius:20px;'>✨ Keunikan</span>"
+                "<span style='background:#e05c8a;color:white;padding:5px 15px;border-radius:20px;'>🛍️ Oleh-oleh</span>"
+                "</div></div>",
+                unsafe_allow_html=True
+            )
+            
+            with st.expander("📌 Atau pilih dari daftar"):
+                # Buat daftar wilayah populer
+                popular_regions = [
+                    "Kabupaten Banyuwangi", "Kabupaten Malang", "Kota Surabaya",
+                    "Kota Batu", "Kabupaten Jember", "Kota Malang",
+                    "Kabupaten Sidoarjo", "Kabupaten Ponorogo", "Kabupaten Pacitan"
+                ]
+                
+                # Tampilkan dalam grid 2 kolom
+                col_reg1, col_reg2 = st.columns(2)
+                for i, region in enumerate(popular_regions):
+                    if i % 2 == 0:
+                        with col_reg1:
+                            if st.button(region, key=f"quick_{region}", use_container_width=True):
+                                st.session_state.selected_wilayah_info = region
+                                st.rerun()
+                    else:
+                        with col_reg2:
+                            if st.button(region, key=f"quick_{region}", use_container_width=True):
+                                st.session_state.selected_wilayah_info = region
+                                st.rerun()
 
     # ==================== AREA GAME ====================
     if PAGE == "Game":
