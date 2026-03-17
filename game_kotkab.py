@@ -930,14 +930,15 @@ def reset_game():
     pilih_wilayah()
 
 
-# ==================== DATABASE INFO WILAYAH LENGKAP ====================
+# ==================== DATABASE INFO WILAYAH LENGKAP (DIPERBAIKI DENGAN PENGECEKAN KETAT) ====================
 
 def get_wilayah_info(nama):
     """
     Fungsi untuk mendapatkan informasi wilayah berdasarkan nama
+    dengan pengecekan yang sangat ketat antara Kabupaten dan Kota
     """
     
-    # Database untuk KOTA
+    # Database untuk KOTA (hanya kota)
     db_kota = {
         "Kota Malang": {
             "geografis": "Kota Malang terletak di dataran tinggi dengan ketinggian 440-667 mdpl. Suhu udara rata-rata 24°C, dikelilingi pegunungan (Arjuno, Semeru, Welirang) dan terkenal dengan julukan Kota Pendidikan.",
@@ -1004,7 +1005,7 @@ def get_wilayah_info(nama):
         },
     }
 
-    # Database untuk KABUPATEN
+    # Database untuk KABUPATEN (hanya kabupaten)
     db_kabupaten = {
         "Kabupaten Banyuwangi": {
             "geografis": "Terletak di ujung timur Pulau Jawa, berbatasan dengan Selat Bali. Wilayah terluas di Jawa Timur (5.782 km²). Memiliki pantai, pegunungan, dan hutan tropis.",
@@ -1094,7 +1095,7 @@ def get_wilayah_info(nama):
             "geografis": "Kabupaten di pesisir selatan, berbatasan dengan Jawa Tengah. Luas 1.389 km², dijuluki 'Kota 1001 Goa'.",
             "demografi": "Penduduk: ±550 ribu jiwa. Mayoritas suku Jawa Mataraman dengan budaya pesisir.",
             "budaya": "Budaya Jawa Mataraman dengan pengaruh pesisir selatan. Tradisi: larung sesaji, wayang kulit, dan jaranan.",
-            "keunikan": "Goa Gong (goa paling indah se-Asia Tenggara), Goa Tabuhan, Pantai Klayar, dan Pantai Soge.",
+            "keunikan": "Goa Gong (goa paling indah se-Asia Tenggara), Goa Tabuhan, Pantai Klayar, dan Pantai Soge. Tempat kelahiran Presiden Jokowi.",
             "oleh_oleh": "Sale pisang, keripik tempe, ikan asap, terasi, dan batik Pacitan."
         },
         "Kabupaten Ngawi": {
@@ -1211,37 +1212,63 @@ def get_wilayah_info(nama):
         }
     }
 
-    # Gabungkan kedua database
+    # PENCARIAN DENGAN PRIORITAS SANGAT KETAT
+    
+    # 1. CEK PREFIX TERLEBIH DAHULU
+    if nama.startswith("Kabupaten "):
+        # Cari di database kabupaten
+        if nama in db_kabupaten:
+            return db_kabupaten[nama]
+        # Case insensitive di kabupaten
+        for key in db_kabupaten.keys():
+            if key.lower() == nama.lower():
+                return db_kabupaten[key]
+    
+    elif nama.startswith("Kota "):
+        # Cari di database kota
+        if nama in db_kota:
+            return db_kota[nama]
+        # Case insensitive di kota
+        for key in db_kota.keys():
+            if key.lower() == nama.lower():
+                return db_kota[key]
+    
+    # 2. JIKA TIDAK ADA PREFIX, COBA COCOKKAN DENGAN KOTA ATAU KABUPATEN YANG SESUAI
+    else:
+        # Coba cari di database kabupaten dulu (default untuk tanpa prefix)
+        for key in db_kabupaten.keys():
+            # Ambil nama tanpa "Kabupaten "
+            nama_tanpa_prefix = key.replace("Kabupaten ", "")
+            if nama_tanpa_prefix.lower() == nama.lower():
+                return db_kabupaten[key]
+        
+        # Coba cari di database kota
+        for key in db_kota.keys():
+            # Ambil nama tanpa "Kota "
+            nama_tanpa_prefix = key.replace("Kota ", "")
+            if nama_tanpa_prefix.lower() == nama.lower():
+                return db_kota[key]
+    
+    # 3. FALLBACK: Gabungkan kedua database dan cari
     db = {**db_kota, **db_kabupaten}
-
-    # Pencarian dengan prioritas
+    
+    # Exact match
     if nama in db:
         return db[nama]
-
+    
     # Case insensitive
     for key in db.keys():
         if key.lower() == nama.lower():
             return db[key]
     
-    # Cari berdasarkan prefix
-    if nama.startswith("Kabupaten "):
-        for key in db_kabupaten.keys():
-            if key.lower() == nama.lower():
-                return db[key]
-    
-    if nama.startswith("Kota "):
-        for key in db_kota.keys():
-            if key.lower() == nama.lower():
-                return db[key]
-    
-    # Cari tanpa prefix
+    # Cari tanpa prefix (dari semua database)
     nama_without_prefix = nama.lower().replace("kabupaten ", "").replace("kota ", "")
     for key in db.keys():
         key_without_prefix = key.lower().replace("kabupaten ", "").replace("kota ", "")
         if key_without_prefix == nama_without_prefix:
             return db[key]
 
-    # Default jika tidak ditemukan
+    # 4. DEFAULT jika tidak ditemukan
     tipe = "Kota" if nama.startswith("Kota ") else "Kabupaten"
     return {
         "geografis": f"{tipe} di Provinsi Jawa Timur dengan berbagai potensi sumber daya alam.",
@@ -2540,6 +2567,9 @@ elif PAGE == "Belajar":
         
         if st.session_state.selected_wilayah_info:
             wil = st.session_state.selected_wilayah_info
+            
+            # Tampilkan debug info (bisa dihapus nanti)
+            st.caption(f"Debug: Mencari data untuk **{wil}**")
             
             # Ambil logo URL
             logo_url = get_logo_url(wil)
