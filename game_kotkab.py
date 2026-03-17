@@ -869,280 +869,288 @@ def reset_game():
     pilih_wilayah()
 
 
-# ==================== DATABASE INFO WILAYAH ====================
+# ==================== DATABASE INFO WILAYAH LENGKAP ====================
 
 def get_wilayah_info(nama):
     db = {
+        # ==================== KOTA ====================
         "Kota Malang": {
-            "geografis": "Kota di dataran tinggi dengan suhu rata-rata 24°C, dikelilingi pegunungan dan terkenal dengan julukan Kota Pendidikan.",
-            "demografi": "Penduduk: ±900 ribu jiwa. Masyarakat multietnis dengan banyak pendatang untuk pendidikan.",
-            "budaya": "Budaya Arek yang dinamis, banyak seni musik modern dan tradisional, serta kafe dan tempat nongkrong artistik.",
-            "keunikan": "Arsitektur kolonial Belanda yang masih terjaga, dijuluki Kota Bunga, dan memiliki banyak universitas ternama.",
-            "oleh_oleh": "Keripik buah, keripik tempe, bakso Malang, wingko babat, dan kripik singkong."
+            "geografis": "Kota Malang terletak di dataran tinggi dengan ketinggian 440-667 mdpl. Suhu udara rata-rata 24°C, dikelilingi pegunungan (Arjuno, Semeru, Welirang) dan terkenal dengan julukan Kota Pendidikan.",
+            "demografi": "Penduduk: ±900.000 jiwa. Mayoritas suku Jawa, dengan komunitas Tionghoa, Arab, dan Madura. Kepadatan tinggi dengan banyak pendatang untuk pendidikan.",
+            "budaya": "Budaya Arek yang dinamis dengan pengaruh Mataraman. Seni tradisional: Tari Topeng Malangan, Wayang Topeng Malangan. Banyak seni musik modern dan tempat nongkrong artistik.",
+            "keunikan": "Arsitektur kolonial Belanda masih terjaga (Gedung Balaikota, Ijen Boulevard). Dijuluki Kota Bunga dan Kota Pendidikan dengan lebih dari 50 perguruan tinggi.",
+            "oleh_oleh": "Keripik buah (apel, salak), keripik tempe, bakso Malang, wingko babat, kripik singkong, coklat Singosari, dan kue lumpur."
         },
         "Kota Surabaya": {
-            "geografis": "Kota pesisir utara, ibu kota Provinsi Jawa Timur, memiliki pelabuhan Tanjung Perak dan kawasan industri.",
-            "demografi": "Penduduk: ±3 juta jiwa. Masyarakat multietnis dengan budaya urban yang dinamis.",
-            "budaya": "Budaya Arek Surabaya, tari Remo, ludruk, dan tradisi 'arek Suroboyo' yang blak-blakan.",
-            "keunikan": "Kota Pahlawan, Tugu Pahlawan, Jembatan Suramadu, House of Sampoerna, dan kuliner malam.",
-            "oleh_oleh": "Kerupuk udang, terasi, sambal bu Rudy, wingko babat, dan spikok Surabaya."
+            "geografis": "Kota pesisir utara Pulau Jawa, ibu kota Provinsi Jawa Timur. Berbatasan dengan Selat Madura di utara dan timur. Memiliki pelabuhan Tanjung Perak dan kawasan industri.",
+            "demografi": "Penduduk: ±3 juta jiwa (kota terbesar kedua di Indonesia). Masyarakat multietnis: Jawa, Madura, Tionghoa, Arab, dengan budaya urban yang dinamis.",
+            "budaya": "Budaya Arek Surabaya yang blak-blakan dan egaliter. Kesenian: Tari Remo, Ludruk, Wayang Kulit, dan tradisi 'arek Suroboyo'. Festival tahunan: Surabaya Cross Culture.",
+            "keunikan": "Kota Pahlawan dengan sejarah pertempuran 10 November 1945. Ikon: Tugu Pahlawan, Jembatan Suramadu, House of Sampoerna, dan Patung Suro dan Boyo.",
+            "oleh_oleh": "Kerupuk udang, terasi, sambal bu Rudy, wingko babat, spikok Surabaya, onde-onde, roti Semir, dan bika ambon."
         },
         "Kota Batu": {
-            "geografis": "Kota wisata pegunungan dengan udara sejuk, dikelilingi Gunung Panderman, Arjuno, dan Anjasmoro.",
-            "demografi": "Penduduk: ±200 ribu jiwa. Masyarakat dengan budaya agraris dan pariwisata.",
-            "budaya": "Budaya Jawa Timuran dengan sentuhan modern karena pariwisata.",
-            "keunikan": "Kota wisata, Jatim Park, Batu Night Spectacular, Selecta, petik apel, dan agro wisata.",
-            "oleh_oleh": "Apel Batu, keripik apel, sari apel, sayuran organik, dan susu murni."
+            "geografis": "Kota wisata pegunungan dengan ketinggian 700-1.700 mdpl. Udara sejuk (17-24°C), dikelilingi Gunung Panderman, Arjuno, dan Anjasmoro. Dijuluki 'Kota Apel'.",
+            "demografi": "Penduduk: ±210.000 jiwa. Masyarakat dengan budaya agraris dan pariwisata. Banyak pendatang untuk bekerja di sektor pariwisata.",
+            "budaya": "Budaya Jawa Timuran dengan sentuhan modern karena pariwisata. Tradisi: Bersih Desa, Grebeg Suro, dan Festival Apel.",
+            "keunikan": "Kota wisata terbesar di Jawa Timur dengan destinasi: Jatim Park 1,2,3, Batu Night Spectacular, Selecta, Songgoriti, petik apel, dan agro wisata.",
+            "oleh_oleh": "Apel Batu (Manalagi, Rome Beauty), keripik apel, sari apel, sayuran organik, susu murni, kripik jamur, dan madu."
         },
         "Kota Mojokerto": {
-            "geografis": "Kota kecil di antara Surabaya dan Malang, dilintasi Sungai Brantas. Sejarah pusat Kerajaan Majapahit.",
-            "demografi": "Penduduk: ±140 ribu jiwa. Masyarakat dengan budaya Jawa Timuran yang kental.",
-            "budaya": "Budaya Jawa dengan pengaruh sejarah Majapahit yang kuat.",
-            "keunikan": "Dikenal sebagai 'Kota Onde-onde'. Dekat situs bersejarah Trowulan.",
-            "oleh_oleh": "Onde-onde Mojokerto, kerupuk rambak, dan berbagai makanan ringan khas."
+            "geografis": "Kota kecil seluas 16,47 km², terletak di antara Surabaya (50 km) dan Malang. Dilintasi Sungai Brantas. Pusat sejarah Kerajaan Majapahit.",
+            "demografi": "Penduduk: ±140.000 jiwa. Masyarakat dengan budaya Jawa Timuran yang kental, mayoritas bekerja di sektor jasa dan perdagangan.",
+            "budaya": "Budaya Jawa dengan pengaruh sejarah Majapahit yang kuat. Tradisi Grebeg Majapahit dan ruwatan agung.",
+            "keunikan": "Dikenal sebagai 'Kota Onde-onde' dan 'Kota Tahu'. Dekat situs bersejarah Trowulan (ibu kota Majapahit).",
+            "oleh_oleh": "Onde-onde Mojokerto, tahu pong, kerupuk rambak, bandeng asap, dan berbagai makanan ringan khas."
         },
         "Kota Kediri": {
-            "geografis": "Kota yang terbelah oleh Sungai Brantas, dikenal sebagai Kota Tahu.",
-            "demografi": "Penduduk: ±300 ribu jiwa.",
-            "budaya": "Budaya Jawa Arekan.",
-            "keunikan": "Pusat industri rokok terbesar di Indonesia (Gudang Garam).",
-            "oleh_oleh": "Tahu takwa, tahu kuning, dan getuk pisang."
+            "geografis": "Kota yang terbelah oleh Sungai Brantas menjadi Kota Barat dan Timur. Luas 63,4 km², dikenal sebagai Kota Tahu dan Kota Stasiun.",
+            "demografi": "Penduduk: ±320.000 jiwa. Mayoritas suku Jawa, dengan budaya yang religius dan pekerja keras.",
+            "budaya": "Budaya Jawa Arekan dengan pengaruh Mataraman. Kesenian: Tari Gambyong, Wayang Kulit, dan tradisi larung sesaji di Sungai Brantas.",
+            "keunikan": "Pusat industri rokok terbesar di Indonesia (Gudang Garam). Terdapat Stasiun Kediri peninggalan Belanda dan kuliner khas yang legendaris.",
+            "oleh_oleh": "Tahu takwa, tahu kuning, getuk pisang, sambal pecel, keripik tempe, dan rokok kretek."
         },
         "Kota Madiun": {
-            "geografis": "Kota di jalur utama Surabaya-Yogyakarta, dikenal sebagai Kota Gadis.",
-            "demografi": "Penduduk: ±200 ribu jiwa. Masyarakat dengan budaya Jawa yang kental.",
-            "budaya": "Budaya Jawa dengan pengaruh arek dan mataraman.",
-            "keunikan": "Dikenal dengan kuliner pecel Madiun dan Brem.",
-            "oleh_oleh": "Pecel Madiun, brem, dan keripik pecel."
+            "geografis": "Kota di jalur utama Surabaya-Yogyakarta, luas 33,23 km². Berada di dataran rendah dengan suhu 20-31°C, dikenal sebagai Kota Gadis (Perdagangan, Pendidikan, Industri).",
+            "demografi": "Penduduk: ±210.000 jiwa. Masyarakat dengan budaya Jawa yang kental, banyak pekerja industri dan pedagang.",
+            "budaya": "Budaya Jawa dengan pengaruh arek dan mataraman (perbatasan). Kesenian: Wayang Kulit, Tari Tayub, dan tradisi Grebeg Suro.",
+            "keunikan": "Dikenal dengan kuliner pecel Madiun dan Brem. Terdapat Pura Agung Taman Sari dan Monumen Kresek.",
+            "oleh_oleh": "Pecel Madiun (bumbu pecel khas), brem padat dan cair, keripik pecel, tahu khas, dan jenang."
         },
         "Kota Blitar": {
-            "geografis": "Kota kecil di kaki Gunung Kelud, terkenal sebagai tempat kelahiran Soekarno.",
-            "demografi": "Penduduk: ±150 ribu jiwa.",
-            "budaya": "Budaya Jawa Arekan.",
-            "keunikan": "Makam Bung Karno, Istana Gebang, dan pusat peringatan Proklamator.",
-            "oleh_oleh": "Rujak cingur khas Blitar, keripik tempe, dan pecel."
+            "geografis": "Kota kecil di kaki Gunung Kelud (masih berstatus waspada). Luas 32,58 km², terkenal sebagai tempat kelahiran Soekarno.",
+            "demografi": "Penduduk: ±155.000 jiwa. Masyarakat dengan budaya Jawa Arekan yang religius dan nasionalis.",
+            "budaya": "Budaya Jawa Arekan dengan pengaruh Mataraman. Tradisi: larung sesaji ke Gunung Kelud dan peringatan hari lahir Bung Karno.",
+            "keunikan": "Makam Bung Karno, Istana Gebang (rumah masa kecil Soekarno), Perpustakaan Bung Karno, dan pusat peringatan Proklamator.",
+            "oleh_oleh": "Rujak cingur khas Blitar, sate blater, keripik tempe, pecel, dan jenang."
         },
         "Kota Pasuruan": {
-            "geografis": "Kota kecil di pesisir utara, antara Surabaya dan Probolinggo.",
-            "demografi": "Penduduk: ±200 ribu jiwa.",
-            "budaya": "Budaya Jawa Arekan.",
-            "keunikan": "Kota transit dengan industri kecil dan menengah.",
-            "oleh_oleh": "Kerupuk udang, ikan asin, dan manisan buah."
+            "geografis": "Kota kecil di pesisir utara Jawa Timur, antara Surabaya (65 km) dan Probolinggo. Luas 35,29 km², dilintasi jalur pantura.",
+            "demografi": "Penduduk: ±210.000 jiwa. Mayoritas bekerja di sektor perdagangan, jasa, dan industri kecil.",
+            "budaya": "Budaya Jawa Arekan dengan pengaruh Madura di pesisir. Kesenian: Tari Remo, Ludruk, dan tradisi petik laut.",
+            "keunikan": "Kota transit dengan industri kecil dan menengah. Terdapat Stasiun Pasuruan tua dan bangunan kolonial.",
+            "oleh_oleh": "Kerupuk udang, ikan asin, manisan buah, bandeng asap, dan terasi."
         },
         "Kota Probolinggo": {
-            "geografis": "Kota pesisir utara, jalur utama Surabaya-Banyuwangi-Bali.",
-            "demografi": "Penduduk: ±240 ribu jiwa.",
-            "budaya": "Budaya Jawa Arekan dengan pengaruh Madura.",
-            "keunikan": "Kota transit menuju Bali, dikenal dengan mangga dan udang.",
-            "oleh_oleh": "Mangga Probolinggo, kerupuk udang, dan ikan asin."
+            "geografis": "Kota pesisir utara di jalur utama Surabaya-Banyuwangi-Bali. Luas 56,67 km², dikenal sebagai Kota Anggur dan Kota Udang.",
+            "demografi": "Penduduk: ±245.000 jiwa. Campuran Jawa dan Madura, banyak bekerja di sektor perikanan dan perdagangan.",
+            "budaya": "Budaya Jawa Arekan dengan pengaruh Madura yang kuat. Tradisi: petik laut, karapan sapi, dan kesenian Tong-tong.",
+            "keunikan": "Kota transit menuju Bali, dikenal dengan mangga dan udang. Terdapat Pelabuhan Tanjung Tembaga dan Gunung Bromo dari sisi Probolinggo.",
+            "oleh_oleh": "Mangga Probolinggo (Mangga Manalagi), kerupuk udang, ikan asin, bandeng asap, dan keripik pisang."
         },
+
+        # ==================== KABUPATEN ====================
         "Kabupaten Banyuwangi": {
-            "geografis": "Ujung timur Pulau Jawa, berbatasan dengan Selat Bali. Wilayah terluas di Jawa Timur.",
-            "demografi": "Penduduk: ±1,7 juta jiwa. Mayoritas suku Osing, Jawa, Madura, dan Bali.",
-            "budaya": "Kesenian Gandrung Banyuwangi, Seblang, dan tari Jejer Jaran Dawuk.",
-            "keunikan": "Kawah Ijen dengan api biru, Taman Nasional Alas Purwo, dan Pantai Plengkung (G-Land).",
-            "oleh_oleh": "Pisang agung, sale pisang, kopi khas Banyuwangi, dan keripik tempe."
+            "geografis": "Terletak di ujung timur Pulau Jawa, berbatasan dengan Selat Bali. Wilayah terluas di Jawa Timur (5.782 km²). Memiliki pantai, pegunungan, dan hutan tropis.",
+            "demografi": "Penduduk: ±1,7 juta jiwa. Mayoritas suku Osing (asli Banyuwangi), Jawa, Madura, dan Bali. Masyarakat multikultural dengan toleransi tinggi.",
+            "budaya": "Kesenian khas: Gandrung Banyuwangi (tari penyambutan), Seblang (tari sakral), dan tari Jejer Jaran Dawuk. Tradisi: Kebo-keboan, Barong Ider Bumi.",
+            "keunikan": "Kawah Ijen dengan fenomena api biru (blue fire), Taman Nasional Alas Purwo, Pantai Plengkung (G-Land) surga surfing, dan De Djawatan Forest.",
+            "oleh_oleh": "Pisang agung, sale pisang, kopi khas Banyuwangi (Kopi Osing, Kopi Ijen), keripik tempe, dan kue kering khas Osing."
         },
         "Kabupaten Malang": {
-            "geografis": "Kabupaten terluas kedua di Jawa Timur, mengelilingi Kota Malang dengan pegunungan dan pantai selatan.",
-            "demografi": "Penduduk: ±2,7 juta jiwa.",
-            "budaya": "Budaya Jawa Arekan.",
-            "keunikan": "Pantai Balekambang, Coban Rondo, dan kawasan Bromo dari sisi Malang.",
-            "oleh_oleh": "Keripik buah, keripik tempe, dan apel Malang."
+            "geografis": "Kabupaten terluas kedua di Jawa Timur (3.530 km²). Mengelilingi Kota Malang dan Kota Batu. Memiliki pegunungan (Bromo, Semeru) dan pantai selatan.",
+            "demografi": "Penduduk: ±2,7 juta jiwa (terbanyak di Jatim). Mayoritas suku Jawa Tengger di pegunungan dan Jawa Arekan di perkotaan.",
+            "budaya": "Budaya Jawa Arekan dan Tengger (di wilayah Bromo). Tradisi: Yadnya Kasada (suku Tengger), bersih desa, dan wayang topeng Malangan.",
+            "keunikan": "Pantai Balekambang (dengan pura di tengah laut), Coban Rondo (air terjun), kawasan Bromo dari sisi Malang, dan wisata petik apel di Poncokusumo.",
+            "oleh_oleh": "Keripik buah (apel, salak), keripik tempe, apel Malang, susu murni, dan kerajinan kayu."
         },
         "Kabupaten Jember": {
-            "geografis": "Kabupaten di kawasan Tapal Kuda, dikenal sebagai Kota Tembakau.",
-            "demografi": "Penduduk: ±2,5 juta jiwa. Masyarakat heterogen.",
-            "budaya": "Budaya campuran Jawa, Madura, dan Pandhalungan.",
-            "keunikan": "Karnaval Jember Fashion Carnival yang mendunia.",
-            "oleh_oleh": "Suwar-suwir, proll tape, dan kopi Jember."
+            "geografis": "Kabupaten di kawasan Tapal Kuda, luas 3.293 km². Dikenal sebagai Kota Tembakau dan Kota Seribu Gumuk (bukit kecil).",
+            "demografi": "Penduduk: ±2,5 juta jiwa. Masyarakat heterogen: Jawa, Madura, Osing, dengan budaya Pandhalungan (campuran).",
+            "budaya": "Budaya campuran Jawa, Madura, dan Osing (Pandhalungan). Tradisi: Jember Fashion Carnival (mendunia), Petik Laut, dan Larung Sesaji.",
+            "keunikan": "Karnaval Jember Fashion Carnival yang mendunia (terinspirasi dari Carnaval de Nice). Terdapat Pantai Papuma, Watu Ulo, dan perkebunan teh.",
+            "oleh_oleh": "Suwar-suwir (kue tradisional), proll tape (kue tape), kopi Jember (Kopi Argopuro), dan olahan tembakau."
         },
         "Kabupaten Sidoarjo": {
-            "geografis": "Kabupaten di selatan Surabaya, terkenal dengan industri dan lumpur Lapindo.",
-            "demografi": "Penduduk: ±2,2 juta jiwa. Masyarakat heterogen.",
-            "budaya": "Budaya Jawa Arekan.",
-            "keunikan": "Pusat industri, bandara Juanda, dan kerajinan tas kulit.",
-            "oleh_oleh": "Kerupuk udang, terasi, dan kerajinan kulit."
+            "geografis": "Kabupaten di selatan Surabaya, luas 714 km². Terkenal dengan industri dan lumpur Lapindo. Berbatasan dengan Selat Madura.",
+            "demografi": "Penduduk: ±2,2 juta jiwa. Masyarakat heterogen dengan banyak pekerja industri dan pengrajin.",
+            "budaya": "Budaya Jawa Arekan dengan pengaruh Madura di pesisir. Tradisi: kupatan, petik laut, dan kesenian ludruk.",
+            "keunikan": "Pusat industri, Bandara Juanda, dan kerajinan tas kulit. Fenomena Lumpur Lapindo yang masih aktif. Penghasil udang dan bandeng.",
+            "oleh_oleh": "Kerupuk udang, terasi, kerajinan kulit (tas, sepatu), bandeng presto, dan otak-otak bandeng."
         },
         "Kabupaten Kediri": {
-            "geografis": "Kabupaten yang mengelilingi Kota Kediri, wilayah subur di sekitar Sungai Brantas.",
-            "demografi": "Penduduk: ±1,7 juta jiwa.",
-            "budaya": "Budaya Jawa Arekan.",
-            "keunikan": "Gunung Kelud, pabrik rokok terbesar, dan situs sejarah Kerajaan Kediri.",
-            "oleh_oleh": "Tahu takwa, tahu kuning, dan getuk pisang."
+            "geografis": "Kabupaten yang mengelilingi Kota Kediri, luas 1.386 km². Wilayah subur di sekitar Sungai Brantas dengan Gunung Kelud di selatan.",
+            "demografi": "Penduduk: ±1,7 juta jiwa. Mayoritas petani dan buruh pabrik rokok.",
+            "budaya": "Budaya Jawa Arekan dengan tradisi: Bersih Desa, Wayang Kulit, dan Tari Gambyong. Pengaruh Kerajaan Kediri (Kadiri) masih kuat.",
+            "keunikan": "Gunung Kelud (salah satu gunung teraktif di Indonesia), pabrik rokok terbesar (Gudang Garam), dan situs sejarah Kerajaan Kediri (Candi Tondowongso).",
+            "oleh_oleh": "Tahu takwa, tahu kuning, getuk pisang, sambal pecel, dan keripik tempe."
         },
         "Kabupaten Mojokerto": {
-            "geografis": "Kabupaten lokasi pusat Kerajaan Majapahit di Trowulan.",
-            "demografi": "Penduduk: ±1,2 juta jiwa.",
-            "budaya": "Budaya Jawa dengan pengaruh sejarah Majapahit.",
-            "keunikan": "Situs Trowulan, bekas ibu kota Kerajaan Majapahit.",
-            "oleh_oleh": "Onde-onde, kerupuk rambak, dan bandeng asap."
+            "geografis": "Kabupaten yang menjadi lokasi pusat Kerajaan Majapahit di Trowulan. Luas 969 km², dilintasi Sungai Brantas.",
+            "demografi": "Penduduk: ±1,2 juta jiwa. Banyak bekerja di sektor pertanian, industri, dan pariwisata sejarah.",
+            "budaya": "Budaya Jawa dengan pengaruh sejarah Majapahit. Tradisi: Grebeg Majapahit, wayang kulit, dan pertunjukan sejarah.",
+            "keunikan": "Situs Trowulan, bekas ibu kota Kerajaan Majapahit dengan museum dan candi (Candi Tikus, Candi Brahu, Kolam Segaran).",
+            "oleh_oleh": "Onde-onde Mojokerto, kerupuk rambak, bandeng asap, dan makanan ringan khas Majapahitan."
         },
         "Kabupaten Pasuruan": {
-            "geografis": "Kabupaten dengan wilayah pegunungan di selatan dan pesisir utara.",
-            "demografi": "Penduduk: ±1,6 juta jiwa.",
-            "budaya": "Budaya Jawa Arekan.",
-            "keunikan": "Kawasan Taman Nasional Bromo Tengger Semeru dari sisi Pasuruan.",
-            "oleh_oleh": "Manisan buah, keripik apel, dan susu murni."
+            "geografis": "Kabupaten dengan wilayah pegunungan di selatan (Gunung Arjuno, Welirang) dan pesisir utara. Luas 1.474 km².",
+            "demografi": "Penduduk: ±1,6 juta jiwa. Masyarakat agraris di pegunungan dan nelayan di pesisir.",
+            "budaya": "Budaya Jawa Arekan dengan tradisi: Yadnya Kasada (Tengger), petik laut, dan wayang kulit.",
+            "keunikan": "Kawasan Taman Nasional Bromo Tengger Semeru dari sisi Pasuruan (Desa Wonokitri). Air terjun dan pemandian air panas.",
+            "oleh_oleh": "Manisan buah, keripik apel, susu murni, sayuran organik, dan madu."
         },
         "Kabupaten Probolinggo": {
-            "geografis": "Kabupaten dengan wilayah pegunungan dan pantai utara.",
-            "demografi": "Penduduk: ±1,2 juta jiwa.",
-            "budaya": "Budaya Jawa Arekan dengan pengaruh Madura.",
-            "keunikan": "Kawasan Gunung Bromo dari sisi Probolinggo, penghasil mangga.",
-            "oleh_oleh": "Mangga, kerupuk udang, dan keripik pisang."
+            "geografis": "Kabupaten dengan wilayah pegunungan (Bromo) di selatan dan pantai utara. Luas 1.696 km².",
+            "demografi": "Penduduk: ±1,2 juta jiwa. Mayoritas suku Jawa Tengger di pegunungan dan Jawa-Madura di pesisir.",
+            "budaya": "Budaya Jawa Arekan dengan pengaruh Madura. Tradisi: Yadnya Kasada (Tengger), karapan sapi, dan petik laut.",
+            "keunikan": "Kawasan Gunung Bromo dari sisi Probolinggo (Cemorolawang), penghasil mangga terbesar di Jatim, dan Pantai Bentar.",
+            "oleh_oleh": "Mangga Probolinggo, kerupuk udang, keripik pisang, dan manisan mangga."
         },
         "Kabupaten Blitar": {
-            "geografis": "Kabupaten di kaki Gunung Kelud, memiliki wilayah pegunungan dan pantai selatan.",
-            "demografi": "Penduduk: ±1,2 juta jiwa.",
-            "budaya": "Budaya Jawa Arekan.",
-            "keunikan": "Tempat kelahiran Presiden Soekarno, memiliki Makam Bung Karno.",
-            "oleh_oleh": "Rujak cingur, sate blater, dan keripik tempe."
+            "geografis": "Kabupaten di kaki Gunung Kelud, memiliki wilayah pegunungan di utara dan pantai selatan (Samudra Hindia). Luas 1.588 km².",
+            "demografi": "Penduduk: ±1,2 juta jiwa. Mayoritas petani dan nelayan dengan budaya yang religius.",
+            "budaya": "Budaya Jawa Arekan dengan tradisi: Larung Sesaji ke Gunung Kelud, petik laut, dan wayang kulit.",
+            "keunikan": "Tempat kelahiran Presiden Soekarno, memiliki Makam Bung Karno, Istana Gebang, dan Pantai Tambakrejo.",
+            "oleh_oleh": "Rujak cingur khas Blitar, sate blater, keripik tempe, pecel, dan jenang."
         },
         "Kabupaten Tulungagung": {
-            "geografis": "Kabupaten di selatan Jawa Timur, terkenal dengan industri marmer.",
-            "demografi": "Penduduk: ±1,1 juta jiwa.",
-            "budaya": "Budaya Jawa Mataraman.",
-            "keunikan": "Penghasil marmer terbesar di Indonesia, Pantai Popoh.",
-            "oleh_oleh": "Kerajinan marmer, keripik tempe, dan jenang."
+            "geografis": "Kabupaten di selatan Jawa Timur, luas 1.055 km². Terkenal dengan industri marmer. Berbatasan dengan Samudra Hindia.",
+            "demografi": "Penduduk: ±1,1 juta jiwa. Banyak bekerja sebagai perajin marmer, petani, dan nelayan.",
+            "budaya": "Budaya Jawa Mataraman dengan pengaruh pesisir selatan. Tradisi: Larung Sesaji ke Pantai Popoh, wayang kulit, dan jaranan.",
+            "keunikan": "Penghasil marmer terbesar di Indonesia (marmer Tulungagung), Pantai Popoh, Pantai Gemah, dan Goa Pasir.",
+            "oleh_oleh": "Kerajinan marmer (patung, asbak, meja), keripik tempe, jenang, dan bandeng asap."
         },
         "Kabupaten Trenggalek": {
-            "geografis": "Kabupaten di pesisir selatan Jawa Timur dengan pantai-pantai indah.",
-            "demografi": "Penduduk: ±750 ribu jiwa. Mayoritas suku Jawa.",
-            "budaya": "Budaya Jawa dengan tradisi pesisiran.",
-            "keunikan": "Memiliki Pantai Prigi dan Pantai Karanggongso yang indah.",
-            "oleh_oleh": "Alen-alen, keripik tempe, dan ikan asap."
+            "geografis": "Kabupaten di pesisir selatan Jawa Timur, luas 1.261 km². Memiliki pantai-pantai indah di sepanjang Samudra Hindia.",
+            "demografi": "Penduduk: ±750 ribu jiwa. Mayoritas suku Jawa dengan budaya pesisiran dan agraris.",
+            "budaya": "Budaya Jawa dengan tradisi pesisiran. Kesenian: Jaranan, Wayang Kulit, dan tradisi larung sesaji.",
+            "keunikan": "Memiliki Pantai Prigi, Pantai Karanggongso, dan Pantai Pasir Putih yang indah. Dikenal dengan kuliner alen-alen.",
+            "oleh_oleh": "Alen-alen (makanan ringan dari singkong), keripik tempe, ikan asap, dan terasi."
         },
         "Kabupaten Ponorogo": {
-            "geografis": "Kabupaten yang terkenal dengan kesenian Reog.",
-            "demografi": "Penduduk: ±950 ribu jiwa.",
-            "budaya": "Budaya Jawa Mataraman, pusat kesenian Reog.",
-            "keunikan": "Kota Reog, Festival Reog Nasional, dan Telaga Ngebel.",
-            "oleh_oleh": "Dawet Jabung, sambal pecel, dan keripik tempe."
+            "geografis": "Kabupaten yang terkenal dengan kesenian Reog, luas 1.371 km². Berada di wilayah barat Jawa Timur.",
+            "demografi": "Penduduk: ±950 ribu jiwa. Mayoritas suku Jawa Mataraman dengan budaya yang kental.",
+            "budaya": "Budaya Jawa Mataraman, pusat kesenian Reog Ponorogo (warisan budaya tak benda). Tradisi: Grebeg Suro, Festival Reog Nasional.",
+            "keunikan": "Kota Reog dengan Patung Reog raksasa, Telaga Ngebel (danau alami), dan Goa Lowo (goa kelelawar).",
+            "oleh_oleh": "Dawet Jabung (minuman khas), sambal pecel, keripik tempe, dan jenang."
         },
         "Kabupaten Pacitan": {
-            "geografis": "Kabupaten di pesisir selatan dengan pantai-pantai indah, dijuluki '1001 Goa'.",
-            "demografi": "Penduduk: ±550 ribu jiwa.",
-            "budaya": "Budaya Jawa Mataraman.",
-            "keunikan": "Goa Gong, Goa Tabuhan, dan pantai-pantai indah di selatan.",
-            "oleh_oleh": "Sale pisang, keripik tempe, dan ikan asap."
+            "geografis": "Kabupaten di pesisir selatan, berbatasan dengan Jawa Tengah. Luas 1.389 km², dijuluki 'Kota 1001 Goa'.",
+            "demografi": "Penduduk: ±550 ribu jiwa. Mayoritas suku Jawa Mataraman dengan budaya pesisir.",
+            "budaya": "Budaya Jawa Mataraman dengan pengaruh pesisir selatan. Tradisi: larung sesaji, wayang kulit, dan jaranan.",
+            "keunikan": "Goa Gong (goa paling indah se-Asia Tenggara), Goa Tabuhan, Pantai Klayar, dan Pantai Soge. Tempat kelahiran Presiden Jokowi.",
+            "oleh_oleh": "Sale pisang, keripik tempe, ikan asap, terasi, dan batik Pacitan."
         },
         "Kabupaten Ngawi": {
-            "geografis": "Kabupaten di perbatasan Jawa Timur dan Jawa Tengah, dilintasi Bengawan Solo.",
-            "demografi": "Penduduk: ±900 ribu jiwa.",
-            "budaya": "Budaya Jawa Mataraman.",
-            "keunikan": "Benteng Van den Bosch, gerbang masuk dari arah Solo.",
-            "oleh_oleh": "Keripik tempe, pecel, dan jenang."
+            "geografis": "Kabupaten di perbatasan Jawa Timur dan Jawa Tengah, dilintasi Bengawan Solo (sungai terpanjang di Jawa). Luas 1.295 km².",
+            "demografi": "Penduduk: ±900 ribu jiwa. Mayoritas suku Jawa Mataraman dengan budaya agraris.",
+            "budaya": "Budaya Jawa Mataraman dengan pengaruh Jawa Tengah. Kesenian: Wayang Kulit, Jaranan, dan tradisi bersih desa.",
+            "keunikan": "Benteng Van den Bosch (benteng peninggalan Belanda), gerbang masuk dari arah Solo, dan Hutan Klitih.",
+            "oleh_oleh": "Keripik tempe, pecel, jenang, dan sale pisang."
         },
         "Kabupaten Magetan": {
-            "geografis": "Kabupaten di perbatasan Jawa Timur dan Jawa Tengah, di lereng Gunung Lawu.",
-            "demografi": "Penduduk: ±650 ribu jiwa.",
-            "budaya": "Budaya Jawa Mataraman (perbatasan dengan Solo/Yogyakarta).",
-            "keunikan": "Telaga Sarangan, gerbang masuk Jawa Timur dari arah barat.",
-            "oleh_oleh": "Keripik buah, brem, dan oleh-oleh khas Lawu."
+            "geografis": "Kabupaten di perbatasan Jawa Timur dan Jawa Tengah, di lereng Gunung Lawu. Luas 688 km², dikenal sebagai 'Kota Kaki Gunung Lawu'.",
+            "demografi": "Penduduk: ±650 ribu jiwa. Mayoritas suku Jawa Mataraman dengan budaya agraris.",
+            "budaya": "Budaya Jawa Mataraman (perbatasan dengan Solo/Yogyakarta). Tradisi: Grebeg Suro, wayang kulit, dan jaranan.",
+            "keunikan": "Telaga Sarangan (danau alami di kaki Gunung Lawu), gerbang masuk Jawa Timur dari arah barat, dan kawasan wisata lereng Lawu.",
+            "oleh_oleh": "Keripik buah, brem, oleh-oleh khas Lawu, dan sayuran organik."
         },
         "Kabupaten Madiun": {
-            "geografis": "Kabupaten di sekitar Kota Madiun, wilayah agraris dengan persawahan luas.",
-            "demografi": "Penduduk: ±750 ribu jiwa.",
-            "budaya": "Budaya Jawa Mataraman.",
-            "keunikan": "Penghasil beras dan jahe, jalur utama Surabaya-Yogyakarta.",
-            "oleh_oleh": "Pecel Madiun, brem, dan jahe instan."
+            "geografis": "Kabupaten yang mengelilingi Kota Madiun, luas 1.010 km². Wilayah agraris dengan persawahan luas di lembah Gunung Wilis.",
+            "demografi": "Penduduk: ±750 ribu jiwa. Mayoritas petani dengan budaya Jawa Mataraman.",
+            "budaya": "Budaya Jawa Mataraman dengan tradisi: Grebeg Suro, wayang kulit, dan jaranan.",
+            "keunikan": "Penghasil beras dan jahe, jalur utama Surabaya-Yogyakarta. Terdapat Waduk Bening dan Waduk Widas.",
+            "oleh_oleh": "Pecel Madiun, brem, jahe instan, dan keripik tempe."
         },
         "Kabupaten Nganjuk": {
-            "geografis": "Kabupaten di lembah Gunung Wilis, dilintasi Sungai Brantas.",
-            "demografi": "Penduduk: ±1,1 juta jiwa. Masyarakat agraris.",
-            "budaya": "Budaya Jawa Mataraman.",
-            "keunikan": "Dikenal sebagai kota bayam dan penghasil beras berkualitas.",
-            "oleh_oleh": "Bayam Nganjuk, keripik bayam, dan getuk pisang."
+            "geografis": "Kabupaten di lembah Gunung Wilis, dilintasi Sungai Brantas. Luas 1.224 km², dikenal sebagai 'Kota Bayam'.",
+            "demografi": "Penduduk: ±1,1 juta jiwa. Masyarakat agraris dengan mayoritas petani.",
+            "budaya": "Budaya Jawa Mataraman dengan tradisi: Wayang Kulit, Jaranan, dan bersih desa.",
+            "keunikan": "Dikenal sebagai kota bayam dan penghasil beras berkualitas. Terdapat Candi Lor dan Candi Ngetos.",
+            "oleh_oleh": "Bayam Nganjuk, keripik bayam, getuk pisang, dan jenang."
         },
         "Kabupaten Jombang": {
-            "geografis": "Kabupaten yang dikenal sebagai 'Kota Santri' karena banyak pesantren.",
-            "demografi": "Penduduk: ±1,3 juta jiwa.",
-            "budaya": "Budaya Jawa dengan pengaruh pesantren.",
-            "keunikan": "Pusat pendidikan Islam dengan pesantren-pesantren besar.",
-            "oleh_oleh": "Jenang, keripik tempe, dan sambal pecel."
+            "geografis": "Kabupaten yang dikenal sebagai 'Kota Santri' karena banyak pesantren. Luas 1.159 km², dilintasi Sungai Brantas.",
+            "demografi": "Penduduk: ±1,3 juta jiwa. Masyarakat religius dengan banyak santri dan ulama.",
+            "budaya": "Budaya Jawa dengan pengaruh pesantren yang kuat. Tradisi: haul kyai, manaqiban, dan kesenian rebana.",
+            "keunikan": "Pusat pendidikan Islam dengan pesantren-pesantren besar (Tebuireng, Denanyar). Makam pendiri NU (KH Hasyim Asy'ari).",
+            "oleh_oleh": "Jenang, keripik tempe, sambal pecel, dan oleh-oleh khas pesantren."
         },
         "Kabupaten Bojonegoro": {
-            "geografis": "Kabupaten di Bengawan Solo, wilayah penghasil minyak dan gas.",
-            "demografi": "Penduduk: ±1,3 juta jiwa.",
-            "budaya": "Budaya Jawa dengan pengaruh Jawa Tengah.",
-            "keunikan": "Kota minyak, Waduk Pacal, dan jembatan tua Bengawan Solo.",
-            "oleh_oleh": "Ledre (makanan khas), sambal pecel, dan keripik pisang."
+            "geografis": "Kabupaten di tepi Bengawan Solo, luas 2.307 km². Wilayah penghasil minyak dan gas terbesar di Jawa Timur.",
+            "demografi": "Penduduk: ±1,3 juta jiwa. Mayoritas petani dan pekerja migas.",
+            "budaya": "Budaya Jawa dengan pengaruh Jawa Tengah (perbatasan). Tradisi: sedekah bumi, wayang kulit, dan jaranan.",
+            "keunikan": "Kota minyak dengan sumur minyak tradisional (mbah Liyung), Waduk Pacal, dan Jembatan tua Bengawan Solo.",
+            "oleh_oleh": "Ledre (makanan khas dari pisang), sambal pecel, keripik pisang, dan olahan jagung."
         },
         "Kabupaten Tuban": {
-            "geografis": "Kabupaten pesisir utara, perbatasan Jawa Timur dan Jawa Tengah.",
-            "demografi": "Penduduk: ±1,2 juta jiwa.",
-            "budaya": "Budaya pesisir dengan pengaruh Jawa dan Madura.",
-            "keunikan": "Makam Sunan Bonang, kota tua dengan sejarah penyebaran Islam.",
-            "oleh_oleh": "Kopi Tuban, bandeng asap, dan kerupuk ikan."
+            "geografis": "Kabupaten pesisir utara, perbatasan Jawa Timur dan Jawa Tengah. Luas 1.834 km², berbatasan dengan Laut Jawa.",
+            "demografi": "Penduduk: ±1,2 juta jiwa. Mayoritas suku Jawa pesisir dengan pengaruh Madura.",
+            "budaya": "Budaya pesisir dengan pengaruh Jawa dan Madura. Tradisi: petik laut, haul wali, dan kesenian sandur.",
+            "keunikan": "Makam Sunan Bonang (salah satu Wali Songo), kota tua dengan sejarah penyebaran Islam, dan Pantai Boom.",
+            "oleh_oleh": "Kopi Tuban, bandeng asap, kerupuk ikan, terasi, dan batik Tuban (batik gedog)."
         },
         "Kabupaten Lamongan": {
-            "geografis": "Kabupaten pesisir utara, berbatasan dengan Laut Jawa.",
-            "demografi": "Penduduk: ±1,4 juta jiwa.",
-            "budaya": "Budaya pesisir dengan pengaruh Jawa dan Madura.",
-            "keunikan": "Makam Sunan Drajat, wisata Bahari Lamongan, dan kuliner terkenal.",
-            "oleh_oleh": "Soto Lamongan, wingko babat, dan kerupuk ikan."
+            "geografis": "Kabupaten pesisir utara, berbatasan dengan Laut Jawa. Luas 1.812 km², dikenal sebagai 'Kota Soto'.",
+            "demografi": "Penduduk: ±1,4 juta jiwa. Campuran Jawa pesisir dan Madura.",
+            "budaya": "Budaya pesisir dengan pengaruh Jawa dan Madura. Tradisi: petik laut, wayang kulit, dan kesenian tong-tong.",
+            "keunikan": "Makam Sunan Drajat (Wali Songo), Wisata Bahari Lamongan (WBL), dan kuliner soto legendaris.",
+            "oleh_oleh": "Soto Lamongan (bumbu soto), wingko babat, kerupuk ikan, bandeng asap, dan terasi."
         },
         "Kabupaten Gresik": {
-            "geografis": "Kabupaten pesisir utara, berbatasan dengan Surabaya, memiliki banyak industri.",
-            "demografi": "Penduduk: ±1,3 juta jiwa. Masyarakat heterogen.",
-            "budaya": "Budaya pesisir dengan pengaruh Jawa dan Madura.",
-            "keunikan": "Kota Industri, makam Sunan Giri, dan bandar udara internasional.",
-            "oleh_oleh": "Bandeng presto, udang, dan kerupuk ikan."
+            "geografis": "Kabupaten pesisir utara, berbatasan dengan Surabaya, luas 1.191 km². Memiliki banyak industri besar (Kawasan Industri Gresik).",
+            "demografi": "Penduduk: ±1,3 juta jiwa. Masyarakat heterogen dengan banyak pekerja industri.",
+            "budaya": "Budaya pesisir dengan pengaruh Jawa dan Madura. Tradisi: haul Sunan Giri, petik laut, dan kesenian hadrah.",
+            "keunikan": "Kota Industri, makam Sunan Giri (Wali Songo), Bandara Internasional Juanda, dan Pelabuhan Gresik.",
+            "oleh_oleh": "Bandeng presto, udang, kerupuk ikan, terasi, dan kerajinan batik Gresik."
         },
         "Kabupaten Bangkalan": {
-            "geografis": "Kabupaten di Pulau Madura, pintu masuk dari Surabaya melalui Jembatan Suramadu.",
-            "demografi": "Penduduk: ±1 juta jiwa. Mayoritas suku Madura.",
-            "budaya": "Budaya Madura yang kental.",
-            "keunikan": "Pintu gerbang Madura, Universitas Trunojoyo, dan makam para ulama.",
-            "oleh_oleh": "Keripik pedas, batik Madura, dan olahan ikan."
+            "geografis": "Kabupaten di Pulau Madura, pintu masuk dari Surabaya melalui Jembatan Suramadu. Luas 1.260 km².",
+            "demografi": "Penduduk: ±1 juta jiwa. Mayoritas suku Madura dengan budaya yang kental.",
+            "budaya": "Budaya Madura yang kental: Karapan Sapi, musik Tong-tong, Tari Muang Sangkal.",
+            "keunikan": "Pintu gerbang Madura melalui Suramadu, Universitas Trunojoyo, dan makam para ulama (Syaikhona Kholil).",
+            "oleh_oleh": "Keripik pedas (cilok), batik Madura, olahan ikan, dan terasi."
         },
         "Kabupaten Sampang": {
-            "geografis": "Kabupaten di Pulau Madura bagian selatan.",
-            "demografi": "Penduduk: ±950 ribu jiwa. Mayoritas suku Madura.",
-            "budaya": "Budaya Madura yang kental.",
-            "keunikan": "Dikenal dengan tradisi karapan sapi dan batik khas Madura.",
-            "oleh_oleh": "Batik Madura, keripik pedas, dan ikan asap."
+            "geografis": "Kabupaten di Pulau Madura bagian selatan, luas 1.233 km². Berbatasan dengan Selat Madura.",
+            "demografi": "Penduduk: ±950 ribu jiwa. Mayoritas suku Madura dengan budaya bahari.",
+            "budaya": "Budaya Madura yang kental: Karapan Sapi, musik Tong-tong, Tari Topeng Madura.",
+            "keunikan": "Dikenal dengan tradisi karapan sapi dan batik khas Madura. Terdapat Pantai Nepa dan Camplong.",
+            "oleh_oleh": "Batik Madura, keripik pedas, ikan asap, dan terasi."
         },
         "Kabupaten Pamekasan": {
-            "geografis": "Kabupaten di Pulau Madura, berbatasan dengan Laut Jawa di utara dan Selat Madura di selatan.",
-            "demografi": "Penduduk: ±850 ribu jiwa. Mayoritas suku Madura.",
-            "budaya": "Budaya Madura yang kuat, tradisi karapan sapi, dan musik tong-tong.",
-            "keunikan": "Dikenal sebagai pusat pendidikan agama di Madura dengan banyak pesantren.",
-            "oleh_oleh": "Keripik pedas, batik Madura, dan olahan ikan."
+            "geografis": "Kabupaten di Pulau Madura, berbatasan dengan Laut Jawa di utara dan Selat Madura di selatan. Luas 792 km².",
+            "demografi": "Penduduk: ±850 ribu jiwa. Mayoritas suku Madura dengan budaya yang kuat.",
+            "budaya": "Budaya Madura yang kuat, tradisi karapan sapi, musik tong-tong, dan Tari Rokat Tase'.",
+            "keunikan": "Dikenal sebagai pusat pendidikan agama di Madura dengan banyak pesantren. Pusat kerajinan batik tulis.",
+            "oleh_oleh": "Keripik pedas, batik Madura (batik tulis Pamekasan), olahan ikan, dan terasi."
         },
         "Kabupaten Sumenep": {
-            "geografis": "Kabupaten di ujung timur Pulau Madura, terdiri dari Pulau Madura dan gugusan kepulauan.",
-            "demografi": "Penduduk: ±1,1 juta jiwa. Suku Madura dengan budaya bahari.",
-            "budaya": "Budaya Madura dengan pengaruh dari berbagai kerajaan.",
-            "keunikan": "Keraton Sumenep, batik tulis Sumenep, dan kepulauan Kangean.",
-            "oleh_oleh": "Batik Sumenep, keripik pedas, dan ikan asap."
+            "geografis": "Kabupaten di ujung timur Pulau Madura, terdiri dari Pulau Madura dan gugusan kepulauan (Kangean, Masalembu). Luas 2.093 km².",
+            "demografi": "Penduduk: ±1,1 juta jiwa. Suku Madura dengan budaya bahari di kepulauan.",
+            "budaya": "Budaya Madura dengan pengaruh dari berbagai kerajaan (Majapahit, Demak). Tradisi: Karapan Sapi, Tari Moang Sangkal.",
+            "keunikan": "Keraton Sumenep (peninggalan kesultanan), batik tulis Sumenep, kepulauan Kangean dengan keindahan bawah laut.",
+            "oleh_oleh": "Batik Sumenep, keripik pedas, ikan asap, kerajinan perak, dan terasi."
         },
         "Kabupaten Bondowoso": {
-            "geografis": "Kabupaten di kawasan Tapal Kuda, Jawa Timur bagian timur.",
-            "demografi": "Penduduk: ±800 ribu jiwa. Campuran Jawa dan Madura.",
-            "budaya": "Budaya campuran Jawa-Madura yang unik.",
-            "keunikan": "Dikenal dengan tape Bondowoso dan kawasan perkebunan kopi.",
-            "oleh_oleh": "Tape Bondowoso, kopi Bondowoso, dan kue nastar tape."
+            "geografis": "Kabupaten di kawasan Tapal Kuda, luas 1.560 km². Dikenal sebagai 'Kota Tape' dan 'Kota Kopi'.",
+            "demografi": "Penduduk: ±800 ribu jiwa. Campuran Jawa dan Madura (Pandhalungan).",
+            "budaya": "Budaya campuran Jawa-Madura yang unik (Pandhalungan). Tradisi: petik kopi, ruwatan, dan kesenian jaranan.",
+            "keunikan": "Dikenal dengan tape Bondowoso dan kawasan perkebunan kopi di dataran tinggi Ijen. Kawah Wurung, Puncak Maha.",
+            "oleh_oleh": "Tape Bondowoso (tape singkong), kopi Bondowoso (Kopi Ijen Raung), kue nastar tape, dan keripik tape."
         },
         "Kabupaten Situbondo": {
-            "geografis": "Kabupaten di kawasan Tapal Kuda, jalur pantai utara menuju Banyuwangi.",
-            "demografi": "Penduduk: ±700 ribu jiwa. Campuran Jawa dan Madura.",
-            "budaya": "Budaya campuran Jawa-Madura.",
-            "keunikan": "Kawasan perbukitan dengan perkebunan, Pantai Pasir Putih.",
-            "oleh_oleh": "Ikan asap, kerupuk ikan, dan manisan buah."
+            "geografis": "Kabupaten di kawasan Tapal Kuda, jalur pantai utara menuju Banyuwangi. Luas 1.638 km².",
+            "demografi": "Penduduk: ±700 ribu jiwa. Campuran Jawa dan Madura (Pandhalungan) dengan budaya pesisir.",
+            "budaya": "Budaya campuran Jawa-Madura. Tradisi: petik laut, karapan sapi, dan kesenian jaranan.",
+            "keunikan": "Kawasan perbukitan dengan perkebunan, Pantai Pasir Putih, Taman Nasional Baluran (African van Java).",
+            "oleh_oleh": "Ikan asap, kerupuk ikan, manisan buah, dan batik Situbondo."
         },
         "Kabupaten Lumajang": {
-            "geografis": "Kabupaten di kaki Gunung Semeru, memiliki pantai selatan yang indah.",
-            "demografi": "Penduduk: ±1,1 juta jiwa.",
-            "budaya": "Budaya Jawa Tengger dan Jawa umumnya.",
-            "keunikan": "Kawasan Ranu Pane dan Ranu Kumbolo di jalur pendakian Semeru.",
-            "oleh_oleh": "Pisang agung, keripik pisang, dan sale pisang."
-        },
+            "geografis": "Kabupaten di kaki Gunung Semeru (tertinggi di Jawa), luas 1.790 km². Memiliki pantai selatan yang indah.",
+            "demografi": "Penduduk: ±1,1 juta jiwa. Mayoritas suku Jawa Tengger di pegunungan dan Jawa Arekan di perkotaan.",
+            "budaya": "Budaya Jawa Tengger dan Jawa umumnya. Tradisi: Yadnya Kasada (Tengger), bersih desa, dan wayang kulit.",
+            "keunikan": "Kawasan Ranu Pane dan Ranu Kumbolo di jalur pendakian Semeru. Pantai Bambang, Pantai Watu Pecak, dan Selokambang.",
+            "oleh_oleh": "Pisang agung, keripik pisang, sale pisang, dan kopi khas Lumajang."
+        }
     }
 
     if nama in db:
         return db[nama]
+
+    # Coba cari dengan case insensitive
+    for key in db.keys():
+        if key.lower() == nama.lower():
+            return db[key]
 
     tipe = "Kota" if nama.startswith("Kota ") else "Kabupaten"
     return {
@@ -1281,7 +1289,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
         return "<p>❌ Data wilayah tidak ditemukan.</p>"
 
     geojson_str = json.dumps(geojson_data)
-    SNAP_DIST   = 80   # piksel toleransi snap (level Normal)
+    SNAP_DIST   = 60   # piksel toleransi snap (level Normal)
 
     html = f"""<!DOCTYPE html>
 <html lang="id">
@@ -2392,10 +2400,129 @@ elif PAGE == "Puzzle":
         )
 
 
-# --- HALAMAN BELAJAR ---
+# ==================== HALAMAN BELAJAR (PERBAIKAN) ====================
 elif PAGE == "Belajar":
     st.title("📚 Mode Belajar Wilayah Jawa Timur")
     st.markdown("**Klik wilayah pada peta** untuk melihat informasi lengkap!")
+    
+    # Buat layout 2 kolom untuk peta dan info
+    col_map, col_info = st.columns([2, 1])
+    
+    with col_map:
+        m = folium.Map(location=[-7.5, 112.3], zoom_start=8,
+                       tiles=None, control_scale=True, prefer_canvas=True)
+        folium.TileLayer(
+            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            attr="Esri", name="Satellite", overlay=False, control=False
+        ).add_to(m)
+
+        def style_function(feature):
+            return {"fillColor": "#33cc33", "color": "#ffffff",
+                    "weight": 1.5, "fillOpacity": 0.5}
+
+        folium.GeoJson(
+            jatim_geojson,
+            name="Wilayah Jatim",
+            style_function=style_function,
+            tooltip=folium.GeoJsonTooltip(
+                fields=["name"], aliases=["Wilayah:"],
+                style="background-color:white;color:#333;font-weight:bold;padding:5px;"
+            ),
+            highlight_function=lambda x: {
+                "fillColor": "#ffaa00", "color": "#ffaa00",
+                "weight": 3, "fillOpacity": 0.7
+            }
+        ).add_to(m)
+
+        map_data = st_folium(m, width=None, height=500, use_container_width=True,
+                             key="belajar_map")
+
+        if map_data:
+            clicked = map_data.get("last_active_drawing")
+            if clicked and "properties" in clicked and "name" in clicked["properties"]:
+                clicked_name = clicked["properties"]["name"]
+                if clicked_name != st.session_state.selected_wilayah_info:
+                    st.session_state.selected_wilayah_info = clicked_name
+                    st.rerun()
+    
+    with col_info:
+        st.markdown("## 📋 Info Wilayah")
+        
+        if st.session_state.selected_wilayah_info:
+            wil = st.session_state.selected_wilayah_info
+            
+            # Tampilkan header wilayah dengan gradient
+            st.markdown(
+                f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);"
+                f"padding:15px;border-radius:10px;margin-bottom:15px;'>"
+                f"<h3 style='color:#ffd700;margin:0;text-align:center;'>📍 {wil}</h3>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+            
+            # Ambil info wilayah
+            info = get_wilayah_info(wil)
+            
+            # Tampilkan dalam expander agar lebih rapi dan pasti tampil
+            with st.expander("🗺️ Geografis", expanded=True):
+                st.write(info["geografis"])
+            
+            with st.expander("👥 Demografi", expanded=True):
+                st.write(info["demografi"])
+            
+            with st.expander("🎭 Budaya", expanded=True):
+                st.write(info["budaya"])
+            
+            with st.expander("✨ Keunikan", expanded=True):
+                st.write(info["keunikan"])
+            
+            with st.expander("🛍️ Oleh-oleh", expanded=True):
+                st.write(info["oleh_oleh"])
+            
+            # Tombol untuk reset
+            if st.button("🔄 Klik wilayah lain", use_container_width=True):
+                st.session_state.selected_wilayah_info = None
+                st.rerun()
+        else:
+            st.markdown(
+                "<div style='background:linear-gradient(135deg,#f8f9fa,#e9ecef);"
+                "padding:30px 20px;border-radius:10px;text-align:center;"
+                "border:3px dashed #667eea;'>"
+                "<h4 style='color:#667eea;margin-bottom:15px;'>👆 Klik Wilayah di Peta</h4>"
+                "<p style='color:#666;font-size:16px;'>Klik wilayah pada peta untuk melihat:</p>"
+                "<div style='display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:15px;'>"
+                "<span style='background:#667eea;color:white;padding:5px 15px;border-radius:20px;'>🗺️ Geografis</span>"
+                "<span style='background:#764ba2;color:white;padding:5px 15px;border-radius:20px;'>👥 Demografi</span>"
+                "<span style='background:#43b89c;color:white;padding:5px 15px;border-radius:20px;'>🎭 Budaya</span>"
+                "<span style='background:#ff9800;color:white;padding:5px 15px;border-radius:20px;'>✨ Keunikan</span>"
+                "<span style='background:#e05c8a;color:white;padding:5px 15px;border-radius:20px;'>🛍️ Oleh-oleh</span>"
+                "</div></div>",
+                unsafe_allow_html=True
+            )
+            
+            with st.expander("📌 Atau pilih dari daftar"):
+                # Daftar wilayah populer
+                popular_regions = [
+                    "Kabupaten Banyuwangi", "Kabupaten Malang", "Kota Surabaya",
+                    "Kota Batu", "Kabupaten Jember", "Kota Malang",
+                    "Kabupaten Sidoarjo", "Kabupaten Ponorogo", "Kabupaten Pacitan",
+                    "Kabupaten Bondowoso", "Kabupaten Lumajang", "Kota Kediri"
+                ]
+                
+                # Tampilkan dalam grid 2 kolom
+                col_reg1, col_reg2 = st.columns(2)
+                for i, region in enumerate(popular_regions):
+                    if i % 2 == 0:
+                        with col_reg1:
+                            if st.button(region, key=f"quick_{region}", use_container_width=True):
+                                st.session_state.selected_wilayah_info = region
+                                st.rerun()
+                    else:
+                        with col_reg2:
+                            if st.button(region, key=f"quick_{region}", use_container_width=True):
+                                st.session_state.selected_wilayah_info = region
+                                st.rerun()
+
 
 # --- HALAMAN BROMO ---
 elif PAGE == "Bromo 3D":
@@ -2902,243 +3029,170 @@ elif PAGE == "Tentang":
     )
 
 
-# ==================== PETA (GAME & BELAJAR) ====================
+# ==================== PETA GAME (TIDAK DIGUNAKAN DI BELAJAR LAGI) ====================
 
-if (PAGE == "Game") or PAGE == "Belajar":
-    if PAGE == "Belajar":
-        col_map, col_info = st.columns([2, 1])
-    else:
-        col_map = st.container()
-        col_info = None
+if PAGE == "Game":
+    # Game map (tanpa col_info)
+    m = folium.Map(location=[-7.5, 112.3], zoom_start=8,
+                   tiles=None, control_scale=True, prefer_canvas=True)
+    folium.TileLayer(
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        attr="Esri", name="Satellite", overlay=False, control=False
+    ).add_to(m)
 
-    map_container = col_map if PAGE == "Belajar" else st.container()
+    def style_function(feature):
+        name = feature["properties"]["name"]
+        if st.session_state.game_started and not st.session_state.game_over and name == st.session_state.current_region:
+            return {"fillColor": "#ff0000", "color": "#ff0000",
+                    "weight": 3, "fillOpacity": 0.7}
+        return {
+            "fillColor": "#3388ff" if st.session_state.game_started else "#cccccc",
+            "color": "#ffffff", "weight": 1.5,
+            "fillOpacity": 0.3 if st.session_state.game_started else 0.1
+        }
 
-    with map_container:
-        m = folium.Map(location=[-7.5, 112.3], zoom_start=8,
-                       tiles=None, control_scale=True, prefer_canvas=True)
-        folium.TileLayer(
-            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            attr="Esri", name="Satellite", overlay=False, control=False
-        ).add_to(m)
+    folium.GeoJson(
+        jatim_geojson,
+        name="Wilayah Jatim",
+        style_function=style_function,
+    ).add_to(m)
 
-        def style_function(feature):
-            name = feature["properties"]["name"]
-            if PAGE == "Belajar":
-                return {"fillColor": "#33cc33", "color": "#ffffff",
-                        "weight": 1.5, "fillOpacity": 0.5}
-            if (st.session_state.game_started and not st.session_state.game_over
-                    and name == st.session_state.current_region):
-                return {"fillColor": "#ff0000", "color": "#ff0000",
-                        "weight": 3, "fillOpacity": 0.7}
-            return {
-                "fillColor": "#3388ff" if st.session_state.game_started else "#cccccc",
-                "color": "#ffffff", "weight": 1.5,
-                "fillOpacity": 0.3 if st.session_state.game_started else 0.1
-            }
+    st_folium(m, width=None, height=500, use_container_width=True, key="game_map")
 
-        if PAGE == "Belajar":
-            folium.GeoJson(
-                jatim_geojson,
-                name="Wilayah Jatim",
-                style_function=style_function,
-                tooltip=folium.GeoJsonTooltip(
-                    fields=["name"], aliases=["Wilayah:"],
-                    style="background-color:white;color:#333;font-weight:bold;padding:5px;"
-                ),
-                highlight_function=lambda x: {
-                    "fillColor": "#ffaa00", "color": "#ffaa00",
-                    "weight": 3, "fillOpacity": 0.7
-                }
-            ).add_to(m)
-        else:
-            folium.GeoJson(
-                jatim_geojson,
-                name="Wilayah Jatim",
-                style_function=style_function,
-            ).add_to(m)
+    if not st.session_state.game_started and not st.session_state.game_over:
+        if st.button("🎮 Mulai Game", use_container_width=True, type="primary"):
+            reset_game()
+            st.rerun()
 
-        map_data = st_folium(m, width=None, height=500, use_container_width=True,
-                             key="belajar_map" if PAGE == "Belajar" else "game_map")
+    # ==================== AREA GAME ====================
+    st.markdown("---")
 
-        if PAGE == "Belajar" and map_data:
-            clicked = map_data.get("last_active_drawing")
-            if clicked and "properties" in clicked and "name" in clicked["properties"]:
-                clicked_name = clicked["properties"]["name"]
-                if clicked_name != st.session_state.selected_wilayah_info:
-                    st.session_state.selected_wilayah_info = clicked_name
-                    st.rerun()
+    if st.session_state.game_over:
+        end_game_timer()
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
+            is_perfect = (st.session_state.score == st.session_state.max_questions)
 
-        if PAGE == "Game" and not st.session_state.game_started and not st.session_state.game_over:
-            if st.button("🎮 Mulai Game", use_container_width=True, type="primary"):
+            if is_perfect or st.session_state.show_perfect_balloon:
+                st.balloons()
+                st.markdown(get_perfect_score_markdown_effect(), unsafe_allow_html=True)
+                st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
+                st.session_state.show_perfect_balloon = False
+
+            st.markdown("## 🎮 Game Selesai!")
+            st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
+            if st.session_state.total_game_duration > 0:
+                st.info(f"⏱️ **Total Waktu:** {format_duration(st.session_state.total_game_duration)}")
+            if st.session_state.average_answer_time > 0:
+                st.info(f"⚡ **Rata-rata Jawab:** {st.session_state.average_answer_time:.1f} dtk")
+
+            if is_perfect:
+                st.markdown("### 🏆 Selamat! Nilai Sempurna!")
+                if st.session_state.question_times:
+                    fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
+                    st.success(f"⚡ **Tercepat:** Soal {fastest['question_number']} dalam {fastest['duration']:.1f} dtk!")
+            elif st.session_state.score >= 7:
+                st.markdown("### 👍 Bagus! Terus belajar!")
+            elif st.session_state.score >= 5:
+                st.markdown("### 📚 Lumayan, coba lagi!")
+            else:
+                st.markdown("### 💪 Ayo coba lagi!")
+
+            if not st.session_state.score_saved and st.session_state.score > 0:
+                st.markdown("---")
+                st.markdown("### 💾 Simpan Skor")
+                with st.form("save_score_form"):
+                    st.markdown(f"Nama: **{st.session_state.user_name}**")
+                    st.markdown(f"Skor: **{st.session_state.score}/{st.session_state.max_questions}** (Level: {st.session_state.difficulty})")
+                    if st.session_state.total_game_duration > 0:
+                        st.markdown(f"Waktu: **{format_duration(st.session_state.total_game_duration)}**")
+                    if st.form_submit_button("💾 Simpan Skor", use_container_width=True, type="primary"):
+                        if add_score(st.session_state.user_name, st.session_state.score,
+                                     st.session_state.difficulty, st.session_state.max_questions,
+                                     st.session_state.game_start_time, st.session_state.game_end_time):
+                            st.session_state.score_saved = True
+                            st.success("✅ Skor disimpan!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Gagal menyimpan skor.")
+            elif st.session_state.score_saved:
+                st.success("✅ Skor sudah disimpan!")
+
+            if st.button("🔄 Main Lagi", use_container_width=True, type="primary"):
                 reset_game()
                 st.rerun()
 
-    # Panel info wilayah (mode Belajar)
-    if PAGE == "Belajar" and col_info is not None:
-        with col_info:
-            st.markdown("## 📋 Info Wilayah")
-            if st.session_state.selected_wilayah_info:
-                wil  = st.session_state.selected_wilayah_info
-                info = get_wilayah_info(wil)
-                st.markdown(
-                    f"<div style='background:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:15px;'>"
-                    f"<h3 style='color:#0066cc;margin-top:0;'>📍 {wil}</h3></div>",
-                    unsafe_allow_html=True
-                )
-                tabs = st.tabs(["🗺️ Geografis", "👥 Demografi", "🎭 Budaya", "✨ Keunikan", "🛍️ Oleh-oleh"])
-                with tabs[0]: st.markdown(info["geografis"])
-                with tabs[1]: st.markdown(info["demografi"])
-                with tabs[2]: st.markdown(info["budaya"])
-                with tabs[3]: st.markdown(info["keunikan"])
-                with tabs[4]: st.markdown(info["oleh_oleh"])
-                if st.button("🔄 Klik wilayah lain", use_container_width=True):
-                    st.session_state.selected_wilayah_info = None
-                    st.rerun()
+    elif st.session_state.game_started:
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown("### 📝 Pertanyaan")
+            st.markdown("**Wilayah manakah yang disorot MERAH pada peta?**")
+        with c2:
+            st.markdown(f"### Soal {st.session_state.total_questions + 1}/{st.session_state.max_questions}")
+
+        if st.session_state.question_start_time:
+            qtime = time.time() - st.session_state.question_start_time
+            st.progress(min(qtime / 60, 1.0), text=f"⏱️ Waktu: {qtime:.1f} dtk")
+
+        st.markdown("### Pilih Jawaban:")
+        options = st.session_state.options
+        half    = len(options) // 2 + len(options) % 2
+        ca1, ca2 = st.columns(2)
+        answer_selected = None
+
+        with ca1:
+            for i, opt in enumerate(options[:half]):
+                if st.button(opt, key=f"opt_{i}", use_container_width=True,
+                             disabled=st.session_state.answered):
+                    answer_selected = opt
+        with ca2:
+            for i, opt in enumerate(options[half:]):
+                if st.button(opt, key=f"opt_{i+half}", use_container_width=True,
+                             disabled=st.session_state.answered):
+                    answer_selected = opt
+
+        if answer_selected and not st.session_state.answered:
+            is_correct = (answer_selected == st.session_state.correct_answer)
+            q_time = end_question_timer(is_correct)
+            st.session_state.total_questions += 1
+            if is_correct:
+                st.session_state.score += 1
+                st.session_state.feedback = f"✅ **Benar! Hebat! (Waktu: {q_time:.1f} dtk)**"
             else:
-                st.markdown(
-                    "<div style='background:#e8f4fd;padding:20px;border-radius:10px;text-align:center;"
-                    "border:2px dashed #0066cc;'>"
-                    "<h4 style='color:#0066cc;'>👆 Klik Wilayah di Peta</h4>"
-                    "<p style='color:#666;'>Klik wilayah untuk melihat informasi lengkap!</p></div>",
-                    unsafe_allow_html=True
+                st.session_state.feedback = (
+                    f"❌ **Jawaban benar: {st.session_state.correct_answer} "
+                    f"(Waktu: {q_time:.1f} dtk)**"
                 )
-                with st.expander("📌 Atau pilih dari daftar"):
-                    for region in ["Kabupaten Banyuwangi", "Kabupaten Malang", "Kota Surabaya",
-                                   "Kota Batu", "Kota Mojokerto"]:
-                        if st.button(region, key=f"quick_{region}"):
-                            st.session_state.selected_wilayah_info = region
-                            st.rerun()
+            st.session_state.answered = True
 
-    # ==================== AREA GAME ====================
-    if PAGE == "Game":
-        st.markdown("---")
-
-        if st.session_state.game_over:
-            end_game_timer()
-            c1, c2, c3 = st.columns([1, 2, 1])
-            with c2:
-                is_perfect = (st.session_state.score == st.session_state.max_questions)
-
-                if is_perfect or st.session_state.show_perfect_balloon:
-                    st.balloons()
-                    st.markdown(get_perfect_score_markdown_effect(), unsafe_allow_html=True)
-                    st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
-                    st.session_state.show_perfect_balloon = False
-
-                st.markdown("## 🎮 Game Selesai!")
-                st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
-                if st.session_state.total_game_duration > 0:
-                    st.info(f"⏱️ **Total Waktu:** {format_duration(st.session_state.total_game_duration)}")
-                if st.session_state.average_answer_time > 0:
-                    st.info(f"⚡ **Rata-rata Jawab:** {st.session_state.average_answer_time:.1f} dtk")
-
-                if is_perfect:
-                    st.markdown("### 🏆 Selamat! Nilai Sempurna!")
-                    if st.session_state.question_times:
-                        fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
-                        st.success(f"⚡ **Tercepat:** Soal {fastest['question_number']} dalam {fastest['duration']:.1f} dtk!")
-                elif st.session_state.score >= 7:
-                    st.markdown("### 👍 Bagus! Terus belajar!")
-                elif st.session_state.score >= 5:
-                    st.markdown("### 📚 Lumayan, coba lagi!")
-                else:
-                    st.markdown("### 💪 Ayo coba lagi!")
-
-                if not st.session_state.score_saved and st.session_state.score > 0:
-                    st.markdown("---")
-                    st.markdown("### 💾 Simpan Skor")
-                    with st.form("save_score_form"):
-                        st.markdown(f"Nama: **{st.session_state.user_name}**")
-                        st.markdown(f"Skor: **{st.session_state.score}/{st.session_state.max_questions}** (Level: {st.session_state.difficulty})")
-                        if st.session_state.total_game_duration > 0:
-                            st.markdown(f"Waktu: **{format_duration(st.session_state.total_game_duration)}**")
-                        if st.form_submit_button("💾 Simpan Skor", use_container_width=True, type="primary"):
-                            if add_score(st.session_state.user_name, st.session_state.score,
-                                         st.session_state.difficulty, st.session_state.max_questions,
-                                         st.session_state.game_start_time, st.session_state.game_end_time):
-                                st.session_state.score_saved = True
-                                st.success("✅ Skor disimpan!")
-                                st.rerun()
-                            else:
-                                st.error("❌ Gagal menyimpan skor.")
-                elif st.session_state.score_saved:
-                    st.success("✅ Skor sudah disimpan!")
-
-                if st.button("🔄 Main Lagi", use_container_width=True, type="primary"):
-                    reset_game()
-                    st.rerun()
-
-        elif st.session_state.game_started:
-            c1, c2 = st.columns(2)
-            with c1:
-                st.markdown("### 📝 Pertanyaan")
-                st.markdown("**Wilayah manakah yang disorot MERAH pada peta?**")
-            with c2:
-                st.markdown(f"### Soal {st.session_state.total_questions + 1}/{st.session_state.max_questions}")
-
-            if st.session_state.question_start_time:
-                qtime = time.time() - st.session_state.question_start_time
-                st.progress(min(qtime / 60, 1.0), text=f"⏱️ Waktu: {qtime:.1f} dtk")
-
-            st.markdown("### Pilih Jawaban:")
-            options = st.session_state.options
-            half    = len(options) // 2 + len(options) % 2
-            ca1, ca2 = st.columns(2)
-            answer_selected = None
-
-            with ca1:
-                for i, opt in enumerate(options[:half]):
-                    if st.button(opt, key=f"opt_{i}", use_container_width=True,
-                                 disabled=st.session_state.answered):
-                        answer_selected = opt
-            with ca2:
-                for i, opt in enumerate(options[half:]):
-                    if st.button(opt, key=f"opt_{i+half}", use_container_width=True,
-                                 disabled=st.session_state.answered):
-                        answer_selected = opt
-
-            if answer_selected and not st.session_state.answered:
-                is_correct = (answer_selected == st.session_state.correct_answer)
-                q_time = end_question_timer(is_correct)
-                st.session_state.total_questions += 1
-                if is_correct:
-                    st.session_state.score += 1
-                    st.session_state.feedback = f"✅ **Benar! Hebat! (Waktu: {q_time:.1f} dtk)**"
-                else:
-                    st.session_state.feedback = (
-                        f"❌ **Jawaban benar: {st.session_state.correct_answer} "
-                        f"(Waktu: {q_time:.1f} dtk)**"
+            if st.session_state.total_questions >= st.session_state.max_questions:
+                st.session_state.game_over      = True
+                st.session_state.game_end_time  = time.time()
+                if st.session_state.game_start_time is not None:
+                    st.session_state.total_game_duration = (
+                        st.session_state.game_end_time - st.session_state.game_start_time
                     )
-                st.session_state.answered = True
+                else:
+                    st.session_state.total_game_duration = sum(
+                        q["duration"] for q in st.session_state.question_times
+                    )
+                if st.session_state.score == st.session_state.max_questions:
+                    st.session_state.show_perfect_balloon = True
 
-                if st.session_state.total_questions >= st.session_state.max_questions:
-                    st.session_state.game_over      = True
-                    st.session_state.game_end_time  = time.time()
-                    if st.session_state.game_start_time is not None:
-                        st.session_state.total_game_duration = (
-                            st.session_state.game_end_time - st.session_state.game_start_time
-                        )
-                    else:
-                        st.session_state.total_game_duration = sum(
-                            q["duration"] for q in st.session_state.question_times
-                        )
-                    if st.session_state.score == st.session_state.max_questions:
-                        st.session_state.show_perfect_balloon = True
+            st.rerun()
 
-                st.rerun()
+        if st.session_state.feedback:
+            st.markdown("---")
+            cf1, cf2, cf3 = st.columns([1, 2, 1])
+            with cf2:
+                st.markdown(f"### {st.session_state.feedback}")
+                if st.session_state.answered and st.session_state.total_questions < st.session_state.max_questions:
+                    if st.button("➡️ Soal Berikutnya", use_container_width=True, type="primary"):
+                        pilih_wilayah()
+                        st.rerun()
 
-            if st.session_state.feedback:
-                st.markdown("---")
-                cf1, cf2, cf3 = st.columns([1, 2, 1])
-                with cf2:
-                    st.markdown(f"### {st.session_state.feedback}")
-                    if st.session_state.answered and st.session_state.total_questions < st.session_state.max_questions:
-                        if st.button("➡️ Soal Berikutnya", use_container_width=True, type="primary"):
-                            pilih_wilayah()
-                            st.rerun()
-
-    # Progress bar
-    if PAGE == "Game" and st.session_state.game_started and not st.session_state.game_over:
+    # Progress bar game
+    if st.session_state.game_started and not st.session_state.game_over:
         st.markdown("---")
         cp1, cp2, cp3, cp4 = st.columns([2, 1, 1, 1])
         with cp1:
@@ -3171,5 +3225,3 @@ footer_texts = {
 footer_text = footer_texts.get(menu_key, "🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
-
-
