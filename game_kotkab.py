@@ -1281,7 +1281,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
         return "<p>❌ Data wilayah tidak ditemukan.</p>"
 
     geojson_str = json.dumps(geojson_data)
-    SNAP_DIST   = 22   # piksel toleransi snap (level Normal)
+    SNAP_DIST   = 45   # piksel toleransi snap (level Mudah)
 
     html = f"""<!DOCTYPE html>
 <html lang="id">
