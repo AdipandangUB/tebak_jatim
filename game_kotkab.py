@@ -31,6 +31,67 @@ FOOTER_BACKGROUND_URL = "https://static.promediateknologi.id/crop/0x0:0x0/0x0/we
 MUSIC_VIDEO_ID = "H1tWb3axAdA"
 
 
+# ==================== DATABASE LOGO KABUPATEN DAN KOTA ====================
+
+# Database logo untuk Kabupaten
+LOGO_KABUPATEN = {
+    "Bangkalan": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_5FVeEeDgFlKsS3FhvSy21TttLuBVNZJT7w&s",
+    "Banyuwangi": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Lambang_Kabupaten_Banyuwangi.png",
+    "Blitar": "https://upload.wikimedia.org/wikipedia/commons/9/94/Lambang_Kabupaten_Blitar.webp",
+    "Bojonegoro": "https://upload.wikimedia.org/wikipedia/commons/1/18/Logo_Kabupaten_Bojonegoro.png",
+    "Bondowoso": "https://upload.wikimedia.org/wikipedia/commons/9/93/Lambang_Bondowoso.png",
+    "Gresik": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Lambang_Kabupaten_Gresik.png/1280px-Lambang_Kabupaten_Gresik.png",
+    "Jember": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Lambang-kabupaten-jember.png",
+    "Jombang": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Seal_of_Jombang_Regency.svg/1920px-Seal_of_Jombang_Regency.svg.png",
+    "Kediri": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Logo_Kabupaten_Kediri_%28Seal_of_Kediri_Regency%29.svg/960px-Logo_Kabupaten_Kediri_%28Seal_of_Kediri_Regency%29.svg.png",
+    "Lamongan": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Lambang_Kabupaten_Lamongan.png/1280px-Lambang_Kabupaten_Lamongan.png",
+    "Lumajang": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Lambang_Kabupaten_Lumajang.png",
+    "Madiun": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Logo_kabupaten_madiun.gif",
+    "Magetan": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Logo_Kabupaten_Magetan_Vector.jpg",
+    "Malang": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Logo_Kabupaten_Malang_-_Seal_of_Malang_Regency.svg/1280px-Logo_Kabupaten_Malang_-_Seal_of_Malang_Regency.svg.png",
+    "Mojokerto": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Lambang_Kabupaten_Mojokerto.png",
+    "Nganjuk": "https://upload.wikimedia.org/wikipedia/commons/a/ac/NganjukLogoNew.png",
+    "Ngawi": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Lambang_Kabupaten_Ngawi_%28svg%29.svg/1280px-Lambang_Kabupaten_Ngawi_%28svg%29.svg.png",
+    "Pacitan": "https://img.favpng.com/23/4/1/regency-gemaharjo-pucangombo-kayen-logo-png-favpng-JfrCwheRDqTBDpZ164kEaLNES_t.jpg",
+    "Pamekasan": "https://pamekasankab.go.id/img/lambang.jpg",
+    "Pasuruan": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Lambang_Kabupaten_Pasuruan.png",
+    "Ponorogo": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Lambang_Kabupaten_Ponorogo.png",
+    "Probolinggo": "https://upload.wikimedia.org/wikipedia/commons/7/7c/Flag_of_Probolinggo_Regency.png",
+    "Sampang": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Lambang_Kabupaten_Sampang.png",
+    "Sidoarjo": "https://upload.wikimedia.org/wikipedia/commons/0/06/Lambang_Kabupaten_Sidoarjo.jpeg",
+    "Situbondo": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Lambang_Kabupaten_Situbondo.png",
+    "Sumenep": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Lambang_Kabupaten_Sumenep.png",
+    "Trenggalek": "https://upload.wikimedia.org/wikipedia/commons/4/49/Trenggalek_coat_of_arms.png",
+    "Tuban": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Lambang_Kabupaten_Tuban.webp",
+    "Tulungagung": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Lambang-tulungagung.png"
+}
+
+# Database logo untuk Kota
+LOGO_KOTA = {
+    "Batu": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Logo_kota_batu_%281%29.png",
+    "Blitar": "https://upload.wikimedia.org/wikipedia/commons/5/55/Lambang_Kota_Blitar.png",
+    "Kediri": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Lambang_Kota_Kediri.png",
+    "Madiun": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Lambang_Kota_Madiun.png",
+    "Malang": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Logo_Kota_Malang_color.png",
+    "Mojokerto": "https://upload.wikimedia.org/wikipedia/commons/9/98/Coat_of_arms_of_the_City_of_Mojokerto.svg",
+    "Pasuruan": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Logo_Kota_Pasuruan.png",
+    "Probolinggo": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Lambang_Kota_Probolinggo.png",
+    "Surabaya": "https://upload.wikimedia.org/wikipedia/commons/b/ba/City_of_Surabaya_Logo.svg"
+}
+
+# Fungsi untuk mendapatkan logo berdasarkan nama wilayah
+def get_logo_url(nama):
+    """Mengembalikan URL logo untuk nama wilayah yang diberikan"""
+    # Hapus prefix "Kabupaten " atau "Kota " untuk pencarian
+    nama_clean = nama.replace("Kabupaten ", "").replace("Kota ", "")
+    
+    # Cek apakah ini kota (dimulai dengan "Kota ")
+    if nama.startswith("Kota "):
+        return LOGO_KOTA.get(nama_clean, None)
+    else:
+        return LOGO_KABUPATEN.get(nama_clean, None)
+
+
 # ==================== FUNGSI EFEK BALON 3 LAPISAN ====================
 
 def get_perfect_score_markdown_effect():
@@ -869,16 +930,12 @@ def reset_game():
     pilih_wilayah()
 
 
-# ==================== DATABASE INFO WILAYAH LENGKAP (DIPERBAIKI DENGAN DEBUGGING) ====================
+# ==================== DATABASE INFO WILAYAH LENGKAP ====================
 
 def get_wilayah_info(nama):
     """
     Fungsi untuk mendapatkan informasi wilayah berdasarkan nama
-    Dengan debugging untuk melihat nama yang masuk
     """
-    
-    # Tampilkan nama yang dicari untuk debugging
-    st.caption(f"🔍 Mencari data untuk: **{nama}**")
     
     # Database untuk KOTA
     db_kota = {
@@ -1154,64 +1211,37 @@ def get_wilayah_info(nama):
         }
     }
 
-    # GABUNGKAN DATABASE
+    # Gabungkan kedua database
     db = {**db_kota, **db_kabupaten}
 
-    # ==================== PRIORITAS PENCARIAN ====================
-    
-    # PRIORITAS 1: Exact match (case sensitive)
+    # Pencarian dengan prioritas
     if nama in db:
-        st.success(f"✅ Exact match ditemukan: {nama}")
         return db[nama]
-    
-    # PRIORITAS 2: Exact match (case insensitive)
+
+    # Case insensitive
     for key in db.keys():
         if key.lower() == nama.lower():
-            st.success(f"✅ Case-insensitive match: {key}")
             return db[key]
     
-    # PRIORITAS 3: Jika nama dimulai dengan "Kabupaten" atau "Kota"
+    # Cari berdasarkan prefix
     if nama.startswith("Kabupaten "):
-        # Cari di database kabupaten
         for key in db_kabupaten.keys():
             if key.lower() == nama.lower():
-                st.success(f"✅ Kabupaten match: {key}")
                 return db[key]
     
     if nama.startswith("Kota "):
-        # Cari di database kota
         for key in db_kota.keys():
             if key.lower() == nama.lower():
-                st.success(f"✅ Kota match: {key}")
                 return db[key]
     
-    # PRIORITAS 4: Cari dengan menghilangkan prefix
+    # Cari tanpa prefix
     nama_without_prefix = nama.lower().replace("kabupaten ", "").replace("kota ", "")
-    
-    # Cari di database kabupaten dulu
-    for key in db_kabupaten.keys():
-        key_without_prefix = key.lower().replace("kabupaten ", "")
-        if key_without_prefix == nama_without_prefix:
-            st.success(f"✅ Kabupaten match (tanpa prefix): {key}")
-            return db[key]
-    
-    # Cari di database kota
-    for key in db_kota.keys():
-        key_without_prefix = key.lower().replace("kota ", "")
-        if key_without_prefix == nama_without_prefix:
-            st.success(f"✅ Kota match (tanpa prefix): {key}")
-            return db[key]
-    
-    # PRIORITAS 5: Fallback ke pencarian umum di semua database
     for key in db.keys():
         key_without_prefix = key.lower().replace("kabupaten ", "").replace("kota ", "")
         if key_without_prefix == nama_without_prefix:
-            st.success(f"✅ Match umum: {key}")
             return db[key]
 
-    # Jika TIDAK DITEMUKAN, tampilkan warning dan gunakan default
-    st.warning(f"⚠️ Data untuk '{nama}' tidak ditemukan dalam database. Menggunakan data default.")
-    
+    # Default jika tidak ditemukan
     tipe = "Kota" if nama.startswith("Kota ") else "Kabupaten"
     return {
         "geografis": f"{tipe} di Provinsi Jawa Timur dengan berbagai potensi sumber daya alam.",
@@ -2460,7 +2490,7 @@ elif PAGE == "Puzzle":
         )
 
 
-# ==================== HALAMAN BELAJAR (DENGAN DEBUGGING VISUAL) ====================
+# ==================== HALAMAN BELAJAR (DENGAN LOGO KABUPATEN & KOTA) ====================
 elif PAGE == "Belajar":
     st.title("📚 Mode Belajar Wilayah Jawa Timur")
     st.markdown("**Klik wilayah pada peta** untuk melihat informasi lengkap!")
@@ -2511,16 +2541,34 @@ elif PAGE == "Belajar":
         if st.session_state.selected_wilayah_info:
             wil = st.session_state.selected_wilayah_info
             
-            # Tampilkan header wilayah dengan gradient
-            st.markdown(
-                f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);"
-                f"padding:15px;border-radius:10px;margin-bottom:15px;'>"
-                f"<h3 style='color:#ffd700;margin:0;text-align:center;'>📍 {wil}</h3>"
-                f"</div>",
-                unsafe_allow_html=True
-            )
+            # Ambil logo URL
+            logo_url = get_logo_url(wil)
             
-            # Ambil info wilayah (dengan debug otomatis dari fungsi)
+            # Tampilkan header dengan logo dan nama wilayah
+            if logo_url:
+                # Layout dengan logo di kiri dan nama di kanan
+                col_logo, col_title = st.columns([1, 3])
+                with col_logo:
+                    st.image(logo_url, width=80)
+                with col_title:
+                    st.markdown(
+                        f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);"
+                        f"padding:15px;border-radius:10px;height:100%;display:flex;align-items:center;'>"
+                        f"<h3 style='color:#ffd700;margin:0;'>📍 {wil}</h3>"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+            else:
+                # Tanpa logo
+                st.markdown(
+                    f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);"
+                    f"padding:15px;border-radius:10px;margin-bottom:15px;'>"
+                    f"<h3 style='color:#ffd700;margin:0;text-align:center;'>📍 {wil}</h3>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+            
+            # Ambil info wilayah
             info = get_wilayah_info(wil)
             
             # Tampilkan dalam expander
@@ -2573,19 +2621,47 @@ elif PAGE == "Belajar":
                     "Kabupaten Mojokerto", "Kota Mojokerto"
                 ]
                 
-                # Tampilkan dalam grid 2 kolom
+                # Tampilkan dalam grid 2 kolom dengan logo kecil
                 col_reg1, col_reg2 = st.columns(2)
                 half = len(popular_regions) // 2 + len(popular_regions) % 2
+                
                 for i, region in enumerate(popular_regions[:half]):
                     with col_reg1:
-                        if st.button(region, key=f"quick_{region}", use_container_width=True):
-                            st.session_state.selected_wilayah_info = region
-                            st.rerun()
+                        # Ambil logo untuk preview
+                        logo_preview = get_logo_url(region)
+                        if logo_preview:
+                            # Tampilkan dengan logo kecil
+                            col_btn_logo, col_btn_text = st.columns([1, 3])
+                            with col_btn_logo:
+                                st.image(logo_preview, width=25)
+                            with col_btn_text:
+                                if st.button(region, key=f"quick_{region}", use_container_width=True):
+                                    st.session_state.selected_wilayah_info = region
+                                    st.rerun()
+                        else:
+                            # Tanpa logo
+                            if st.button(region, key=f"quick_{region}", use_container_width=True):
+                                st.session_state.selected_wilayah_info = region
+                                st.rerun()
+                
                 for i, region in enumerate(popular_regions[half:]):
                     with col_reg2:
-                        if st.button(region, key=f"quick_{region}_{i}", use_container_width=True):
-                            st.session_state.selected_wilayah_info = region
-                            st.rerun()
+                        # Ambil logo untuk preview
+                        logo_preview = get_logo_url(region)
+                        if logo_preview:
+                            # Tampilkan dengan logo kecil
+                            col_btn_logo, col_btn_text = st.columns([1, 3])
+                            with col_btn_logo:
+                                st.image(logo_preview, width=25)
+                            with col_btn_text:
+                                if st.button(region, key=f"quick_{region}_{i}", use_container_width=True):
+                                    st.session_state.selected_wilayah_info = region
+                                    st.rerun()
+                        else:
+                            # Tanpa logo
+                            if st.button(region, key=f"quick_{region}_{i}", use_container_width=True):
+                                st.session_state.selected_wilayah_info = region
+                                st.rerun()
 
 
 # --- HALAMAN BROMO ---
@@ -2937,7 +3013,7 @@ elif PAGE == "Tentang":
 
         **Fitur:**
         - 🧩 Tebak bentuk kota & wilayah dari peta
-        - 📚 Mode belajar dengan info wilayah
+        - 📚 Mode belajar dengan info wilayah + Logo Kabupaten/Kota
         - 🧩 **Puzzle Drag & Drop** — Kepingan berbentuk POLYGON ASLI wilayah administrasi
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
@@ -3277,7 +3353,7 @@ if PAGE == "Game":
 menu_key = PAGE
 footer_texts = {
     "Game":             f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
-    "Belajar":          f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia",
+    "Belajar":          f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia + Logo",
     "Puzzle":           f"🧩 Puzzle Peta Jawa Timur — {len(jatim_geojson.get('features', []))} Kepingan Kab/Kota | Level Normal",
     "Bromo 3D":         "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D":     "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
