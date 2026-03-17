@@ -869,9 +869,17 @@ def reset_game():
     pilih_wilayah()
 
 
-# ==================== DATABASE INFO WILAYAH LENGKAP (DIPERBAIKI TOTAL) ====================
+# ==================== DATABASE INFO WILAYAH LENGKAP (DIPERBAIKI DENGAN DEBUGGING) ====================
 
 def get_wilayah_info(nama):
+    """
+    Fungsi untuk mendapatkan informasi wilayah berdasarkan nama
+    Dengan debugging untuk melihat nama yang masuk
+    """
+    
+    # Tampilkan nama yang dicari untuk debugging
+    st.caption(f"🔍 Mencari data untuk: **{nama}**")
+    
     # Database untuk KOTA
     db_kota = {
         "Kota Malang": {
@@ -1146,31 +1154,64 @@ def get_wilayah_info(nama):
         }
     }
 
-    # Gabungkan kedua database
+    # GABUNGKAN DATABASE
     db = {**db_kota, **db_kabupaten}
 
-    # Debug: cetak nama yang dicari (bisa diaktifkan jika perlu)
-    # st.write(f"Mencari info untuk: {nama}")
+    # ==================== PRIORITAS PENCARIAN ====================
     
+    # PRIORITAS 1: Exact match (case sensitive)
     if nama in db:
-        # st.write(f"Ditemukan exact match: {nama}")
+        st.success(f"✅ Exact match ditemukan: {nama}")
         return db[nama]
-
-    # Coba cari dengan case insensitive
+    
+    # PRIORITAS 2: Exact match (case insensitive)
     for key in db.keys():
         if key.lower() == nama.lower():
-            # st.write(f"Ditemukan case-insensitive: {key}")
+            st.success(f"✅ Case-insensitive match: {key}")
             return db[key]
     
-    # Jika tidak ditemukan, coba cari dengan menghilangkan prefix
+    # PRIORITAS 3: Jika nama dimulai dengan "Kabupaten" atau "Kota"
+    if nama.startswith("Kabupaten "):
+        # Cari di database kabupaten
+        for key in db_kabupaten.keys():
+            if key.lower() == nama.lower():
+                st.success(f"✅ Kabupaten match: {key}")
+                return db[key]
+    
+    if nama.startswith("Kota "):
+        # Cari di database kota
+        for key in db_kota.keys():
+            if key.lower() == nama.lower():
+                st.success(f"✅ Kota match: {key}")
+                return db[key]
+    
+    # PRIORITAS 4: Cari dengan menghilangkan prefix
     nama_without_prefix = nama.lower().replace("kabupaten ", "").replace("kota ", "")
+    
+    # Cari di database kabupaten dulu
+    for key in db_kabupaten.keys():
+        key_without_prefix = key.lower().replace("kabupaten ", "")
+        if key_without_prefix == nama_without_prefix:
+            st.success(f"✅ Kabupaten match (tanpa prefix): {key}")
+            return db[key]
+    
+    # Cari di database kota
+    for key in db_kota.keys():
+        key_without_prefix = key.lower().replace("kota ", "")
+        if key_without_prefix == nama_without_prefix:
+            st.success(f"✅ Kota match (tanpa prefix): {key}")
+            return db[key]
+    
+    # PRIORITAS 5: Fallback ke pencarian umum di semua database
     for key in db.keys():
         key_without_prefix = key.lower().replace("kabupaten ", "").replace("kota ", "")
         if key_without_prefix == nama_without_prefix:
-            # st.write(f"Ditemukan dengan stripping: {key}")
+            st.success(f"✅ Match umum: {key}")
             return db[key]
 
-    # Default jika tidak ditemukan
+    # Jika TIDAK DITEMUKAN, tampilkan warning dan gunakan default
+    st.warning(f"⚠️ Data untuk '{nama}' tidak ditemukan dalam database. Menggunakan data default.")
+    
     tipe = "Kota" if nama.startswith("Kota ") else "Kabupaten"
     return {
         "geografis": f"{tipe} di Provinsi Jawa Timur dengan berbagai potensi sumber daya alam.",
@@ -2419,7 +2460,7 @@ elif PAGE == "Puzzle":
         )
 
 
-# ==================== HALAMAN BELAJAR (PERBAIKAN DENGAN DATABASE TERPISAH) ====================
+# ==================== HALAMAN BELAJAR (DENGAN DEBUGGING VISUAL) ====================
 elif PAGE == "Belajar":
     st.title("📚 Mode Belajar Wilayah Jawa Timur")
     st.markdown("**Klik wilayah pada peta** untuk melihat informasi lengkap!")
@@ -2479,10 +2520,10 @@ elif PAGE == "Belajar":
                 unsafe_allow_html=True
             )
             
-            # Ambil info wilayah
+            # Ambil info wilayah (dengan debug otomatis dari fungsi)
             info = get_wilayah_info(wil)
             
-            # Tampilkan dalam expander agar lebih rapi
+            # Tampilkan dalam expander
             with st.expander("🗺️ Geografis", expanded=True):
                 st.write(info["geografis"])
             
@@ -2525,22 +2566,26 @@ elif PAGE == "Belajar":
                     "Kabupaten Banyuwangi", "Kabupaten Malang", "Kota Surabaya",
                     "Kota Batu", "Kabupaten Jember", "Kota Malang",
                     "Kabupaten Sidoarjo", "Kabupaten Ponorogo", "Kabupaten Pacitan",
-                    "Kabupaten Bondowoso", "Kabupaten Lumajang", "Kota Kediri"
+                    "Kabupaten Bondowoso", "Kabupaten Lumajang", "Kota Kediri",
+                    "Kabupaten Kediri", "Kabupaten Madiun", "Kota Madiun",
+                    "Kabupaten Blitar", "Kota Blitar", "Kabupaten Pasuruan",
+                    "Kota Pasuruan", "Kabupaten Probolinggo", "Kota Probolinggo",
+                    "Kabupaten Mojokerto", "Kota Mojokerto"
                 ]
                 
                 # Tampilkan dalam grid 2 kolom
                 col_reg1, col_reg2 = st.columns(2)
-                for i, region in enumerate(popular_regions):
-                    if i % 2 == 0:
-                        with col_reg1:
-                            if st.button(region, key=f"quick_{region}", use_container_width=True):
-                                st.session_state.selected_wilayah_info = region
-                                st.rerun()
-                    else:
-                        with col_reg2:
-                            if st.button(region, key=f"quick_{region}", use_container_width=True):
-                                st.session_state.selected_wilayah_info = region
-                                st.rerun()
+                half = len(popular_regions) // 2 + len(popular_regions) % 2
+                for i, region in enumerate(popular_regions[:half]):
+                    with col_reg1:
+                        if st.button(region, key=f"quick_{region}", use_container_width=True):
+                            st.session_state.selected_wilayah_info = region
+                            st.rerun()
+                for i, region in enumerate(popular_regions[half:]):
+                    with col_reg2:
+                        if st.button(region, key=f"quick_{region}_{i}", use_container_width=True):
+                            st.session_state.selected_wilayah_info = region
+                            st.rerun()
 
 
 # --- HALAMAN BROMO ---
