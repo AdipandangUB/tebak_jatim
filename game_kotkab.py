@@ -871,6 +871,8 @@ def reset_game():
 
 # ==================== DATABASE INFO WILAYAH ====================
 
+# ==================== DATABASE INFO WILAYAH ====================
+
 def get_wilayah_info(nama):
     db = {
         "Kota Malang": {
@@ -1144,6 +1146,7 @@ def get_wilayah_info(nama):
     if nama in db:
         return db[nama]
 
+    # Default untuk wilayah yang tidak ada di database
     tipe = "Kota" if nama.startswith("Kota ") else "Kabupaten"
     return {
         "geografis": f"{tipe} di Provinsi Jawa Timur dengan berbagai potensi sumber daya alam.",
