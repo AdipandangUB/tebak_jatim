@@ -1656,7 +1656,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
     const p = new Path2D();
     function addRing(ring) {{
       ring.forEach((c, i) => {{
-        const [x,y] = project(c[0], c[1]);
+        const [x,y] = project(c[0],c[1]);
         if(i===0) p.moveTo(x,y); else p.lineTo(x,y);
       }});
       p.closePath();
@@ -3182,6 +3182,161 @@ elif PAGE == "Tentang":
                            padding:4px 12px;border-radius:12px;font-size:11px;
                            border:1px solid rgba(255,255,255,0.3);'>
                 🌿 Environmental Planning
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # ==================== RESEARCH ASSISTANTS (BARU) ====================
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        "<div style='text-align:center;margin-bottom:16px;'>"
+        "<span style='background:linear-gradient(135deg,#FF9800,#f57c00);color:white;"
+        "padding:4px 20px;border-radius:20px;font-weight:bold;font-size:13px;'>🔬 RESEARCH ASSISTANTS</span>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    # Membuat 3 baris untuk Research Assistants
+    ra1, ra2, ra3 = st.columns(3)
+    
+    with ra1:
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
+                        border-radius:16px;padding:22px;text-align:center;
+                        box-shadow:0 6px 20px rgba(255,152,0,0.3);
+                        height:100%;'>
+              <img src='data:image/jpeg;base64,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'
+                   style='width:110px;height:110px;border-radius:50%;
+                          object-fit:cover;object-position:top;
+                          border:4px solid rgba(255,255,255,0.6);
+                          box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                          margin-bottom:12px;'>
+              <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
+                Nabila Zahra
+              </h4>
+              <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
+                        font-size:12px;font-style:italic;'>Research Assistant</p>
+              <span style='background:rgba(255,255,255,0.2);color:white;
+                           padding:4px 12px;border-radius:12px;font-size:11px;
+                           border:1px solid rgba(255,255,255,0.3);'>
+                🔬 Data & Research
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    with ra2:
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
+                        border-radius:16px;padding:22px;text-align:center;
+                        box-shadow:0 6px 20px rgba(255,152,0,0.3);
+                        height:100%;'>
+              <img src='https://media.licdn.com/dms/image/v2/D4E03AQGqTT63jvv2Fg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1723509953345?e=2147483647&v=beta&t=oSubn-UP7bawIpCNv7qCQ3w3ykUdTu-3hkzUE4YQO5w'
+                   style='width:110px;height:110px;border-radius:50%;
+                          object-fit:cover;object-position:top;
+                          border:4px solid rgba(255,255,255,0.6);
+                          box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                          margin-bottom:12px;'>
+              <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
+                Riska Dwi Thalita Putri
+              </h4>
+              <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
+                        font-size:12px;font-style:italic;'>Research Assistant</p>
+              <span style='background:rgba(255,255,255,0.2);color:white;
+                           padding:4px 12px;border-radius:12px;font-size:11px;
+                           border:1px solid rgba(255,255,255,0.3);'>
+                📊 Data Analyst
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    with ra3:
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
+                        border-radius:16px;padding:22px;text-align:center;
+                        box-shadow:0 6px 20px rgba(255,152,0,0.3);
+                        height:100%;'>
+              <img src='https://img.freepik.com/vektor-premium/gambar-profil-avatar-pria-diisolasi-pada-gambar-profil-avatar-latar-belakang-untuk-pria_1293239-4842.jpg'
+                   style='width:110px;height:110px;border-radius:50%;
+                          object-fit:cover;object-position:top;
+                          border:4px solid rgba(255,255,255,0.6);
+                          box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                          margin-bottom:12px;'>
+              <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
+                Muhammad Fulan Hidayatullah
+              </h4>
+              <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
+                        font-size:12px;font-style:italic;'>Research Assistant</p>
+              <span style='background:rgba(255,255,255,0.2);color:white;
+                           padding:4px 12px;border-radius:12px;font-size:11px;
+                           border:1px solid rgba(255,255,255,0.3);'>
+                💻 Developer
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    ra4, ra5, _ = st.columns(3)  # Kolom ketiga dikosongkan untuk penempatan yang rapi
+    
+    with ra4:
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
+                        border-radius:16px;padding:22px;text-align:center;
+                        box-shadow:0 6px 20px rgba(255,152,0,0.3);
+                        height:100%;'>
+              <img src='https://img.freepik.com/vektor-premium/ilustrasi-vektor-profil-avatar-wanita-imut_1058532-14546.jpg'
+                   style='width:110px;height:110px;border-radius:50%;
+                          object-fit:cover;object-position:top;
+                          border:4px solid rgba(255,255,255,0.6);
+                          box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                          margin-bottom:12px;'>
+              <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
+                Daniella Nathalie Makalew
+              </h4>
+              <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
+                        font-size:12px;font-style:italic;'>Research Assistant</p>
+              <span style='background:rgba(255,255,255,0.2);color:white;
+                           padding:4px 12px;border-radius:12px;font-size:11px;
+                           border:1px solid rgba(255,255,255,0.3);'>
+                🎨 UI/UX Design
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    with ra5:
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
+                        border-radius:16px;padding:22px;text-align:center;
+                        box-shadow:0 6px 20px rgba(255,152,0,0.3);
+                        height:100%;'>
+              <img src='https://png.pngtree.com/png-clipart/20240416/original/pngtree-hijab-girl-cartoon-avatar-png-image_14848857.png'
+                   style='width:110px;height:110px;border-radius:50%;
+                          object-fit:cover;object-position:top;
+                          border:4px solid rgba(255,255,255,0.6);
+                          box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                          margin-bottom:12px;'>
+              <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
+                Naraya Helga Amelia
+              </h4>
+              <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
+                        font-size:12px;font-style:italic;'>Research Assistant</p>
+              <span style='background:rgba(255,255,255,0.2);color:white;
+                           padding:4px 12px;border-radius:12px;font-size:11px;
+                           border:1px solid rgba(255,255,255,0.3);'>
+                📝 Content Writer
               </span>
             </div>
             """,
