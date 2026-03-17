@@ -1037,7 +1037,7 @@ def get_wilayah_info(nama):
             "geografis": "Kabupaten di pesisir selatan, berbatasan dengan Jawa Tengah. Luas 1.389 km², dijuluki 'Kota 1001 Goa'.",
             "demografi": "Penduduk: ±550 ribu jiwa. Mayoritas suku Jawa Mataraman dengan budaya pesisir.",
             "budaya": "Budaya Jawa Mataraman dengan pengaruh pesisir selatan. Tradisi: larung sesaji, wayang kulit, dan jaranan.",
-            "keunikan": "Goa Gong (goa paling indah se-Asia Tenggara), Goa Tabuhan, Pantai Klayar, dan Pantai Soge. Tempat kelahiran Presiden Jokowi.",
+            "keunikan": "Goa Gong (goa paling indah se-Asia Tenggara), Goa Tabuhan, Pantai Klayar, dan Pantai Soge.",
             "oleh_oleh": "Sale pisang, keripik tempe, ikan asap, terasi, dan batik Pacitan."
         },
         "Kabupaten Ngawi": {
