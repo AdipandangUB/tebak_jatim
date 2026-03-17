@@ -869,7 +869,7 @@ def reset_game():
     pilih_wilayah()
 
 
-# ==================== DATABASE INFO WILAYAH LENGKAP ====================
+# ==================== DATABASE INFO WILAYAH LENGKAP (DIPERBAIKI) ====================
 
 def get_wilayah_info(nama):
     db = {
@@ -1144,15 +1144,29 @@ def get_wilayah_info(nama):
         }
     }
 
+    # Debug: cetak nama yang dicari (bisa diaktifkan jika perlu)
+    # print(f"Mencari info untuk: {nama}")
+    
     if nama in db:
+        # print(f"Ditemukan exact match: {nama}")
         return db[nama]
 
     # Coba cari dengan case insensitive
     for key in db.keys():
         if key.lower() == nama.lower():
+            # print(f"Ditemukan case-insensitive: {key}")
+            return db[key]
+    
+    # Coba cari dengan menghilangkan "Kabupaten" atau "Kota" jika perlu
+    nama_without_prefix = nama.lower().replace("kabupaten ", "").replace("kota ", "")
+    for key in db.keys():
+        key_without_prefix = key.lower().replace("kabupaten ", "").replace("kota ", "")
+        if key_without_prefix == nama_without_prefix:
+            # print(f"Ditemukan dengan stripping: {key}")
             return db[key]
 
     tipe = "Kota" if nama.startswith("Kota ") else "Kabupaten"
+    # print(f"Tidak ditemukan, menggunakan default untuk {tipe}")
     return {
         "geografis": f"{tipe} di Provinsi Jawa Timur dengan berbagai potensi sumber daya alam.",
         "demografi": f"Penduduk dengan keragaman budaya dan tradisi khas {tipe} di Jawa Timur.",
@@ -2400,7 +2414,7 @@ elif PAGE == "Puzzle":
         )
 
 
-# ==================== HALAMAN BELAJAR (PERBAIKAN) ====================
+# ==================== HALAMAN BELAJAR (PERBAIKAN DENGAN DEBUGGING) ====================
 elif PAGE == "Belajar":
     st.title("📚 Mode Belajar Wilayah Jawa Timur")
     st.markdown("**Klik wilayah pada peta** untuk melihat informasi lengkap!")
@@ -2451,6 +2465,9 @@ elif PAGE == "Belajar":
         if st.session_state.selected_wilayah_info:
             wil = st.session_state.selected_wilayah_info
             
+            # DEBUG: Tampilkan nama wilayah yang dipilih
+            st.caption(f"📍 **Wilayah terpilih:** {wil}")
+            
             # Tampilkan header wilayah dengan gradient
             st.markdown(
                 f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);"
@@ -2463,9 +2480,16 @@ elif PAGE == "Belajar":
             # Ambil info wilayah
             info = get_wilayah_info(wil)
             
+            # DEBUG: Tampilkan source data (untuk verifikasi)
+            with st.expander("🔍 Debug Info (Sumber Data)"):
+                st.json(info)
+            
             # Tampilkan dalam expander agar lebih rapi dan pasti tampil
             with st.expander("🗺️ Geografis", expanded=True):
                 st.write(info["geografis"])
+                # Tambahkan penanda jika ini data default
+                if "Kabupaten di Provinsi Jawa Timur" in info["geografis"] and "Jember" in wil:
+                    st.warning("⚠️ Ini adalah data default! Seharusnya data spesifik Jember.")
             
             with st.expander("👥 Demografi", expanded=True):
                 st.write(info["demografi"])
