@@ -2165,8 +2165,7 @@ if not st.session_state.name_submitted:
                     line-height:1.7;
                     margin:0;
                 '>
-                    © 2026 <strong>Program Pengabdian Masyarakat</strong> — Penguatan Geospasial Tentang Jawa Timur
-                    Sejak Usia Dini Melalui Edukasi Gamifikasi Menggunakan Platform <em>"Pengetahuan Jatim"</em><br>
+                    © 2026 <strong>Program Pengabdian Masyarakat</strong> — Penguatan Literasi Geospasial Jawa Timur Bagi Gen Z Melalui Edukasi Berbasis Gamifikasi Menggunakan Platform" <em>"Sepiro Jatim, Sampeyan"</em><br>
                     🏛️ Lab. <strong>Environmental, Infrastructure, and Information System (EIIS)</strong> ·
                     Dept. Perencanaan Wilayah &amp; Kota · Fak. Teknik · <strong>Universitas Brawijaya</strong>
                 </p>
