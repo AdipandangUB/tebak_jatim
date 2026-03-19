@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Sepiro Jawa Timur, Sampeyan",
+    page_title="Pengetahuan Tentang Kota & Kabupaten di Jawa Timur",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -1382,10 +1382,10 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Sepiro Jawa Timur, Sampeyan</div>
+            <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten Jawa Timur</div>
             <p>{footer_text}</p>
             <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Literasi Geospasial Jawa Timur Bagi Gen Z Melalui Edukasi Berbasis Gamifikasi Menggunakan Platform "Sepiro Jatim, Sampeyan" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.9.0</p>
-            <p>Quiz Tebak Wilayah | Info Wilayah | Puzzle Drag & Drop | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
+            <p>Game Tebak Wilayah | Mode Belajar | Puzzle Drag & Drop | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
     """
@@ -2146,7 +2146,7 @@ if not st.session_state.name_submitted:
         st.markdown("---")
         st.markdown(
             "<div style='text-align:center;color:#666;font-size:14px;'>"
-            "<p>✨ Fitur: 🎮 Quiz | 📚 Info Wilayah | 🧩 Puzzle | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
+            "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🧩 Puzzle | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
             unsafe_allow_html=True
         )
         st.markdown(
@@ -2183,7 +2183,7 @@ with st.sidebar:
         "https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg",
         width=100
     )
-    st.title("🧩 Ensiklopedia Jatim")
+    st.title("🧩 Pengetahuan Jatim")
 
     time_info = get_current_time_info()
     st.markdown(
@@ -2212,7 +2212,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    menu_options = ["📚 Info Wilayah","🎮 Quiz", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
+    menu_options = ["📚 Belajar","🎮 Game", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
                     "🏆 Papan Skor", "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
     selected_menu = st.radio("Menu", menu_options, index=0,
                              label_visibility="collapsed", key="main_navigation")
@@ -2286,7 +2286,7 @@ with st.sidebar:
                 st.rerun()
 
     elif PAGE == "Belajar":
-        st.header("📚 Info Wilayah")
+        st.header("📚 Mode Belajar")
         st.markdown("Klik wilayah di peta untuk melihat informasi lengkap.")
         c1, c2, c3 = st.columns(3)
         with c1:
@@ -3041,7 +3041,7 @@ elif PAGE == "Tentang":
         Aplikasi interaktif untuk mempelajari bentuk kota dan kabupaten di Jawa Timur.
 
         **Fitur:**
-        - 🧩 Quiz Tebak bentuk kota & wilayah dari peta
+        - 🧩 Tebak bentuk kota & wilayah dari peta
         - 📚 Mode belajar dengan info wilayah + Logo Kabupaten/Kota
         - 🧩 **Puzzle Drag & Drop** — Kepingan berbentuk POLYGON ASLI wilayah administrasi
         - 🌋 Visualisasi 3D Gunung Bromo
@@ -3536,16 +3536,17 @@ if PAGE == "Game":
 
 menu_key = PAGE
 footer_texts = {
-    "Game":             f"🗺️ Quiz Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
-    "Belajar":          f"📚 Info Wilayah: {len(wilayah_list)} wilayah tersedia + Logo",
+    "Game":             f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
+    "Belajar":          f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia + Logo",
     "Puzzle":           f"🧩 Puzzle Peta Jawa Timur — {len(jatim_geojson.get('features', []))} Kepingan Kab/Kota | Level Normal",
     "Bromo 3D":         "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D":     "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
     "Papan Skor":       "🏆 Papan Skor Tebak Jawa Timur",
     "Statistik Waktu":  "⏱️ Statistik Waktu Bermain",
     "Pengaturan":       "⚙️ Sesuaikan pengalaman bermain Anda",
-    "Tentang":          "ℹ️ Sepiro Jawa Timur, Sampeyan - Aplikasi Interaktif Pembelajaran Geospasial Jawa Timur"
+    "Tentang":          "ℹ️ Pengetahuan Jawa Timur - Aplikasi Interaktif Pembelajaran Geospasial Jawa Timur"
 }
-footer_text = footer_texts.get(menu_key, "🧩 Sepiro Jawa Timur, Sampeyan")
+footer_text = footer_texts.get(menu_key, "🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
+
