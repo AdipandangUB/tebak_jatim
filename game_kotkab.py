@@ -694,16 +694,17 @@ def load_puzzle_scoreboard():
 
 
 def save_puzzle_scoreboard(scoreboard):
-    """Simpan semua entri (maks 50), urutkan: penalti terkecil = terbaik."""
+    """Simpan SEMUA entri (semua percobaan semua pemain),
+    urutkan penalti terkecil = peringkat tertinggi, simpan top 10."""
     try:
         if not isinstance(scoreboard, list):
             scoreboard = []
-        # Sort by penalti (waktu + kesalahan×10), lalu terbaru jika sama
+        # Sort: penalti terkecil dulu, jika sama ambil yang terbaru
         scoreboard.sort(key=lambda x: (
             x.get("poin_penalti", float("inf")),
             -x.get("timestamp", 0)
         ))
-        scoreboard = scoreboard[:50]  # simpan maksimal 50 entri histori
+        scoreboard = scoreboard[:10]  # simpan top 10 entri terbaik
         st.session_state.puzzle_scoreboard_data = scoreboard
         return True
     except Exception as e:
@@ -711,22 +712,6 @@ def save_puzzle_scoreboard(scoreboard):
         return False
 
 
-def get_puzzle_best_per_player(scoreboard):
-    """
-    Ambil skor TERBAIK (penalti terkecil) per pemain.
-    Kembalikan list top 10 pemain unik, diurutkan terbaik ke terburuk.
-    """
-    best = {}
-    for entry in scoreboard:
-        nama = entry.get("nama", "")
-        penalti = entry.get("poin_penalti", float("inf"))
-        if nama not in best or penalti < best[nama].get("poin_penalti", float("inf")):
-            best[nama] = entry
-    ranked = sorted(best.values(), key=lambda x: (
-        x.get("poin_penalti", float("inf")),
-        -x.get("timestamp", 0)
-    ))
-    return ranked[:10]  # top 10 pemain unik
 
 
 def add_puzzle_score(nama, waktu_detik, kesalahan):
@@ -762,22 +747,21 @@ def add_puzzle_score(nama, waktu_detik, kesalahan):
 
 
 def get_puzzle_scoreboard_stats(scoreboard):
-    """Stats dihitung dari skor terbaik tiap pemain (bukan semua entri mentah)."""
+    """Stats dihitung langsung dari semua entri di papan skor."""
     if not scoreboard:
-        return {"total_pemain": 0, "waktu_tercepat": None, "kesalahan_minimal": None,
+        return {"total_entri": 0, "waktu_tercepat": None, "kesalahan_minimal": None,
                 "rata_waktu": None, "rata_kesalahan": None}
-    best_list = get_puzzle_best_per_player(scoreboard)
-    total = len(best_list)   # jumlah pemain unik
-    tercepat    = min(best_list, key=lambda x: x.get("waktu_detik", float("inf")))
-    minimal_err = min(best_list, key=lambda x: x.get("kesalahan",   float("inf")))
-    rata_w = sum(s.get("waktu_detik", 0) for s in best_list) / total
-    rata_e = sum(s.get("kesalahan",   0) for s in best_list) / total
+    total       = len(scoreboard)
+    tercepat    = min(scoreboard, key=lambda x: x.get("waktu_detik",  float("inf")))
+    minimal_err = min(scoreboard, key=lambda x: x.get("kesalahan",    float("inf")))
+    rata_w      = sum(s.get("waktu_detik", 0) for s in scoreboard) / total
+    rata_e      = sum(s.get("kesalahan",   0) for s in scoreboard) / total
     return {
-        "total_pemain": total,
-        "waktu_tercepat": tercepat,
+        "total_entri":      total,
+        "waktu_tercepat":   tercepat,
         "kesalahan_minimal": minimal_err,
-        "rata_waktu": round(rata_w, 1),
-        "rata_kesalahan": round(rata_e, 1),
+        "rata_waktu":       round(rata_w, 1),
+        "rata_kesalahan":   round(rata_e, 1),
     }
 
 
@@ -2512,7 +2496,7 @@ with st.sidebar:
         pstats = get_puzzle_scoreboard_stats(psb)
         cp1, cp2 = st.columns(2)
         with cp1:
-            st.metric("Pemain Puzzle", pstats["total_pemain"])
+            st.metric("Entri Puzzle", pstats.get("total_entri", 0))
         with cp2:
             wt = pstats["waktu_tercepat"]
             st.metric("⚡ Tercepat", wt.get("waktu_format", "-") if wt else "-")
@@ -3216,12 +3200,11 @@ elif PAGE == "Papan Skor":
         )
 
         puzzle_sb      = load_puzzle_scoreboard()
-        puzzle_top10   = get_puzzle_best_per_player(puzzle_sb)   # top 10 terbaik per pemain
-        puzzle_stats   = get_puzzle_scoreboard_stats(puzzle_sb)
+        puzzle_stats = get_puzzle_scoreboard_stats(puzzle_sb)   # stats dari semua entri
 
-        if puzzle_top10:
+        if puzzle_sb:
             rows_p = []
-            for i, p in enumerate(puzzle_top10, 1):
+            for i, p in enumerate(puzzle_sb, 1):
                 icon = {1: "👑", 2: "🥈", 3: "🥉"}.get(i, f"{i}.")
                 nm   = p.get("nama", "Unknown")
                 if nm == st.session_state.user_name:
@@ -3243,7 +3226,7 @@ elif PAGE == "Papan Skor":
             # Statistik ringkas
             pc1, pc2, pc3, pc4 = st.columns(4)
             with pc1:
-                juara = puzzle_top10[0]
+                juara = puzzle_sb[0]
                 st.metric("👑 Juara 1", juara.get("nama", "-"))
             with pc2:
                 wt = puzzle_stats["waktu_tercepat"]
@@ -3258,7 +3241,7 @@ elif PAGE == "Papan Skor":
                     f"{me.get('kesalahan','-')} oleh {me.get('nama','-')[:8]}" if me else "-"
                 )
             with pc4:
-                st.metric("👥 Total Pemain", puzzle_stats["total_pemain"])
+                st.metric("📋 Total Entri", puzzle_stats["total_entri"])
 
             if puzzle_stats["rata_waktu"]:
                 rw = int(puzzle_stats["rata_waktu"])
@@ -3270,14 +3253,14 @@ elif PAGE == "Papan Skor":
 
             # Highlight podium top 3
             st.markdown("#### 🏅 Podium Juara Puzzle")
-            podium_cols = st.columns(min(3, len(puzzle_top10)))
+            podium_cols = st.columns(min(3, len(puzzle_sb)))
             podium_styles = [
                 ("👑", "#ffd700", "linear-gradient(135deg,#2d2010,#3d2e0a)"),
                 ("🥈", "#c0c0c0", "linear-gradient(135deg,#1a1a1a,#2a2a2a)"),
                 ("🥉", "#cd7f32", "linear-gradient(135deg,#1a0e05,#2a1a0a)"),
             ]
             for idx, (col, (medal, color, bg)) in enumerate(zip(podium_cols, podium_styles)):
-                p = puzzle_top10[idx]
+                p = puzzle_sb[idx]
                 nm = p.get("nama", "?")
                 if nm == st.session_state.user_name:
                     nm = f"⭐ {nm}"
