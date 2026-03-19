@@ -916,10 +916,28 @@ _defaults = {
     "puzzle_score_saved": False,
     "puzzle_pending_save": False,
     "pending_navigation": None,
+    "puzzle_js_waktu": None,
+    "puzzle_js_errors": None,
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
         st.session_state[key] = val
+
+
+# ==================== BACA HASIL PUZZLE DARI JS (query_params) ====================
+# JS kirim waktu & kesalahan via URL params: ?puzzle_waktu=X&puzzle_salah=Y
+try:
+    _qp = st.query_params
+    if "puzzle_waktu" in _qp and "puzzle_salah" in _qp:
+        _wkt = int(_qp["puzzle_waktu"])
+        _slh = int(_qp["puzzle_salah"])
+        if _wkt > 0:
+            st.session_state.puzzle_js_waktu  = _wkt
+            st.session_state.puzzle_js_errors = _slh
+            # Hapus dari URL supaya tidak terbaca ulang
+            st.query_params.clear()
+except Exception:
+    pass
 
 
 # ==================== FUNGSI TIMER ====================
@@ -2681,77 +2699,123 @@ elif PAGE == "Puzzle":
             )
 
             if not st.session_state.puzzle_score_saved:
-                col_w, col_e, col_btn = st.columns([2, 2, 2])
-                with col_w:
-                    # Hitung waktu otomatis dari puzzle_start_time
-                    auto_detik = 0
-                    if st.session_state.puzzle_start_time:
-                        auto_detik = int(time.time() - st.session_state.puzzle_start_time)
-                    auto_menit = auto_detik // 60
-                    auto_sisa  = auto_detik % 60
-                    st.markdown(f"**⏱️ Waktu Bermain (otomatis):** `{auto_menit:02d}:{auto_sisa:02d}`")
-                    waktu_input_mnt = st.number_input(
-                        "Menit (dari layar PUZZLE SELESAI!)",
-                        min_value=0, max_value=99,
-                        value=auto_menit, step=1,
-                        key="puzzle_input_menit"
-                    )
-                    waktu_input_dtk = st.number_input(
-                        "Detik (dari layar PUZZLE SELESAI!)",
-                        min_value=0, max_value=59,
-                        value=min(auto_sisa, 59), step=1,
-                        key="puzzle_input_detik"
-                    )
-                with col_e:
-                    st.markdown("**❌ Jumlah Kesalahan**")
-                    kesalahan_input = st.number_input(
-                        "Kesalahan (dari layar PUZZLE SELESAI!)",
-                        min_value=0, max_value=999,
-                        value=0, step=1,
-                        key="puzzle_input_kesalahan"
-                    )
-                    st.caption(
-                        "💡 Peringkat ditentukan dari:\n"
-                        "1️⃣ Waktu tercepat\n"
-                        "2️⃣ Kesalahan paling sedikit"
-                    )
-                with col_btn:
-                    st.markdown("**👤 Nama Pemain**")
+                # Ambil data dari JS (via query_params) atau fallback Python timer
+                js_wkt = st.session_state.get("puzzle_js_waktu")
+                js_err = st.session_state.get("puzzle_js_errors", 0)
+
+                if js_wkt:
+                    # Data akurat dari JS checkWin
+                    wm_js, ws_js = divmod(int(js_wkt), 60)
+                    penalti_js = int(js_wkt) + (js_err or 0) * 10
                     st.markdown(
-                        f"<div style='padding:8px 12px;background:rgba(255,215,0,0.15);"
-                        f"border:1px solid #ffd700;border-radius:8px;color:#ffd700;"
-                        f"font-weight:bold;margin-bottom:8px;'>⭐ {st.session_state.user_name}</div>",
+                        f"""
+                        <div style='background:linear-gradient(135deg,#0d2137,#1a3a52);
+                            border:1.5px solid #ffd700;border-radius:12px;
+                            padding:16px 20px;margin-bottom:12px;'>
+                          <div style='display:flex;flex-wrap:wrap;gap:24px;align-items:center;'>
+                            <div style='text-align:center;'>
+                              <div style='color:rgba(255,255,255,0.6);font-size:0.78em;'>⏱️ WAKTU</div>
+                              <div style='color:#ffd700;font-size:1.8em;font-weight:900;'>{wm_js:02d}:{ws_js:02d}</div>
+                            </div>
+                            <div style='text-align:center;'>
+                              <div style='color:rgba(255,255,255,0.6);font-size:0.78em;'>❌ KESALAHAN</div>
+                              <div style='color:#ff6b6b;font-size:1.8em;font-weight:900;'>{js_err}</div>
+                            </div>
+                            <div style='text-align:center;'>
+                              <div style='color:rgba(255,255,255,0.6);font-size:0.78em;'>📊 PENALTI</div>
+                              <div style='color:#4ade80;font-size:1.8em;font-weight:900;'>{penalti_js}</div>
+                            </div>
+                            <div style='margin-left:auto;'>
+                              <div style='color:rgba(255,255,255,0.6);font-size:0.78em;'>👤 PEMAIN</div>
+                              <div style='color:#ffd700;font-size:1em;font-weight:bold;'>⭐ {st.session_state.user_name}</div>
+                            </div>
+                          </div>
+                        </div>
+                        """,
                         unsafe_allow_html=True
                     )
-                    total_detik_input = waktu_input_mnt * 60 + waktu_input_dtk
-                    st.markdown(
-                        f"**Skor Penalti:** `{total_detik_input + kesalahan_input * 10}` "
-                        f"*(makin kecil makin baik)*"
-                    )
-                    st.markdown("")
                     if st.button(
                         "💾 Simpan Skor Puzzle",
                         use_container_width=True,
                         type="primary",
                         key="btn_simpan_puzzle_score"
                     ):
-                        if total_detik_input > 0:
-                            berhasil = add_puzzle_score(
-                                st.session_state.user_name,
-                                total_detik_input,
-                                kesalahan_input
-                            )
-                            if berhasil:
-                                st.session_state.puzzle_score_saved = True
-                                st.session_state.puzzle_result_time_sec  = total_detik_input
-                                st.session_state.puzzle_result_errors    = kesalahan_input
-                                st.session_state.puzzle_pending_save     = False
-                                st.success("✅ Skor puzzle berhasil disimpan ke Papan Skor!")
-                                st.rerun()
-                            else:
-                                st.error("❌ Gagal menyimpan skor.")
+                        berhasil = add_puzzle_score(
+                            st.session_state.user_name,
+                            js_wkt,
+                            js_err
+                        )
+                        if berhasil:
+                            st.session_state.puzzle_score_saved    = True
+                            st.session_state.puzzle_result_time_sec = js_wkt
+                            st.session_state.puzzle_result_errors   = js_err
+                            st.session_state.puzzle_js_waktu        = None
+                            st.session_state.puzzle_js_errors       = None
+                            st.session_state.puzzle_pending_save    = False
+                            st.success("✅ Skor puzzle berhasil disimpan ke Papan Skor!")
+                            st.rerun()
                         else:
-                            st.warning("⚠️ Waktu harus lebih dari 0 detik!")
+                            st.error("❌ Gagal menyimpan skor.")
+                else:
+                    # Fallback: input manual jika data JS belum masuk
+                    st.info(
+                        "💡 Klik **🏆 Simpan ke Papan Skor** di overlay 'PUZZLE SELESAI!' "
+                        "untuk mengisi waktu otomatis. Atau isi manual di bawah:"
+                    )
+                    col_w, col_e, col_btn = st.columns([2, 2, 2])
+                    with col_w:
+                        st.markdown("**⏱️ Waktu (dari layar PUZZLE SELESAI!)**")
+                        waktu_input_mnt = st.number_input(
+                            "Menit", min_value=0, max_value=99,
+                            value=0, step=1, key="puzzle_input_menit"
+                        )
+                        waktu_input_dtk = st.number_input(
+                            "Detik", min_value=0, max_value=59,
+                            value=0, step=1, key="puzzle_input_detik"
+                        )
+                    with col_e:
+                        st.markdown("**❌ Jumlah Kesalahan**")
+                        kesalahan_input = st.number_input(
+                            "Kesalahan", min_value=0, max_value=999,
+                            value=0, step=1, key="puzzle_input_kesalahan"
+                        )
+                        st.caption("💡 Peringkat: waktu tercepat → kesalahan minimal")
+                    with col_btn:
+                        st.markdown("**👤 Nama Pemain**")
+                        st.markdown(
+                            f"<div style='padding:8px 12px;background:rgba(255,215,0,0.15);"
+                            f"border:1px solid #ffd700;border-radius:8px;color:#ffd700;"
+                            f"font-weight:bold;margin-bottom:8px;'>⭐ {st.session_state.user_name}</div>",
+                            unsafe_allow_html=True
+                        )
+                        total_detik_input = waktu_input_mnt * 60 + waktu_input_dtk
+                        st.markdown(
+                            f"**Penalti:** `{total_detik_input + kesalahan_input * 10}`"
+                        )
+                        st.markdown("")
+                        if st.button(
+                            "💾 Simpan Skor Manual",
+                            use_container_width=True,
+                            type="primary",
+                            key="btn_simpan_puzzle_score"
+                        ):
+                            if total_detik_input > 0:
+                                berhasil = add_puzzle_score(
+                                    st.session_state.user_name,
+                                    total_detik_input,
+                                    kesalahan_input
+                                )
+                                if berhasil:
+                                    st.session_state.puzzle_score_saved    = True
+                                    st.session_state.puzzle_result_time_sec = total_detik_input
+                                    st.session_state.puzzle_result_errors   = kesalahan_input
+                                    st.session_state.puzzle_pending_save    = False
+                                    st.success("✅ Skor puzzle berhasil disimpan!")
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Gagal menyimpan skor.")
+                            else:
+                                st.warning("⚠️ Waktu harus lebih dari 0 detik!")
             else:
                 # Sudah tersimpan
                 wt = st.session_state.puzzle_result_time_sec or 0
