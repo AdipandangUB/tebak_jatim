@@ -1101,7 +1101,7 @@ def get_wilayah_info(nama):
     # Database untuk KABUPATEN (hanya kabupaten)
     db_kabupaten = {
         "Kabupaten Banyuwangi": {
-            "geografis": "Terletak di ujung timur Pulau Jawa, berbatasan dengan Selat Bali. Wilayah terluas di Jawa Timur (5.782 km²). Memiliki pantai, pegunungan, dan hutan tropis.",
+            "geografis": "Kabupaten yang terletak di ujung timur Pulau Jawa, berbatasan dengan Selat Bali. Wilayah terluas di Jawa Timur (5.782 km²). Memiliki pantai, pegunungan, dan hutan tropis.",
             "demografi": "Penduduk: ±1,7 juta jiwa. Mayoritas suku Osing (asli Banyuwangi), Jawa, Madura, dan Bali. Masyarakat multikultural dengan toleransi tinggi.",
             "budaya": "Kesenian khas: Gandrung Banyuwangi (tari penyambutan), Seblang (tari sakral), dan tari Jejer Jaran Dawuk. Tradisi: Kebo-keboan, Barong Ider Bumi.",
             "keunikan": "Kawah Ijen dengan fenomena api biru (blue fire), Taman Nasional Alas Purwo, Pantai Plengkung (G-Land) surga surfing, dan De Djawatan Forest.",
