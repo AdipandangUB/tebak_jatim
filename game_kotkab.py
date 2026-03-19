@@ -3264,22 +3264,8 @@ elif PAGE == "Papan Skor":
     # =========================================================
     with tab_puzzle:
         st.markdown("### 🧩 Papan Skor Puzzle Peta Jawa Timur")
-        st.caption("Peringkat: ⏱️ Waktu tercepat → ❌ Kesalahan paling sedikit → Terbaru")
+        st.caption("Peringkat: ⏱️ Waktu tercepat → Terbaru")
 
-        st.markdown(
-            """
-            <div style='background:linear-gradient(135deg,#0f3443,#1a1a2e);
-                border:1px solid rgba(255,215,0,0.3);border-radius:12px;
-                padding:12px 16px;margin-bottom:14px;'>
-              <span style='color:#ffd700;font-weight:bold;'>📐 Sistem Penilaian Puzzle:</span>
-              <span style='color:rgba(255,255,255,0.8);font-size:0.9em;'>
-                &nbsp; Skor Penalti = Waktu (detik) + Kesalahan × 10 &nbsp;|&nbsp;
-                Makin kecil skor penalti = Peringkat makin tinggi
-              </span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
 
         puzzle_sb      = load_puzzle_scoreboard()
         puzzle_stats = get_puzzle_scoreboard_stats(puzzle_sb)   # stats dari semua entri
@@ -3292,21 +3278,17 @@ elif PAGE == "Papan Skor":
                 if nm == st.session_state.user_name:
                     nm = f"⭐ {nm} (Kamu)"
                 waktu_fmt = p.get("waktu_format", "--:--")
-                kesalahan = p.get("kesalahan", 0)
-                penalti   = p.get("poin_penalti", "-")
                 tgl       = (p.get("tanggal", "")[:16] if p.get("tanggal") else "")
                 rows_p.append({
-                    "Peringkat":    icon,
-                    "Nama":         nm,
-                    "⏱️ Waktu":     waktu_fmt,
-                    "❌ Kesalahan": kesalahan,
-                    "📊 Penalti":   penalti,
-                    "🗓️ Tanggal":   tgl,
+                    "Peringkat":  icon,
+                    "Nama":       nm,
+                    "⏱️ Waktu":   waktu_fmt,
+                    "🗓️ Tanggal": tgl,
                 })
             st.dataframe(pd.DataFrame(rows_p), hide_index=True, use_container_width=True)
 
             # Statistik ringkas
-            pc1, pc2, pc3, pc4 = st.columns(4)
+            pc1, pc2, pc3 = st.columns(3)
             with pc1:
                 juara = puzzle_sb[0]
                 st.metric("👑 Juara 1", juara.get("nama", "-"))
@@ -3317,21 +3299,12 @@ elif PAGE == "Papan Skor":
                     wt.get("waktu_format", "-") if wt else "-"
                 )
             with pc3:
-                me = puzzle_stats["kesalahan_minimal"]
-                st.metric(
-                    "🎯 Min. Kesalahan",
-                    f"{me.get('kesalahan','-')} oleh {me.get('nama','-')[:8]}" if me else "-"
-                )
-            with pc4:
                 st.metric("📋 Total Entri", puzzle_stats["total_entri"])
 
             if puzzle_stats["rata_waktu"]:
                 rw = int(puzzle_stats["rata_waktu"])
                 rm, rs = divmod(rw, 60)
-                st.info(
-                    f"📊 Rata-rata waktu: **{rm:02d}:{rs:02d}** | "
-                    f"Rata-rata kesalahan: **{puzzle_stats['rata_kesalahan']}**"
-                )
+                st.info(f"📊 Rata-rata waktu: **{rm:02d}:{rs:02d}**")
 
             # Highlight podium top 3
             st.markdown("#### 🏅 Podium Juara Puzzle")
@@ -3357,12 +3330,7 @@ elif PAGE == "Papan Skor":
                               margin:4px 0;word-break:break-all;'>{nm}</div>
                           <div style='color:rgba(255,255,255,0.9);font-size:1.2em;
                               font-weight:bold;'>⏱️ {wm_p:02d}:{ws_p:02d}</div>
-                          <div style='color:rgba(255,255,255,0.7);font-size:0.85em;'>
-                            ❌ {p.get("kesalahan",0)} kesalahan
-                          </div>
-                          <div style='color:{color};font-size:0.8em;margin-top:4px;'>
-                            Penalti: {p.get("poin_penalti","-")}
-                          </div>
+
                         </div>
                         """,
                         unsafe_allow_html=True
