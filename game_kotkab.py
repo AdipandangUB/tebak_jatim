@@ -2367,7 +2367,7 @@ with st.sidebar:
 
     elif PAGE == "Tentang":
         st.header("ℹ️ Tentang")
-        st.markdown("**Pengetahuan Tentang Kota & Kabupaten di Jawa Timur** v2.9.0\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
+        st.markdown("**Sepiro Jawa Timur, Sampeyan** v2.9.0\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
 
 # Expose PAGE for main content area
 PAGE = st.session_state.get("main_navigation", "🎮 Game")
@@ -3036,12 +3036,12 @@ elif PAGE == "Tentang":
     c1, c2 = st.columns([2, 1])
     with c1:
         st.markdown("""
-        ### Pengetahuan Tentang Kota & Wilayah di Jawa Timur
+        ### Sepiro Jawa Timur, Sampeyan
 
         Aplikasi interaktif untuk mempelajari bentuk kota dan kabupaten di Jawa Timur.
 
         **Fitur:**
-        - 🧩 Tebak bentuk kota & wilayah dari peta
+        - 🧩 Quiz Tebak bentuk kota & wilayah dari peta
         - 📚 Mode belajar dengan info wilayah + Logo Kabupaten/Kota
         - 🧩 **Puzzle Drag & Drop** — Kepingan berbentuk POLYGON ASLI wilayah administrasi
         - 🌋 Visualisasi 3D Gunung Bromo
