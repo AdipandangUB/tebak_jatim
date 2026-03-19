@@ -2358,16 +2358,20 @@ with st.sidebar:
     # ==================== PERUBAHAN: "Belajar" -> "Info Wilayah", "Game" -> "Quiz" ====================
     menu_options = ["📚 Info Wilayah", "🎮 Quiz", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
                     "🏆 Papan Skor", "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
-    # Terapkan pending navigation sebelum widget radio dirender
+    # Terapkan pending navigation: tentukan index awal radio
+    _nav_index = 0
     if st.session_state.get("pending_navigation"):
         _target = st.session_state.pending_navigation
         st.session_state.pending_navigation = None
         if _target in menu_options:
-            st.session_state["main_navigation"] = _target
+            _nav_index = menu_options.index(_target)
+    elif st.session_state.get("main_navigation") in menu_options:
+        _nav_index = menu_options.index(st.session_state["main_navigation"])
+
     selected_menu = st.radio("Menu", menu_options,
-                             index=menu_options.index(st.session_state.get("main_navigation", menu_options[0]))
-                                   if st.session_state.get("main_navigation") in menu_options else 0,
-                             label_visibility="collapsed", key="main_navigation")
+                             index=_nav_index,
+                             label_visibility="collapsed",
+                             key="main_navigation")
 
     PAGE = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
 
@@ -2769,48 +2773,58 @@ elif PAGE == "Puzzle":
                 unsafe_allow_html=True
             )
 
-            with st.form("puzzle_save_form"):
-                st.markdown(f"**Nama:** {st.session_state.user_name}")
-                st.markdown(f"**Waktu:** `{wm:02d}:{ws:02d}`")
-                kesalahan_input = st.number_input(
-                    "❌ Jumlah Kesalahan (lihat angka di layar puzzle)",
-                    min_value=0, max_value=999, value=0, step=1
-                )
-                st.caption("💡 Penalti = Waktu (detik) + Kesalahan × 10 — makin kecil makin baik")
-                c_save, c_skip = st.columns(2)
-                with c_save:
-                    simpan = st.form_submit_button(
-                        "💾 Simpan Skor ke Papan Skor",
-                        use_container_width=True,
-                        type="primary"
-                    )
-                with c_skip:
-                    skip = st.form_submit_button(
-                        "🔄 Main Lagi (tanpa simpan)",
-                        use_container_width=True
-                    )
-                # Simpan nilai ke session_state DI DALAM form
-                # saat submit, nilai kesalahan_input sudah terbaca dengan benar
-                if simpan:
-                    _kesalahan = int(kesalahan_input)
-                    if add_puzzle_score(st.session_state.user_name, _js_wkt, _kesalahan):
-                        st.session_state.puzzle_score_saved     = True
-                        st.session_state.puzzle_completed       = False
-                        st.session_state.puzzle_result_time_sec = _js_wkt
-                        st.session_state.puzzle_result_errors   = _kesalahan
-                        st.session_state.puzzle_js_waktu        = None
-                        st.session_state.puzzle_js_errors       = None
-                        st.rerun()
-                    else:
-                        st.error("❌ Gagal menyimpan skor.")
+            st.markdown(f"**Nama:** {st.session_state.user_name}")
+            st.markdown(f"**Waktu:** `{wm:02d}:{ws:02d}`")
 
-                if skip:
-                    st.session_state.puzzle_started     = False
-                    st.session_state.puzzle_start_time  = None
-                    st.session_state.puzzle_completed   = False
-                    st.session_state.puzzle_js_waktu    = None
-                    st.session_state.puzzle_js_errors   = None
+            # Gunakan number_input biasa (tanpa st.form) dengan key unik
+            # Nilai tersimpan di st.session_state["_pzl_err"] secara otomatis
+            _kesalahan_val = st.number_input(
+                "❌ Jumlah Kesalahan (lihat angka di layar puzzle)",
+                min_value=0, max_value=999, value=0, step=1,
+                key="_pzl_err"
+            )
+            st.caption("💡 Penalti = Waktu (detik) + Kesalahan × 10 — makin kecil makin baik")
+
+            c_save, c_skip = st.columns(2)
+            with c_save:
+                simpan = st.button(
+                    "💾 Simpan Skor ke Papan Skor",
+                    use_container_width=True,
+                    type="primary",
+                    key="btn_puzzle_simpan"
+                )
+            with c_skip:
+                skip = st.button(
+                    "🔄 Main Lagi (tanpa simpan)",
+                    use_container_width=True,
+                    key="btn_puzzle_skip"
+                )
+
+            if simpan:
+                # Baca langsung dari session_state — dijamin nilai terbaru
+                _kesalahan = int(st.session_state.get("_pzl_err", 0))
+                if add_puzzle_score(st.session_state.user_name, _js_wkt, _kesalahan):
+                    st.session_state.puzzle_score_saved     = True
+                    st.session_state.puzzle_completed       = False
+                    st.session_state.puzzle_result_time_sec = _js_wkt
+                    st.session_state.puzzle_result_errors   = _kesalahan
+                    st.session_state.puzzle_js_waktu        = None
+                    st.session_state.puzzle_js_errors       = None
+                    if "_pzl_err" in st.session_state:
+                        del st.session_state["_pzl_err"]
                     st.rerun()
+                else:
+                    st.error("❌ Gagal menyimpan skor.")
+
+            if skip:
+                st.session_state.puzzle_started     = False
+                st.session_state.puzzle_start_time  = None
+                st.session_state.puzzle_completed   = False
+                st.session_state.puzzle_js_waktu    = None
+                st.session_state.puzzle_js_errors   = None
+                if "_pzl_err" in st.session_state:
+                    del st.session_state["_pzl_err"]
+                st.rerun()
 
         else:
             # puzzle_completed = True tapi js_waktu kosong (edge case)
