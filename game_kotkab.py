@@ -1713,12 +1713,17 @@ def get_puzzle_html(geojson_data, start_time_ms):
     <p style="color:#ffd700;font-size:0.88em;margin-top:8px;">
       🎉 Luar biasa! Kamu mengenal semua wilayah Jawa Timur!
     </p>
-    <p style="color:#4ade80;font-size:0.85em;margin-top:8px;">
-      ⏳ Skor sedang disimpan otomatis...
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="puzzle-btn success"
+        style="font-size:1em;padding:10px 24px;"
+        onclick="tutupOverlayDanSimpan()">📥 Selesai & Simpan Skor</button>
+      <button class="puzzle-btn"
+        style="font-size:1em;padding:10px 24px;"
+        onclick="location.reload()">🔄 Main Lagi</button>
+    </div>
+    <p id="overlay-info" style="color:rgba(255,255,255,0.55);font-size:0.78em;margin-top:10px;">
+      Klik "Selesai & Simpan Skor" untuk lanjut ke halaman simpan skor
     </p>
-    <button class="puzzle-btn success"
-      style="margin-top:14px;font-size:1em;padding:10px 30px;"
-      onclick="location.reload()">🔄 Main Lagi</button>
   </div>
 </div>
 
@@ -2069,30 +2074,29 @@ def get_puzzle_html(geojson_data, start_time_ms):
         String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
       document.getElementById('win-moves').textContent = mistakes+' kesalahan';
 
-      // === KIRIM HASIL KE STREAMLIT OTOMATIS VIA URL PARAMS ===
-      try {{
-        const u = new URL(window.parent.location.href);
-        u.searchParams.set('puzzle_waktu', e);
-        u.searchParams.set('puzzle_salah', mistakes);
-        window.parent.history.replaceState(null, '', u.toString());
-      }} catch(err) {{}}
+      // Simpan hasil ke variabel global agar bisa dibaca saat tombol diklik
+      window._puzzleWaktuDetik = e;
+      window._puzzleMistakes   = mistakes;
 
-      // Tampilkan overlay setelah delay singkat
+      // Tampilkan overlay
       setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 600);
-
-      // Reload Streamlit otomatis setelah overlay ditampilkan (2.5 detik)
-      // agar Python membaca query params dan menyimpan skor
-      setTimeout(() => {{
-        try {{
-          const u2 = new URL(window.parent.location.href);
-          if(u2.searchParams.get('puzzle_waktu')) {{
-            // Trigger Streamlit rerun via navigation
-            window.parent.location.href = u2.toString();
-          }}
-        }} catch(err) {{}}
-      }}, 2500);
     }}
   }}
+
+  // Tombol "Selesai & Simpan Skor": tulis params ke URL lalu reload agar
+  // Python membaca hasilnya dan menampilkan form simpan skor
+  window.tutupOverlayDanSimpan = function() {{
+    const waktu = window._puzzleWaktuDetik || 0;
+    const salah = window._puzzleMistakes   || 0;
+    try {{
+      const u = new URL(window.parent.location.href);
+      u.searchParams.set('puzzle_waktu', waktu);
+      u.searchParams.set('puzzle_salah', salah);
+      window.parent.location.href = u.toString();   // reload + bawa params
+    }} catch(err) {{
+      location.reload();
+    }}
+  }};
 
   // ===== TIMER =====
   setInterval(() => {{
@@ -2238,17 +2242,9 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return html
 
 
-# ==================== AUTO SIMPAN SKOR PUZZLE ====================
-# Jika ada data pending dari query_params JS, simpan otomatis ke papan skor
-if st.session_state.get("puzzle_auto_save_pending") and not st.session_state.get("puzzle_score_saved"):
-    _wkt = st.session_state.get("puzzle_js_waktu")
-    _slh = st.session_state.get("puzzle_js_errors", 0)
-    if _wkt and _wkt > 0:
-        if add_puzzle_score(st.session_state.user_name, _wkt, _slh):
-            st.session_state.puzzle_score_saved      = True
-            st.session_state.puzzle_result_time_sec  = _wkt
-            st.session_state.puzzle_result_errors    = _slh
-            st.session_state.puzzle_auto_save_pending = False
+# ==================== BACA HASIL PUZZLE DARI JS (query_params) ====================
+# JS tutupOverlayDanSimpan() menulis ?puzzle_waktu=X&puzzle_salah=Y ke URL lalu reload
+# Python cukup menyimpan ke session state — penyimpanan ke papan skor lewat tombol
 
 
 # ==================== CSS RENDER ====================
@@ -2688,60 +2684,32 @@ elif PAGE == "Puzzle":
             "Klik **💡 Petunjuk** untuk melihat outline panduan."
         )
 
-        # ===== HASIL PUZZLE — OTOMATIS TERSIMPAN =====
+        # ===== HASIL PUZZLE & SIMPAN SKOR =====
         st.markdown("---")
+        _js_wkt = st.session_state.get("puzzle_js_waktu")
+        _js_err = st.session_state.get("puzzle_js_errors", 0)
+
         if st.session_state.puzzle_score_saved:
-            # Skor sudah tersimpan otomatis
+            # --- Skor sudah disimpan ---
             wt  = st.session_state.puzzle_result_time_sec or 0
             err = st.session_state.puzzle_result_errors   or 0
-            wm, ws = divmod(int(wt), 60)
+            wm, ws  = divmod(int(wt), 60)
             penalti = int(wt) + err * 10
-            st.markdown(
-                f"""
-                <div style='background:linear-gradient(135deg,#0a2a1a,#0d3d26);
-                    border:2px solid #4ade80;border-radius:16px;padding:20px 24px;
-                    margin-bottom:12px;'>
-                  <div style='display:flex;align-items:center;gap:14px;flex-wrap:wrap;'>
-                    <span style='font-size:2.2em;'>🏆</span>
-                    <div>
-                      <div style='color:#4ade80;font-size:1.1em;font-weight:900;'>
-                        ✅ Skor Tersimpan Otomatis ke Papan Skor!
-                      </div>
-                      <div style='color:rgba(255,255,255,0.7);font-size:0.85em;'>
-                        ⭐ {st.session_state.user_name}
-                      </div>
-                    </div>
-                  </div>
-                  <div style='display:flex;flex-wrap:wrap;gap:20px;margin-top:14px;'>
-                    <div style='text-align:center;background:rgba(255,255,255,0.07);
-                        border-radius:10px;padding:10px 18px;'>
-                      <div style='color:rgba(255,255,255,0.55);font-size:0.75em;'>⏱️ WAKTU</div>
-                      <div style='color:#ffd700;font-size:1.7em;font-weight:900;'>{wm:02d}:{ws:02d}</div>
-                    </div>
-                    <div style='text-align:center;background:rgba(255,255,255,0.07);
-                        border-radius:10px;padding:10px 18px;'>
-                      <div style='color:rgba(255,255,255,0.55);font-size:0.75em;'>❌ KESALAHAN</div>
-                      <div style='color:#ff6b6b;font-size:1.7em;font-weight:900;'>{err}</div>
-                    </div>
-                    <div style='text-align:center;background:rgba(255,255,255,0.07);
-                        border-radius:10px;padding:10px 18px;'>
-                      <div style='color:rgba(255,255,255,0.55);font-size:0.75em;'>📊 PENALTI</div>
-                      <div style='color:#4ade80;font-size:1.7em;font-weight:900;'>{penalti}</div>
-                    </div>
-                  </div>
-                </div>
-                """,
-                unsafe_allow_html=True
+            st.success(
+                f"✅ **Skor Puzzle sudah disimpan!** — "
+                f"⏱️ {wm:02d}:{ws:02d} | ❌ {err} kesalahan | 📊 Penalti: {penalti}"
             )
             cola, colb = st.columns(2)
             with cola:
                 if st.button("🔄 Main Puzzle Lagi", use_container_width=True,
                              type="primary", key="btn_puzzle_ulang"):
-                    st.session_state.puzzle_started          = False
-                    st.session_state.puzzle_start_time       = None
-                    st.session_state.puzzle_score_saved      = False
-                    st.session_state.puzzle_result_time_sec  = None
-                    st.session_state.puzzle_result_errors    = None
+                    st.session_state.puzzle_started           = False
+                    st.session_state.puzzle_start_time        = None
+                    st.session_state.puzzle_score_saved       = False
+                    st.session_state.puzzle_result_time_sec   = None
+                    st.session_state.puzzle_result_errors     = None
+                    st.session_state.puzzle_js_waktu          = None
+                    st.session_state.puzzle_js_errors         = None
                     st.session_state.puzzle_auto_save_pending = False
                     st.rerun()
             with colb:
@@ -2749,9 +2717,80 @@ elif PAGE == "Puzzle":
                              key="btn_lihat_papan"):
                     st.session_state.pending_navigation = "🏆 Papan Skor"
                     st.rerun()
+
+        elif _js_wkt:
+            # --- Puzzle selesai, belum disimpan — tampilkan form simpan ---
+            wm, ws  = divmod(int(_js_wkt), 60)
+            penalti = int(_js_wkt) + (_js_err or 0) * 10
+
+            st.markdown("### 🏆 Puzzle Selesai!")
+            st.markdown(
+                f"""
+                <div style='background:linear-gradient(135deg,#1a1a2e,#16213e);
+                    border:2px solid #ffd700;border-radius:14px;padding:18px 22px;
+                    margin-bottom:14px;'>
+                  <div style='display:flex;flex-wrap:wrap;gap:24px;align-items:center;'>
+                    <div style='text-align:center;'>
+                      <div style='color:rgba(255,255,255,0.55);font-size:0.78em;'>⏱️ WAKTU</div>
+                      <div style='color:#ffd700;font-size:2em;font-weight:900;'>{wm:02d}:{ws:02d}</div>
+                    </div>
+                    <div style='text-align:center;'>
+                      <div style='color:rgba(255,255,255,0.55);font-size:0.78em;'>❌ KESALAHAN</div>
+                      <div style='color:#ff6b6b;font-size:2em;font-weight:900;'>{_js_err}</div>
+                    </div>
+                    <div style='text-align:center;'>
+                      <div style='color:rgba(255,255,255,0.55);font-size:0.78em;'>📊 PENALTI</div>
+                      <div style='color:#4ade80;font-size:2em;font-weight:900;'>{penalti}</div>
+                    </div>
+                    <div style='margin-left:auto;'>
+                      <div style='color:rgba(255,255,255,0.55);font-size:0.78em;'>👤 PEMAIN</div>
+                      <div style='color:#ffd700;font-weight:bold;'>⭐ {st.session_state.user_name}</div>
+                    </div>
+                  </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            with st.form("puzzle_save_form"):
+                st.markdown(f"**Nama:** {st.session_state.user_name}")
+                st.markdown(f"**Waktu:** {wm:02d}:{ws:02d} &nbsp;|&nbsp; **Kesalahan:** {_js_err} &nbsp;|&nbsp; **Penalti:** {penalti}")
+                c_save, c_skip = st.columns(2)
+                with c_save:
+                    simpan = st.form_submit_button(
+                        "💾 Simpan Skor ke Papan Skor",
+                        use_container_width=True,
+                        type="primary"
+                    )
+                with c_skip:
+                    skip = st.form_submit_button(
+                        "🔄 Main Lagi (tanpa simpan)",
+                        use_container_width=True
+                    )
+
+            if simpan:
+                if add_puzzle_score(st.session_state.user_name, _js_wkt, _js_err):
+                    st.session_state.puzzle_score_saved      = True
+                    st.session_state.puzzle_result_time_sec  = _js_wkt
+                    st.session_state.puzzle_result_errors    = _js_err
+                    st.session_state.puzzle_js_waktu         = None
+                    st.session_state.puzzle_js_errors        = None
+                    st.session_state.puzzle_auto_save_pending = False
+                    st.success("✅ Skor berhasil disimpan ke Papan Skor!")
+                    st.rerun()
+                else:
+                    st.error("❌ Gagal menyimpan skor.")
+
+            if skip:
+                st.session_state.puzzle_started           = False
+                st.session_state.puzzle_start_time        = None
+                st.session_state.puzzle_js_waktu          = None
+                st.session_state.puzzle_js_errors         = None
+                st.session_state.puzzle_auto_save_pending = False
+                st.rerun()
+
         else:
-            # Puzzle selesai tapi skor belum tersimpan (mungkin halaman baru dibuka)
-            st.info("🧩 Selesaikan puzzle untuk menyimpan skor secara otomatis.")
+            st.info("💡 Selesaikan puzzle lalu klik **📥 Selesai & Simpan Skor** pada layar hasil.")
 
 
 # ==================== HALAMAN INFO WILAYAH (dengan logo) ====================
@@ -3286,7 +3325,7 @@ elif PAGE == "Papan Skor":
                         unsafe_allow_html=True
                     )
         else:
-            st.info("Belum ada skor Puzzle. Mainkan Puzzle dulu untuk menyimpan hasilnya secara otomatis!")
+            st.info("Belum ada skor Puzzle. Mainkan Puzzle dan simpan hasilnya ke Papan Skor!")
 
         # Skor puzzle user saat ini (jika belum disimpan dari halaman puzzle)
         st.markdown("---")
