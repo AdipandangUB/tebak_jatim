@@ -2769,17 +2769,12 @@ elif PAGE == "Puzzle":
                 unsafe_allow_html=True
             )
 
-            # Inisialisasi nilai kesalahan di session state agar tersimpan antar render
-            if "puzzle_input_kesalahan" not in st.session_state:
-                st.session_state.puzzle_input_kesalahan = 0
-
             with st.form("puzzle_save_form"):
                 st.markdown(f"**Nama:** {st.session_state.user_name}")
                 st.markdown(f"**Waktu:** `{wm:02d}:{ws:02d}`")
-                st.number_input(
+                kesalahan_input = st.number_input(
                     "❌ Jumlah Kesalahan (lihat angka di layar puzzle)",
-                    min_value=0, max_value=999, step=1,
-                    key="puzzle_input_kesalahan"
+                    min_value=0, max_value=999, value=0, step=1
                 )
                 st.caption("💡 Penalti = Waktu (detik) + Kesalahan × 10 — makin kecil makin baik")
                 c_save, c_skip = st.columns(2)
@@ -2794,31 +2789,28 @@ elif PAGE == "Puzzle":
                         "🔄 Main Lagi (tanpa simpan)",
                         use_container_width=True
                     )
+                # Simpan nilai ke session_state DI DALAM form
+                # saat submit, nilai kesalahan_input sudah terbaca dengan benar
+                if simpan:
+                    _kesalahan = int(kesalahan_input)
+                    if add_puzzle_score(st.session_state.user_name, _js_wkt, _kesalahan):
+                        st.session_state.puzzle_score_saved     = True
+                        st.session_state.puzzle_completed       = False
+                        st.session_state.puzzle_result_time_sec = _js_wkt
+                        st.session_state.puzzle_result_errors   = _kesalahan
+                        st.session_state.puzzle_js_waktu        = None
+                        st.session_state.puzzle_js_errors       = None
+                        st.rerun()
+                    else:
+                        st.error("❌ Gagal menyimpan skor.")
 
-            # Baca nilai dari session_state (bukan dari variabel lokal)
-            # agar nilai yang diinput user benar-benar tersimpan saat submit
-            if simpan:
-                _kesalahan = int(st.session_state.get("puzzle_input_kesalahan", 0))
-                if add_puzzle_score(st.session_state.user_name, _js_wkt, _kesalahan):
-                    st.session_state.puzzle_score_saved          = True
-                    st.session_state.puzzle_completed            = False
-                    st.session_state.puzzle_result_time_sec      = _js_wkt
-                    st.session_state.puzzle_result_errors        = _kesalahan
-                    st.session_state.puzzle_js_waktu             = None
-                    st.session_state.puzzle_js_errors            = None
-                    st.session_state.puzzle_input_kesalahan      = 0
+                if skip:
+                    st.session_state.puzzle_started     = False
+                    st.session_state.puzzle_start_time  = None
+                    st.session_state.puzzle_completed   = False
+                    st.session_state.puzzle_js_waktu    = None
+                    st.session_state.puzzle_js_errors   = None
                     st.rerun()
-                else:
-                    st.error("❌ Gagal menyimpan skor.")
-
-            if skip:
-                st.session_state.puzzle_started          = False
-                st.session_state.puzzle_start_time       = None
-                st.session_state.puzzle_completed        = False
-                st.session_state.puzzle_js_waktu         = None
-                st.session_state.puzzle_js_errors        = None
-                st.session_state.puzzle_input_kesalahan  = 0
-                st.rerun()
 
         else:
             # puzzle_completed = True tapi js_waktu kosong (edge case)
