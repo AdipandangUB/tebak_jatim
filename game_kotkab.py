@@ -928,20 +928,19 @@ for key, val in _defaults.items():
         st.session_state[key] = val
 
 
-# ==================== BACA HASIL PUZZLE DARI JS (query_params) & SIMPAN OTOMATIS ====================
-# JS checkWin menulis ?puzzle_waktu=X&puzzle_salah=Y ke URL lalu reload
-# Python membaca, langsung simpan ke papan skor tanpa interaksi user
+# ==================== BACA HASIL PUZZLE DARI JS (query_params) ====================
+# JS tutupOverlayDanSimpan() menulis ?puzzle_waktu=X&puzzle_salah=Y ke URL lalu reload
+# Python membaca dan menyimpan ke session state; form simpan skor tampil di halaman puzzle
 try:
     _qp = st.query_params
     if "puzzle_waktu" in _qp and "puzzle_salah" in _qp:
         _wkt = int(_qp["puzzle_waktu"])
         _slh = int(_qp["puzzle_salah"])
-        if _wkt > 0 and not st.session_state.get("puzzle_score_saved"):
-            st.session_state.puzzle_js_waktu          = _wkt
-            st.session_state.puzzle_js_errors         = _slh
-            st.session_state.puzzle_auto_save_pending = True
-        # Hapus dari URL supaya tidak terbaca ulang
-        st.query_params.clear()
+        if _wkt > 0:
+            st.session_state.puzzle_js_waktu    = _wkt
+            st.session_state.puzzle_js_errors   = _slh
+            st.session_state.puzzle_completed   = True   # puzzle selesai, tampilkan form
+        st.query_params.clear()                          # bersihkan URL
 except Exception:
     pass
 
@@ -2594,7 +2593,7 @@ elif PAGE == "Puzzle":
         unsafe_allow_html=True
     )
 
-    if not st.session_state.puzzle_started:
+    if not st.session_state.puzzle_started and not st.session_state.puzzle_completed and not st.session_state.puzzle_score_saved:
         # Preview peta + tombol mulai
         st.markdown("### 🗺️ Pratinjau Peta Jawa Timur")
 
@@ -2654,7 +2653,7 @@ elif PAGE == "Puzzle":
             "5. Susun semua kepingan untuk melengkapi peta Jawa Timur!"
         )
 
-    else:
+    elif st.session_state.puzzle_started:
         # PUZZLE AKTIF
         h1, h2 = st.columns([3, 1])
         with h1:
@@ -2684,33 +2683,35 @@ elif PAGE == "Puzzle":
             "Klik **💡 Petunjuk** untuk melihat outline panduan."
         )
 
-        # ===== HASIL PUZZLE & SIMPAN SKOR =====
-        st.markdown("---")
+    # ===== HASIL PUZZLE & FORM SIMPAN SKOR =====
+    # Ditampilkan ketika puzzle_completed = True (dari JS) atau puzzle_score_saved = True
+    if st.session_state.puzzle_completed or st.session_state.puzzle_score_saved:
         _js_wkt = st.session_state.get("puzzle_js_waktu")
         _js_err = st.session_state.get("puzzle_js_errors", 0)
 
         if st.session_state.puzzle_score_saved:
-            # --- Skor sudah disimpan ---
+            # Skor sudah disimpan
             wt  = st.session_state.puzzle_result_time_sec or 0
             err = st.session_state.puzzle_result_errors   or 0
             wm, ws  = divmod(int(wt), 60)
             penalti = int(wt) + err * 10
+            st.markdown("### 🏆 Puzzle Selesai!")
             st.success(
-                f"✅ **Skor Puzzle sudah disimpan!** — "
+                f"✅ **Skor berhasil disimpan ke Papan Skor!** — "
                 f"⏱️ {wm:02d}:{ws:02d} | ❌ {err} kesalahan | 📊 Penalti: {penalti}"
             )
             cola, colb = st.columns(2)
             with cola:
                 if st.button("🔄 Main Puzzle Lagi", use_container_width=True,
                              type="primary", key="btn_puzzle_ulang"):
-                    st.session_state.puzzle_started           = False
-                    st.session_state.puzzle_start_time        = None
-                    st.session_state.puzzle_score_saved       = False
-                    st.session_state.puzzle_result_time_sec   = None
-                    st.session_state.puzzle_result_errors     = None
-                    st.session_state.puzzle_js_waktu          = None
-                    st.session_state.puzzle_js_errors         = None
-                    st.session_state.puzzle_auto_save_pending = False
+                    st.session_state.puzzle_started         = False
+                    st.session_state.puzzle_start_time      = None
+                    st.session_state.puzzle_completed       = False
+                    st.session_state.puzzle_score_saved     = False
+                    st.session_state.puzzle_result_time_sec = None
+                    st.session_state.puzzle_result_errors   = None
+                    st.session_state.puzzle_js_waktu        = None
+                    st.session_state.puzzle_js_errors       = None
                     st.rerun()
             with colb:
                 if st.button("🏆 Lihat Papan Skor Puzzle", use_container_width=True,
@@ -2719,7 +2720,7 @@ elif PAGE == "Puzzle":
                     st.rerun()
 
         elif _js_wkt:
-            # --- Puzzle selesai, belum disimpan — tampilkan form simpan ---
+            # Puzzle selesai, belum disimpan — tampilkan form simpan bergaya Quiz
             wm, ws  = divmod(int(_js_wkt), 60)
             penalti = int(_js_wkt) + (_js_err or 0) * 10
 
@@ -2754,7 +2755,11 @@ elif PAGE == "Puzzle":
 
             with st.form("puzzle_save_form"):
                 st.markdown(f"**Nama:** {st.session_state.user_name}")
-                st.markdown(f"**Waktu:** {wm:02d}:{ws:02d} &nbsp;|&nbsp; **Kesalahan:** {_js_err} &nbsp;|&nbsp; **Penalti:** {penalti}")
+                st.markdown(
+                    f"**Waktu:** {wm:02d}:{ws:02d} &nbsp;|&nbsp; "
+                    f"**Kesalahan:** {_js_err} &nbsp;|&nbsp; "
+                    f"**Penalti:** {penalti}"
+                )
                 c_save, c_skip = st.columns(2)
                 with c_save:
                     simpan = st.form_submit_button(
@@ -2770,27 +2775,31 @@ elif PAGE == "Puzzle":
 
             if simpan:
                 if add_puzzle_score(st.session_state.user_name, _js_wkt, _js_err):
-                    st.session_state.puzzle_score_saved      = True
-                    st.session_state.puzzle_result_time_sec  = _js_wkt
-                    st.session_state.puzzle_result_errors    = _js_err
-                    st.session_state.puzzle_js_waktu         = None
-                    st.session_state.puzzle_js_errors        = None
-                    st.session_state.puzzle_auto_save_pending = False
-                    st.success("✅ Skor berhasil disimpan ke Papan Skor!")
+                    st.session_state.puzzle_score_saved     = True
+                    st.session_state.puzzle_completed       = False
+                    st.session_state.puzzle_result_time_sec = _js_wkt
+                    st.session_state.puzzle_result_errors   = _js_err
+                    st.session_state.puzzle_js_waktu        = None
+                    st.session_state.puzzle_js_errors       = None
                     st.rerun()
                 else:
                     st.error("❌ Gagal menyimpan skor.")
 
             if skip:
-                st.session_state.puzzle_started           = False
-                st.session_state.puzzle_start_time        = None
-                st.session_state.puzzle_js_waktu          = None
-                st.session_state.puzzle_js_errors         = None
-                st.session_state.puzzle_auto_save_pending = False
+                st.session_state.puzzle_started     = False
+                st.session_state.puzzle_start_time  = None
+                st.session_state.puzzle_completed   = False
+                st.session_state.puzzle_js_waktu    = None
+                st.session_state.puzzle_js_errors   = None
                 st.rerun()
 
         else:
-            st.info("💡 Selesaikan puzzle lalu klik **📥 Selesai & Simpan Skor** pada layar hasil.")
+            # puzzle_completed = True tapi js_waktu kosong (edge case)
+            st.info("💡 Data hasil puzzle tidak ditemukan. Silakan main puzzle lagi.")
+            if st.button("🔄 Main Puzzle Lagi", key="btn_puzzle_retry"):
+                st.session_state.puzzle_completed = False
+                st.session_state.puzzle_started   = False
+                st.rerun()
 
 
 # ==================== HALAMAN INFO WILAYAH (dengan logo) ====================
