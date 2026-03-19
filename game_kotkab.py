@@ -915,6 +915,7 @@ _defaults = {
     "puzzle_result_errors": None,
     "puzzle_score_saved": False,
     "puzzle_pending_save": False,
+    "pending_navigation": None,
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
@@ -2330,7 +2331,15 @@ with st.sidebar:
     # ==================== PERUBAHAN: "Belajar" -> "Info Wilayah", "Game" -> "Quiz" ====================
     menu_options = ["📚 Info Wilayah", "🎮 Quiz", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
                     "🏆 Papan Skor", "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
-    selected_menu = st.radio("Menu", menu_options, index=0,
+    # Terapkan pending navigation sebelum widget radio dirender
+    if st.session_state.get("pending_navigation"):
+        _target = st.session_state.pending_navigation
+        st.session_state.pending_navigation = None
+        if _target in menu_options:
+            st.session_state["main_navigation"] = _target
+    selected_menu = st.radio("Menu", menu_options,
+                             index=menu_options.index(st.session_state.get("main_navigation", menu_options[0]))
+                                   if st.session_state.get("main_navigation") in menu_options else 0,
                              label_visibility="collapsed", key="main_navigation")
 
     PAGE = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
@@ -2764,7 +2773,7 @@ elif PAGE == "Puzzle":
                         st.rerun()
                 with colb:
                     if st.button("🏆 Lihat Papan Skor Puzzle", use_container_width=True, key="btn_lihat_papan"):
-                        st.session_state.main_navigation = "🏆 Papan Skor"
+                        st.session_state.pending_navigation = "🏆 Papan Skor"
                         st.rerun()
 
 
