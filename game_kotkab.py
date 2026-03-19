@@ -1765,8 +1765,33 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return p;
   }}
 
-  // Centroid proyeksi dari geometry
+  // Hitung luas poligon (dalam satuan proyeksi)
+  function polyArea(ring) {{
+    let area = 0;
+    const pts = ring.map(c => project(c[0], c[1]));
+    for(let i=0, j=pts.length-1; i<pts.length; j=i++) {{
+      area += (pts[j][0]+pts[i][0]) * (pts[j][1]-pts[i][1]);
+    }}
+    return Math.abs(area / 2);
+  }}
+
+  // Centroid proyeksi: untuk MultiPolygon pakai polygon TERBESAR
+  // sehingga kepulauan kecil tidak menarik centroid ke tengah laut
   function geomCentroid(geom) {{
+    if(geom.type === 'MultiPolygon') {{
+      // Cari polygon terbesar berdasarkan luas ring luar
+      let bestRing = null, bestArea = 0;
+      geom.coordinates.forEach(poly => {{
+        const area = polyArea(poly[0]);
+        if(area > bestArea) {{ bestArea = area; bestRing = poly[0]; }}
+      }});
+      if(bestRing) {{
+        let sx=0, sy=0;
+        bestRing.forEach(c => {{ const [x,y]=project(c[0],c[1]); sx+=x; sy+=y; }});
+        return [sx/bestRing.length, sy/bestRing.length];
+      }}
+    }}
+    // Polygon biasa atau fallback: rata-rata semua titik
     let sx=0, sy=0, n=0;
     iterGeom(geom, (lon,lat) => {{
       const [x,y] = project(lon,lat);
@@ -1991,14 +2016,28 @@ def get_puzzle_html(geojson_data, start_time_ms):
   }});
 
   // ===== SNAP =====
+  // Wilayah kepulauan: centroid bisa bergeser, beri toleransi ekstra
+  const KEPULAUAN_BONUS = {{
+    'Kabupaten Sumenep': 2.2,   // kepulauan sangat tersebar (Kangean, Masalembu)
+    'Kabupaten Bangkalan': 1.4,
+    'Kabupaten Sampang':  1.4,
+    'Kabupaten Pamekasan':1.4,
+    'Kabupaten Gresik':   1.3,  // ada Pulau Bawean
+  }};
+
   function trySnap(piece, dropX, dropY) {{
     const tx   = piece.centroid[0];
     const ty   = piece.centroid[1];
     const dist = Math.hypot(dropX - tx, dropY - ty);
-    // Snap threshold: makin kecil wilayah, makin toleran
-    const bb   = piece.bbox;
-    const size = Math.min(bb.w, bb.h);
-    const thr  = Math.max(SNAP_DIST, Math.min(size * 0.55, 50)) * (W / 680);
+
+    // Threshold dasar: akar luas bbox (lebih representatif dari min dimension)
+    const bb     = piece.bbox;
+    const sqrtArea = Math.sqrt(bb.w * bb.h);
+    const baseThr  = Math.max(SNAP_DIST, Math.min(sqrtArea * 0.45, 72));
+
+    // Bonus threshold untuk wilayah kepulauan
+    const bonus  = KEPULAUAN_BONUS[piece.name] || 1.0;
+    const thr    = baseThr * bonus * (W / 680);
 
     if(dist <= thr) {{
       piece.dx = 0; piece.dy = 0;
@@ -2012,7 +2051,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
       mistakes++;
       showFB(dropX, dropY, false);
       updateAccuracy();
-      // Kepingan tetap mengambang di posisi drop (tidak kembali ke panel)
+      // Kepingan tetap mengambang di posisi drop
     }}
   }}
 
@@ -3973,4 +4012,3 @@ footer_texts = {
 footer_text = footer_texts.get(menu_key, "🧩 Sepiro Jawa Timur, Sampeyan")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
-
