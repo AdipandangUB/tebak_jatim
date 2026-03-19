@@ -56,7 +56,7 @@ LOGO_KABUPATEN = {
     "Pamekasan": "https://pamekasankab.go.id/img/lambang.jpg",
     "Pasuruan": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Lambang_Kabupaten_Pasuruan.png",
     "Ponorogo": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Lambang_Kabupaten_Ponorogo.png",
-    "Probolinggo": "https://upload.wikimedia.org/wikipedia/commons/7/7c/Flag_of_Probolinggo_Regency.png",
+    "Probolinggo": "https://upload.wikimedia.org/wikipedia/commons/7/7c/Flag_of_Probolinggo_Registry.png",
     "Sampang": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Lambang_Kabupaten_Sampang.png",
     "Sidoarjo": "https://upload.wikimedia.org/wikipedia/commons/0/06/Lambang_Kabupaten_Sidoarjo.jpeg",
     "Situbondo": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Lambang_Kabupaten_Situbondo.png",
@@ -2538,9 +2538,8 @@ with st.sidebar:
         st.header("ℹ️ Tentang")
         st.markdown("**Sepiro Jawa Timur, Sampeyan** v2.9.0\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
 
-# Expose PAGE for main content area
-PAGE = st.session_state.get("main_navigation", "📚 Info Wilayah")
-PAGE = PAGE.split(" ", 1)[1] if " " in PAGE else PAGE
+# PAGE sudah didefinisikan dari sidebar, gunakan langsung
+# Tidak perlu mendefinisikan ulang di sini
 
 
 # ==================== KONTEN UTAMA ====================
