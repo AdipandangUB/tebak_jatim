@@ -3162,12 +3162,47 @@ elif PAGE == "Papan Skor":
     st.title("🏆 Papan Skor Pemain")
     st.info("ℹ️ Papan skor tersimpan selama sesi berlangsung. Refresh halaman akan mereset data.")
 
-    tab_quiz, tab_puzzle = st.tabs(["🎮 Quiz Tebak Wilayah", "🧩 Puzzle Peta Jawa Timur"])
+    # Tambahkan CSS untuk membuat radio horizontal terlihat seperti tabs
+    st.markdown("""
+    <style>
+    div.row-widget.stRadio > div {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+    div.row-widget.stRadio > div[role="radiogroup"] > label {
+        background-color: #f0f2f6;
+        border-radius: 5px 5px 0 0;
+        padding: 10px 20px;
+        margin: 0;
+        border: 1px solid #ddd;
+        border-bottom: none;
+        cursor: pointer;
+    }
+    div.row-widget.stRadio > div[role="radiogroup"] > label[data-baseweb="radio"] {
+        background-color: #fff;
+        border-bottom: 2px solid #667eea;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    # =========================================================
-    # TAB 1 — QUIZ
-    # =========================================================
-    with tab_quiz:
+    # Pilih tab aktif
+    tab_options = ["🎮 Quiz Tebak Wilayah", "🧩 Puzzle Peta Jawa Timur"]
+    default_tab = 1 if st.session_state.get("pending_puzzle_tab", False) else 0
+    st.session_state.pending_puzzle_tab = False  # reset flag
+    
+    selected_tab = st.radio(
+        "Pilih Tipe Skor",
+        tab_options,
+        index=default_tab,
+        horizontal=True,
+        label_visibility="collapsed",
+        key="scoreboard_tab_selector"
+    )
+    
+    if selected_tab == "🎮 Quiz Tebak Wilayah":
+        # ========== TAB QUIZ ==========
         st.markdown("### 🎮 Papan Skor Quiz")
         st.caption("Peringkat: Skor tertinggi → Waktu tercepat → Terbaru")
 
@@ -3259,16 +3294,13 @@ elif PAGE == "Papan Skor":
                 st.success("✅ Papan skor Quiz direset!")
                 st.rerun()
 
-    # =========================================================
-    # TAB 2 — PUZZLE
-    # =========================================================
-    with tab_puzzle:
+    else:  # selected_tab == "🧩 Puzzle Peta Jawa Timur"
+        # ========== TAB PUZZLE ==========
         st.markdown("### 🧩 Papan Skor Puzzle Peta Jawa Timur")
         st.caption("Peringkat: ⏱️ Waktu tercepat → Terbaru")
 
-
         puzzle_sb      = load_puzzle_scoreboard()
-        puzzle_stats = get_puzzle_scoreboard_stats(puzzle_sb)   # stats dari semua entri
+        puzzle_stats = get_puzzle_scoreboard_stats(puzzle_sb)
 
         if puzzle_sb:
             rows_p = []
@@ -3330,7 +3362,6 @@ elif PAGE == "Papan Skor":
                               margin:4px 0;word-break:break-all;'>{nm}</div>
                           <div style='color:rgba(255,255,255,0.9);font-size:1.2em;
                               font-weight:bold;'>⏱️ {wm_p:02d}:{ws_p:02d}</div>
-
                         </div>
                         """,
                         unsafe_allow_html=True
