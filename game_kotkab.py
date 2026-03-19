@@ -2704,7 +2704,7 @@ elif PAGE == "Puzzle":
             type="primary",
             key="btn_puzzle_selesai"
         ):
-            waktu_selesai = int(time.time() - st.session_state.puzzle_start_time)                             if st.session_state.puzzle_start_time else 0
+            waktu_selesai = int(time.time() - st.session_state.puzzle_start_time) if st.session_state.puzzle_start_time else 0
             st.session_state.puzzle_js_waktu  = waktu_selesai
             st.session_state.puzzle_js_errors = 0   # user isi sendiri di form
             st.session_state.puzzle_completed = True
@@ -2712,7 +2712,7 @@ elif PAGE == "Puzzle":
             st.rerun()
 
     # ===== HASIL PUZZLE & FORM SIMPAN SKOR =====
-    # Ditampilkan ketika puzzle_completed = True (dari JS) atau puzzle_score_saved = True
+    # Ditampilkan ketika puzzle_completed = True atau puzzle_score_saved = True
     if st.session_state.puzzle_completed or st.session_state.puzzle_score_saved:
         _js_wkt = st.session_state.get("puzzle_js_waktu")
         _js_err = st.session_state.get("puzzle_js_errors", 0)
@@ -2728,10 +2728,13 @@ elif PAGE == "Puzzle":
                 f"✅ **Skor berhasil disimpan ke Papan Skor!** — "
                 f"⏱️ {wm:02d}:{ws:02d} | ❌ {err} kesalahan | 📊 Penalti: {penalti}"
             )
+            
+            # Tampilkan 2 tombol: Main Lagi dan Keluar
             cola, colb = st.columns(2)
             with cola:
                 if st.button("🔄 Main Puzzle Lagi", use_container_width=True,
                              type="primary", key="btn_puzzle_ulang"):
+                    # Reset semua state puzzle untuk main lagi
                     st.session_state.puzzle_started         = False
                     st.session_state.puzzle_start_time      = None
                     st.session_state.puzzle_completed       = False
@@ -2742,13 +2745,23 @@ elif PAGE == "Puzzle":
                     st.session_state.puzzle_js_errors       = None
                     st.rerun()
             with colb:
-                if st.button("🏆 Lihat Papan Skor Puzzle", use_container_width=True,
-                             key="btn_lihat_papan"):
-                    st.session_state.pending_navigation = "🏆 Papan Skor"
+                if st.button("🚪 Keluar dari Permainan Puzzle", use_container_width=True,
+                             key="btn_keluar_puzzle"):
+                    # Reset semua state puzzle
+                    st.session_state.puzzle_started         = False
+                    st.session_state.puzzle_start_time      = None
+                    st.session_state.puzzle_completed       = False
+                    st.session_state.puzzle_score_saved     = False
+                    st.session_state.puzzle_result_time_sec = None
+                    st.session_state.puzzle_result_errors   = None
+                    st.session_state.puzzle_js_waktu        = None
+                    st.session_state.puzzle_js_errors       = None
+                    # Navigasi ke Info Wilayah
+                    st.session_state.pending_navigation = "📚 Info Wilayah"
                     st.rerun()
 
         elif _js_wkt:
-            # Puzzle selesai, belum disimpan — tampilkan form simpan bergaya Quiz
+            # Puzzle selesai, belum disimpan — tampilkan form simpan
             wm, ws = divmod(int(_js_wkt), 60)
 
             st.markdown("### 🏆 Puzzle Selesai!")
@@ -2786,19 +2799,26 @@ elif PAGE == "Puzzle":
             )
             st.caption("💡 Jumlah kesalahan terlihat di layar puzzle saat selesai")
 
-            c_save, c_skip = st.columns(2)
+            # Tampilkan 3 tombol: Simpan, Main Lagi, Keluar
+            c_save, c_skip, c_exit = st.columns(3)
             with c_save:
                 simpan = st.button(
-                    "💾 Simpan Skor ke Papan Skor",
+                    "💾 Simpan Skor",
                     use_container_width=True,
                     type="primary",
                     key="btn_puzzle_simpan"
                 )
             with c_skip:
                 skip = st.button(
-                    "🔄 Main Lagi (tanpa simpan)",
+                    "🔄 Main Lagi",
                     use_container_width=True,
                     key="btn_puzzle_skip"
+                )
+            with c_exit:
+                exit_puzzle = st.button(
+                    "🚪 Keluar",
+                    use_container_width=True,
+                    key="btn_puzzle_exit_form"
                 )
 
             if simpan:
@@ -2811,12 +2831,14 @@ elif PAGE == "Puzzle":
                     st.session_state.puzzle_js_waktu        = None
                     st.session_state.puzzle_js_errors       = None
                     # Hapus key widget sebelum rerun agar tidak trigger StreamlitAPIException
-                    del st.session_state["_pzl_err"]
+                    if "_pzl_err" in st.session_state:
+                        del st.session_state["_pzl_err"]
                     st.rerun()
                 else:
                     st.error("❌ Gagal menyimpan skor.")
 
             if skip:
+                # Reset untuk main lagi tanpa menyimpan
                 st.session_state.puzzle_started   = False
                 st.session_state.puzzle_start_time = None
                 st.session_state.puzzle_completed  = False
@@ -2825,6 +2847,23 @@ elif PAGE == "Puzzle":
                 # Hapus key widget sebelum rerun
                 if "_pzl_err" in st.session_state:
                     del st.session_state["_pzl_err"]
+                st.rerun()
+                
+            if exit_puzzle:
+                # Reset semua state puzzle dan keluar ke Info Wilayah
+                st.session_state.puzzle_started   = False
+                st.session_state.puzzle_start_time = None
+                st.session_state.puzzle_completed  = False
+                st.session_state.puzzle_js_waktu   = None
+                st.session_state.puzzle_js_errors  = None
+                st.session_state.puzzle_score_saved = False
+                st.session_state.puzzle_result_time_sec = None
+                st.session_state.puzzle_result_errors = None
+                # Hapus key widget sebelum rerun
+                if "_pzl_err" in st.session_state:
+                    del st.session_state["_pzl_err"]
+                # Navigasi ke Info Wilayah
+                st.session_state.pending_navigation = "📚 Info Wilayah"
                 st.rerun()
 
         else:
@@ -3189,8 +3228,7 @@ elif PAGE == "Papan Skor":
 
     # Pilih tab aktif
     tab_options = ["🎮 Quiz Tebak Wilayah", "🧩 Puzzle Peta Jawa Timur"]
-    default_tab = 1 if st.session_state.get("pending_puzzle_tab", False) else 0
-    st.session_state.pending_puzzle_tab = False  # reset flag
+    default_tab = 0  # default ke Quiz
     
     selected_tab = st.radio(
         "Pilih Tipe Skor",
