@@ -1382,10 +1382,10 @@ def create_footer(footer_text, image_url, brightness=0.7):
     <div class="footer-divider"></div>
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-title">🧩 Pengetahuan Tentang Kota & Kabupaten Jawa Timur</div>
+            <div class="footer-title">🧩 Sepiro Jawa Timur, Sampeyan</div>
             <p>{footer_text}</p>
             <p>⏰ {current_time} WIB | © 2026 Program Pengabdian Masyarakat - Penguatan Literasi Geospasial Jawa Timur Bagi Gen Z Melalui Edukasi Berbasis Gamifikasi Menggunakan Platform "Sepiro Jatim, Sampeyan" - Lab. Environmental, Infrastructure, and Information System (EIIS), Dept. Perencanaan Wilayah & Kota, Fak. Teknik, Universitas Brawijaya | Versi 2.9.0</p>
-            <p>Game Tebak Wilayah | Mode Belajar | Puzzle Drag & Drop | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
+            <p>Quiz Tebak Wilayah | Info Wilayah | Puzzle Drag & Drop | Bromo 3D | Balaikota 3D | Papan Skor | Statistik Waktu | 🎵 Musik</p>
         </div>
     </div>
     """
@@ -2146,7 +2146,7 @@ if not st.session_state.name_submitted:
         st.markdown("---")
         st.markdown(
             "<div style='text-align:center;color:#666;font-size:14px;'>"
-            "<p>✨ Fitur: 🎮 Game | 📚 Belajar | 🧩 Puzzle | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
+            "<p>✨ Fitur: 🎮 Quiz | 📚 Info Wilayah | 🧩 Puzzle | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
             unsafe_allow_html=True
         )
         st.markdown(
@@ -2183,7 +2183,7 @@ with st.sidebar:
         "https://img.freepik.com/vektor-premium/peta-yang-digambar-tangan-dari-provinsi-jawa-timur-indonesia-desain-kartun-garis-sederhana-modern_242622-498.jpg",
         width=100
     )
-    st.title("🧩 Pengetahuan Jatim")
+    st.title("🧩 Ensiklopedia Jatim")
 
     time_info = get_current_time_info()
     st.markdown(
