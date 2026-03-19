@@ -2776,11 +2776,13 @@ elif PAGE == "Puzzle":
             st.markdown(f"**Nama:** {st.session_state.user_name}")
             st.markdown(f"**Waktu:** `{wm:02d}:{ws:02d}`")
 
-            # Gunakan number_input biasa (tanpa st.form) dengan key unik
-            # Nilai tersimpan di st.session_state["_pzl_err"] secara otomatis
-            _kesalahan_val = st.number_input(
+            # Inisialisasi _pzl_err hanya jika belum ada (jangan override nilai user)
+            if "_pzl_err" not in st.session_state:
+                st.session_state["_pzl_err"] = 0
+
+            st.number_input(
                 "❌ Jumlah Kesalahan (lihat angka di layar puzzle)",
-                min_value=0, max_value=999, value=0, step=1,
+                min_value=0, max_value=999, step=1,
                 key="_pzl_err"
             )
             st.caption("💡 Penalti = Waktu (detik) + Kesalahan × 10 — makin kecil makin baik")
@@ -2801,7 +2803,7 @@ elif PAGE == "Puzzle":
                 )
 
             if simpan:
-                # Baca langsung dari session_state — dijamin nilai terbaru
+                # Ambil nilai dari session_state LANGSUNG — tidak pakai del sebelum rerun
                 _kesalahan = int(st.session_state.get("_pzl_err", 0))
                 if add_puzzle_score(st.session_state.user_name, _js_wkt, _kesalahan):
                     st.session_state.puzzle_score_saved     = True
@@ -2810,20 +2812,19 @@ elif PAGE == "Puzzle":
                     st.session_state.puzzle_result_errors   = _kesalahan
                     st.session_state.puzzle_js_waktu        = None
                     st.session_state.puzzle_js_errors       = None
-                    if "_pzl_err" in st.session_state:
-                        del st.session_state["_pzl_err"]
+                    # Reset _pzl_err SETELAH disimpan, siap untuk sesi berikutnya
+                    st.session_state["_pzl_err"] = 0
                     st.rerun()
                 else:
                     st.error("❌ Gagal menyimpan skor.")
 
             if skip:
-                st.session_state.puzzle_started     = False
-                st.session_state.puzzle_start_time  = None
-                st.session_state.puzzle_completed   = False
-                st.session_state.puzzle_js_waktu    = None
-                st.session_state.puzzle_js_errors   = None
-                if "_pzl_err" in st.session_state:
-                    del st.session_state["_pzl_err"]
+                st.session_state.puzzle_started       = False
+                st.session_state.puzzle_start_time    = None
+                st.session_state.puzzle_completed     = False
+                st.session_state.puzzle_js_waktu      = None
+                st.session_state.puzzle_js_errors     = None
+                st.session_state["_pzl_err"]          = 0
                 st.rerun()
 
         else:
