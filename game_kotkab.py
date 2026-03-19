@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Pengetahuan Tentang Kota & Kabupaten di Jawa Timur",
+    page_title="Sepiro Jawa Timur, Sampeyan",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -3536,17 +3536,17 @@ if PAGE == "Game":
 
 menu_key = PAGE
 footer_texts = {
-    "Game":             f"🗺️ Tebak {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
-    "Belajar":          f"📚 Mode Belajar: {len(wilayah_list)} wilayah tersedia + Logo",
+    "Game":             f"🗺️ Quiz {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
+    "Belajar":          f"📚 Info Wilayah: {len(wilayah_list)} wilayah tersedia + Logo",
     "Puzzle":           f"🧩 Puzzle Peta Jawa Timur — {len(jatim_geojson.get('features', []))} Kepingan Kab/Kota | Level Normal",
     "Bromo 3D":         "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D":     "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
     "Papan Skor":       "🏆 Papan Skor Tebak Jawa Timur",
     "Statistik Waktu":  "⏱️ Statistik Waktu Bermain",
     "Pengaturan":       "⚙️ Sesuaikan pengalaman bermain Anda",
-    "Tentang":          "ℹ️ Pengetahuan Jawa Timur - Aplikasi Interaktif Pembelajaran Geospasial Jawa Timur"
+    "Tentang":          "ℹ️ Sepiro Jawa Timur, Sampeyan - Aplikasi Interaktif Pembelajaran Geospasial Jawa Timur"
 }
-footer_text = footer_texts.get(menu_key, "🧩 Pengetahuan Tentang Kota & Kabupaten di Jawa Timur")
+footer_text = footer_texts.get(menu_key, "🧩 Sepiro Jawa Timur, Sampeyan")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
 
