@@ -17,7 +17,7 @@ import time
 
 # ==================== KONFIGURASI HALAMAN ====================
 st.set_page_config(
-    page_title="Pengetahuan Tentang Kota & Kabupaten di Jawa Timur",
+    page_title="Sepiro Jawa Timur, Sampeyan",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
