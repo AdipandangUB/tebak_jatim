@@ -2437,11 +2437,6 @@ with st.sidebar:
         st.header("🏆 Papan Skor")
         # --- Quiz summary ---
         st.markdown("**🎮 Quiz**")
-        st.selectbox("Filter level:", ["Semua Level", "Mudah", "Normal", "Sulit"],
-                     key="scoreboard_level_filter")
-        st.selectbox("Filter waktu:", ["Semua Waktu", "Hari Ini", "7 Hari Terakhir",
-                                       "30 Hari Terakhir", "Bulan Ini"],
-                     key="scoreboard_time_filter")
         sb    = get_filtered_scoreboard(
             st.session_state.get("scoreboard_level_filter", "Semua Level"),
             st.session_state.get("scoreboard_time_filter", "Semua Waktu")
