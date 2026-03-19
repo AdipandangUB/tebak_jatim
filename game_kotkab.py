@@ -685,6 +685,83 @@ def get_scoreboard_stats(scoreboard):
     }
 
 
+# ==================== PAPAN SKOR PUZZLE ====================
+
+def load_puzzle_scoreboard():
+    if "puzzle_scoreboard_data" not in st.session_state:
+        st.session_state.puzzle_scoreboard_data = []
+    return list(st.session_state.puzzle_scoreboard_data)
+
+
+def save_puzzle_scoreboard(scoreboard):
+    """Simpan dan urutkan: waktu tercepat + kesalahan minimal = peringkat tertinggi."""
+    try:
+        if not isinstance(scoreboard, list):
+            scoreboard = []
+        # Ranking: waktu terkecil dulu, lalu kesalahan terkecil, lalu terbaru
+        scoreboard.sort(key=lambda x: (
+            x.get("waktu_detik", float("inf")),
+            x.get("kesalahan", float("inf")),
+            -x.get("timestamp", 0)
+        ))
+        scoreboard = scoreboard[:20]  # simpan top 20
+        st.session_state.puzzle_scoreboard_data = scoreboard
+        return True
+    except Exception as e:
+        st.error(f"Error menyimpan skor puzzle: {str(e)}")
+        return False
+
+
+def add_puzzle_score(nama, waktu_detik, kesalahan):
+    """Tambahkan hasil puzzle ke papan skor puzzle."""
+    try:
+        if not nama or waktu_detik is None:
+            return False
+        scoreboard = load_puzzle_scoreboard()
+        now = now_wib()
+        menit = int(waktu_detik // 60)
+        detik = int(waktu_detik % 60)
+        # Hitung skor poin: waktu × 1 + kesalahan × 10 (makin kecil makin baik)
+        poin_penalti = round(waktu_detik + kesalahan * 10, 1)
+        new_entry = {
+            "nama": str(nama),
+            "waktu_detik": round(float(waktu_detik), 1),
+            "waktu_format": f"{menit:02d}:{detik:02d}",
+            "waktu_teks": f"{menit} menit {detik} detik" if menit > 0 else f"{detik} detik",
+            "kesalahan": int(kesalahan),
+            "poin_penalti": poin_penalti,
+            "tanggal": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "tanggal_only": now.strftime("%Y-%m-%d"),
+            "jam": now.strftime("%H:%M:%S"),
+            "tahun": now.year,
+            "bulan": now.month,
+            "timestamp": time.time(),
+        }
+        scoreboard.append(new_entry)
+        return save_puzzle_scoreboard(scoreboard)
+    except Exception as e:
+        st.error(f"Error menambah skor puzzle: {str(e)}")
+        return False
+
+
+def get_puzzle_scoreboard_stats(scoreboard):
+    if not scoreboard:
+        return {"total_pemain": 0, "waktu_tercepat": None, "kesalahan_minimal": None,
+                "rata_waktu": None, "rata_kesalahan": None}
+    total = len(scoreboard)
+    tercepat = min(scoreboard, key=lambda x: x.get("waktu_detik", float("inf")))
+    minimal_err = min(scoreboard, key=lambda x: x.get("kesalahan", float("inf")))
+    rata_w = sum(s.get("waktu_detik", 0) for s in scoreboard) / total
+    rata_e = sum(s.get("kesalahan", 0) for s in scoreboard) / total
+    return {
+        "total_pemain": total,
+        "waktu_tercepat": tercepat,
+        "kesalahan_minimal": minimal_err,
+        "rata_waktu": round(rata_w, 1),
+        "rata_kesalahan": round(rata_e, 1),
+    }
+
+
 # ==================== LOAD & PROSES GEOJSON ====================
 
 @st.cache_data(show_spinner="Memuat data wilayah...")
@@ -832,6 +909,12 @@ _defaults = {
     "puzzle_started": False,
     "puzzle_start_time": None,
     "puzzle_completed": False,
+    # Puzzle scoreboard & hasil
+    "puzzle_scoreboard_data": [],
+    "puzzle_result_time_sec": None,
+    "puzzle_result_errors": None,
+    "puzzle_score_saved": False,
+    "puzzle_pending_save": False,
 }
 for key, val in _defaults.items():
     if key not in st.session_state:
@@ -1605,9 +1688,18 @@ def get_puzzle_html(geojson_data, start_time_ms):
     <p style="color:#ffd700;font-size:0.88em;margin-top:8px;">
       🎉 Luar biasa! Kamu mengenal semua wilayah Jawa Timur!
     </p>
-    <button class="puzzle-btn success"
-      style="margin-top:16px;font-size:1em;padding:10px 30px;"
-      onclick="location.reload()">🔄 Main Lagi</button>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="puzzle-btn success"
+        style="font-size:1em;padding:10px 22px;"
+        id="btn-save-score"
+        onclick="kirimHasilPuzzle()">🏆 Simpan ke Papan Skor</button>
+      <button class="puzzle-btn"
+        style="font-size:1em;padding:10px 22px;"
+        onclick="location.reload()">🔄 Main Lagi</button>
+    </div>
+    <div id="save-status" style="margin-top:10px;font-size:0.85em;color:#4ade80;display:none;">
+      ✅ Hasil terkirim! Klik "Simpan Skor" di bawah puzzle.
+    </div>
   </div>
 </div>
 
@@ -1955,9 +2047,32 @@ def get_puzzle_html(geojson_data, start_time_ms):
       document.getElementById('win-time').textContent =
         String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
       document.getElementById('win-moves').textContent = mistakes+' kesalahan';
+      // Simpan hasil ke variabel global untuk dikirim ke Streamlit
+      window._puzzleWaktuDetik = e;
+      window._puzzleMistakes  = mistakes;
       setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 600);
     }}
   }}
+
+  // ===== KIRIM HASIL PUZZLE KE STREAMLIT VIA PARENT POSTMESSAGE =====
+  window.kirimHasilPuzzle = function() {{
+    const waktu   = window._puzzleWaktuDetik || 0;
+    const salah   = window._puzzleMistakes   || 0;
+    const payload = {{ type: 'PUZZLE_RESULT', waktu_detik: waktu, kesalahan: salah }};
+    // Kirim ke parent frame (Streamlit)
+    try {{ window.parent.postMessage(JSON.stringify(payload), '*'); }} catch(e) {{}}
+    // Fallback: update URL search params agar Streamlit bisa baca
+    try {{
+      const u = new URL(window.parent.location.href);
+      u.searchParams.set('puzzle_waktu', waktu);
+      u.searchParams.set('puzzle_salah', salah);
+      window.parent.history.replaceState(null, '', u.toString());
+    }} catch(e) {{}}
+    const btn = document.getElementById('btn-save-score');
+    if(btn) {{ btn.disabled = true; btn.textContent = '✅ Terkirim!'; }}
+    const st = document.getElementById('save-status');
+    if(st) st.style.display = 'block';
+  }};
 
   // ===== TIMER =====
   setInterval(() => {{
@@ -2278,8 +2393,11 @@ with st.sidebar:
         )
         st.markdown("---")
         if st.button("▶️ Mulai Puzzle", use_container_width=True, type="primary"):
-            st.session_state.puzzle_started = True
-            st.session_state.puzzle_start_time = time.time()
+            st.session_state.puzzle_started     = True
+            st.session_state.puzzle_start_time  = time.time()
+            st.session_state.puzzle_score_saved = False
+            st.session_state.puzzle_result_time_sec = None
+            st.session_state.puzzle_result_errors   = None
             st.rerun()
         if st.session_state.puzzle_started:
             if st.button("⛔ Keluar Puzzle", use_container_width=True):
@@ -2317,22 +2435,37 @@ with st.sidebar:
 
     elif PAGE == "Papan Skor":
         st.header("🏆 Papan Skor")
+        # --- Quiz summary ---
+        st.markdown("**🎮 Quiz**")
         st.selectbox("Filter level:", ["Semua Level", "Mudah", "Normal", "Sulit"],
                      key="scoreboard_level_filter")
         st.selectbox("Filter waktu:", ["Semua Waktu", "Hari Ini", "7 Hari Terakhir",
                                        "30 Hari Terakhir", "Bulan Ini"],
                      key="scoreboard_time_filter")
-        sb = get_filtered_scoreboard(
+        sb    = get_filtered_scoreboard(
             st.session_state.get("scoreboard_level_filter", "Semua Level"),
             st.session_state.get("scoreboard_time_filter", "Semua Waktu")
         )
         stats = get_scoreboard_stats(sb)
         c1, c2 = st.columns(2)
         with c1:
-            st.metric("Pemain", stats["total_pemain"])
+            st.metric("Pemain Quiz", stats["total_pemain"])
         with c2:
             if sb:
-                st.metric("Tertinggi", f"{stats['skor_tertinggi']}/{sb[0]['total_soal']}")
+                st.metric("Skor Tertinggi", f"{stats['skor_tertinggi']}/{sb[0]['total_soal']}")
+        st.markdown("---")
+        # --- Puzzle summary ---
+        st.markdown("**🧩 Puzzle**")
+        psb   = load_puzzle_scoreboard()
+        pstats = get_puzzle_scoreboard_stats(psb)
+        cp1, cp2 = st.columns(2)
+        with cp1:
+            st.metric("Pemain Puzzle", pstats["total_pemain"])
+        with cp2:
+            wt = pstats["waktu_tercepat"]
+            st.metric("⚡ Tercepat", wt.get("waktu_format", "-") if wt else "-")
+        if psb:
+            st.success(f"👑 Juara: {psb[0].get('nama','-')}")
 
     elif PAGE == "Statistik Waktu":
         st.header("⏱️ Statistik Waktu")
@@ -2472,8 +2605,11 @@ elif PAGE == "Puzzle":
             )
             st.markdown("")
             if st.button("▶️ MULAI PUZZLE!", use_container_width=True, type="primary"):
-                st.session_state.puzzle_started = True
-                st.session_state.puzzle_start_time = time.time()
+                st.session_state.puzzle_started     = True
+                st.session_state.puzzle_start_time  = time.time()
+                st.session_state.puzzle_score_saved = False
+                st.session_state.puzzle_result_time_sec = None
+                st.session_state.puzzle_result_errors   = None
                 st.rerun()
 
         st.markdown("---")
@@ -2515,6 +2651,126 @@ elif PAGE == "Puzzle":
             "kepingan *snap* otomatis jika benar. "
             "Klik **💡 Petunjuk** untuk melihat outline panduan."
         )
+
+        # ===== FORM SIMPAN SKOR PUZZLE =====
+        st.markdown("---")
+        with st.container():
+            st.markdown(
+                """
+                <div style='background:linear-gradient(135deg,#1a1a2e,#16213e);
+                    border:2px solid #ffd700;border-radius:16px;padding:20px 24px;
+                    margin-bottom:8px;'>
+                  <div style='display:flex;align-items:center;gap:12px;margin-bottom:4px;'>
+                    <span style='font-size:2em;'>🏆</span>
+                    <div>
+                      <div style='color:#ffd700;font-size:1.15em;font-weight:900;'>
+                        Simpan Hasil Puzzle ke Papan Skor
+                      </div>
+                      <div style='color:rgba(255,255,255,0.7);font-size:0.85em;'>
+                        Masukkan waktu dan jumlah kesalahan dari layar "PUZZLE SELESAI!"
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            if not st.session_state.puzzle_score_saved:
+                col_w, col_e, col_btn = st.columns([2, 2, 2])
+                with col_w:
+                    # Hitung waktu otomatis dari puzzle_start_time
+                    auto_detik = 0
+                    if st.session_state.puzzle_start_time:
+                        auto_detik = int(time.time() - st.session_state.puzzle_start_time)
+                    auto_menit = auto_detik // 60
+                    auto_sisa  = auto_detik % 60
+                    st.markdown(f"**⏱️ Waktu Bermain (otomatis):** `{auto_menit:02d}:{auto_sisa:02d}`")
+                    waktu_input_mnt = st.number_input(
+                        "Menit (dari layar PUZZLE SELESAI!)",
+                        min_value=0, max_value=99,
+                        value=auto_menit, step=1,
+                        key="puzzle_input_menit"
+                    )
+                    waktu_input_dtk = st.number_input(
+                        "Detik (dari layar PUZZLE SELESAI!)",
+                        min_value=0, max_value=59,
+                        value=min(auto_sisa, 59), step=1,
+                        key="puzzle_input_detik"
+                    )
+                with col_e:
+                    st.markdown("**❌ Jumlah Kesalahan**")
+                    kesalahan_input = st.number_input(
+                        "Kesalahan (dari layar PUZZLE SELESAI!)",
+                        min_value=0, max_value=999,
+                        value=0, step=1,
+                        key="puzzle_input_kesalahan"
+                    )
+                    st.caption(
+                        "💡 Peringkat ditentukan dari:\n"
+                        "1️⃣ Waktu tercepat\n"
+                        "2️⃣ Kesalahan paling sedikit"
+                    )
+                with col_btn:
+                    st.markdown("**👤 Nama Pemain**")
+                    st.markdown(
+                        f"<div style='padding:8px 12px;background:rgba(255,215,0,0.15);"
+                        f"border:1px solid #ffd700;border-radius:8px;color:#ffd700;"
+                        f"font-weight:bold;margin-bottom:8px;'>⭐ {st.session_state.user_name}</div>",
+                        unsafe_allow_html=True
+                    )
+                    total_detik_input = waktu_input_mnt * 60 + waktu_input_dtk
+                    st.markdown(
+                        f"**Skor Penalti:** `{total_detik_input + kesalahan_input * 10}` "
+                        f"*(makin kecil makin baik)*"
+                    )
+                    st.markdown("")
+                    if st.button(
+                        "💾 Simpan Skor Puzzle",
+                        use_container_width=True,
+                        type="primary",
+                        key="btn_simpan_puzzle_score"
+                    ):
+                        if total_detik_input > 0:
+                            berhasil = add_puzzle_score(
+                                st.session_state.user_name,
+                                total_detik_input,
+                                kesalahan_input
+                            )
+                            if berhasil:
+                                st.session_state.puzzle_score_saved = True
+                                st.session_state.puzzle_result_time_sec  = total_detik_input
+                                st.session_state.puzzle_result_errors    = kesalahan_input
+                                st.session_state.puzzle_pending_save     = False
+                                st.success("✅ Skor puzzle berhasil disimpan ke Papan Skor!")
+                                st.rerun()
+                            else:
+                                st.error("❌ Gagal menyimpan skor.")
+                        else:
+                            st.warning("⚠️ Waktu harus lebih dari 0 detik!")
+            else:
+                # Sudah tersimpan
+                wt = st.session_state.puzzle_result_time_sec or 0
+                err = st.session_state.puzzle_result_errors or 0
+                wm, ws = divmod(int(wt), 60)
+                st.success(
+                    f"✅ **Skor puzzle sudah tersimpan!** — "
+                    f"⏱️ {wm:02d}:{ws:02d} | ❌ {err} kesalahan | "
+                    f"Penalti: {int(wt) + err * 10}"
+                )
+                cola, colb = st.columns(2)
+                with cola:
+                    if st.button("🔄 Main Puzzle Lagi", use_container_width=True, key="btn_puzzle_ulang"):
+                        st.session_state.puzzle_started     = False
+                        st.session_state.puzzle_start_time  = None
+                        st.session_state.puzzle_score_saved = False
+                        st.session_state.puzzle_result_time_sec = None
+                        st.session_state.puzzle_result_errors   = None
+                        st.rerun()
+                with colb:
+                    if st.button("🏆 Lihat Papan Skor Puzzle", use_container_width=True, key="btn_lihat_papan"):
+                        st.session_state.main_navigation = "🏆 Papan Skor"
+                        st.rerun()
 
 
 # ==================== HALAMAN INFO WILAYAH (dengan logo) ====================
@@ -2843,73 +3099,250 @@ elif PAGE == "Papan Skor":
     st.title("🏆 Papan Skor Pemain")
     st.info("ℹ️ Papan skor tersimpan selama sesi berlangsung. Refresh halaman akan mereset data.")
 
-    lf = st.session_state.get("scoreboard_level_filter", "Semua Level")
-    tf = st.session_state.get("scoreboard_time_filter", "Semua Waktu")
-    scoreboard = get_filtered_scoreboard(lf, tf)
-    stats = get_scoreboard_stats(scoreboard)
+    tab_quiz, tab_puzzle = st.tabs(["🎮 Quiz Tebak Wilayah", "🧩 Puzzle Peta Jawa Timur"])
 
-    st.info(f"📊 Menampilkan: **{lf}** | **{tf}**")
+    # =========================================================
+    # TAB 1 — QUIZ
+    # =========================================================
+    with tab_quiz:
+        st.markdown("### 🎮 Papan Skor Quiz")
+        st.caption("Peringkat: Skor tertinggi → Waktu tercepat → Terbaru")
 
-    if scoreboard:
-        rows = []
-        for i, p in enumerate(scoreboard[:10], 1):
-            icon = {1: "👑", 2: "🥈", 3: "🥉"}.get(i, f"{i}.")
-            nm = p.get("nama", "Unknown")
-            if nm == st.session_state.user_name:
-                nm = f"⭐ {nm} (Kamu)"
-            dur = p.get("durasi", {}).get("format", "-") if p.get("durasi") else "-"
-            rows.append({
-                "Peringkat": icon, "Nama": nm,
-                "Skor": f"{p.get('skor',0)}/{p.get('total_soal',0)}",
-                "Persentase": f"{p.get('persentase',0)}%",
-                "Level": p.get("level", "-"),
-                "Durasi": dur,
-                "Tanggal": (p.get("tanggal", "")[:10] if p.get("tanggal") else "")
-            })
-        st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            lf = st.selectbox(
+                "Filter level:",
+                ["Semua Level", "Mudah", "Normal", "Sulit"],
+                key="scoreboard_level_filter"
+            )
+        with col_f2:
+            tf = st.selectbox(
+                "Filter waktu:",
+                ["Semua Waktu", "Hari Ini", "7 Hari Terakhir", "30 Hari Terakhir", "Bulan Ini"],
+                key="scoreboard_time_filter"
+            )
 
-        c1, c2, c3, c4 = st.columns(4)
-        with c1:
-            st.metric("🏆 Juara 1", scoreboard[0].get("nama", "-"))
-        with c2:
-            st.metric("⭐ Tertinggi", f"{stats['skor_tertinggi']}/{scoreboard[0].get('total_soal',0)}")
-        with c3:
-            st.metric("📊 Rata-rata", str(stats["rata_rata"]))
-        with c4:
-            st.metric("🎯 Level Populer", stats["level_populer"])
-        if stats["waktu_tercepat"]:
-            st.success(f"⚡ Waktu Tercepat: {stats['waktu_tercepat']['format']} oleh {stats['waktu_tercepat']['nama']}")
-    else:
-        st.info("Belum ada skor. Mainkan quiz dulu!")
+        scoreboard = get_filtered_scoreboard(lf, tf)
+        stats      = get_scoreboard_stats(scoreboard)
 
-    st.markdown("---")
-    st.markdown(f"### 📝 Skor Kakak: **{st.session_state.user_name}**")
-    st.markdown(f"**Skor:** {st.session_state.score}/{st.session_state.max_questions} (Level: {st.session_state.difficulty})")
-    if st.session_state.total_game_duration > 0:
-        st.markdown(f"**Waktu:** {format_duration(st.session_state.total_game_duration)}")
+        if scoreboard:
+            rows = []
+            for i, p in enumerate(scoreboard[:10], 1):
+                icon = {1: "👑", 2: "🥈", 3: "🥉"}.get(i, f"{i}.")
+                nm   = p.get("nama", "Unknown")
+                if nm == st.session_state.user_name:
+                    nm = f"⭐ {nm} (Kamu)"
+                dur  = p.get("durasi", {}).get("format", "-") if p.get("durasi") else "-"
+                rows.append({
+                    "Peringkat": icon,
+                    "Nama":      nm,
+                    "Skor":      f"{p.get('skor',0)}/{p.get('total_soal',0)}",
+                    "Persentase":f"{p.get('persentase',0)}%",
+                    "Level":     p.get("level", "-"),
+                    "Durasi":    dur,
+                    "Tanggal":   (p.get("tanggal", "")[:10] if p.get("tanggal") else "")
+                })
+            st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
 
-    if st.session_state.score > 0 and not st.session_state.score_saved:
-        if st.button("💾 Simpan Skor ke Papan Skor", use_container_width=True, type="primary"):
-            if not st.session_state.game_end_time:
-                st.session_state.game_end_time = time.time()
-            end_game_timer()
-            if add_score(st.session_state.user_name, st.session_state.score,
-                         st.session_state.difficulty, st.session_state.max_questions,
-                         st.session_state.game_start_time, st.session_state.game_end_time):
-                st.session_state.score_saved = True
-                st.success("✅ Skor berhasil disimpan!")
+            c1, c2, c3, c4 = st.columns(4)
+            with c1:
+                st.metric("🏆 Juara 1", scoreboard[0].get("nama", "-"))
+            with c2:
+                st.metric("⭐ Skor Tertinggi", f"{stats['skor_tertinggi']}/{scoreboard[0].get('total_soal',0)}")
+            with c3:
+                st.metric("📊 Rata-rata Skor", str(stats["rata_rata"]))
+            with c4:
+                st.metric("🎯 Level Populer", stats["level_populer"])
+            if stats["waktu_tercepat"]:
+                st.success(
+                    f"⚡ Waktu Tercepat (Perfect Score): "
+                    f"{stats['waktu_tercepat']['format']} oleh {stats['waktu_tercepat']['nama']}"
+                )
+        else:
+            st.info("Belum ada skor Quiz. Mainkan Quiz dulu!")
+
+        st.markdown("---")
+        st.markdown(f"### 📝 Skor Quiz Kakak: **{st.session_state.user_name}**")
+        st.markdown(
+            f"**Skor:** {st.session_state.score}/{st.session_state.max_questions} "
+            f"(Level: {st.session_state.difficulty})"
+        )
+        if st.session_state.total_game_duration > 0:
+            st.markdown(f"**Waktu:** {format_duration(st.session_state.total_game_duration)}")
+
+        if st.session_state.score > 0 and not st.session_state.score_saved:
+            if st.button("💾 Simpan Skor Quiz ke Papan Skor", use_container_width=True,
+                         type="primary", key="btn_simpan_quiz_papan"):
+                if not st.session_state.game_end_time:
+                    st.session_state.game_end_time = time.time()
+                end_game_timer()
+                if add_score(
+                    st.session_state.user_name, st.session_state.score,
+                    st.session_state.difficulty, st.session_state.max_questions,
+                    st.session_state.game_start_time, st.session_state.game_end_time
+                ):
+                    st.session_state.score_saved = True
+                    st.success("✅ Skor Quiz berhasil disimpan!")
+                    st.rerun()
+                else:
+                    st.error("❌ Gagal menyimpan skor.")
+        elif st.session_state.score_saved:
+            st.success("✅ Skor Quiz sudah disimpan!")
+
+        with st.expander("🛠️ Reset Papan Skor Quiz (Admin)"):
+            st.warning("⚠️ Akan menghapus semua data skor Quiz sesi ini!")
+            if st.button("🗑️ Reset Skor Quiz", use_container_width=True, key="btn_reset_quiz"):
+                st.session_state.scoreboard_data = []
+                st.success("✅ Papan skor Quiz direset!")
                 st.rerun()
-            else:
-                st.error("❌ Gagal menyimpan skor.")
-    elif st.session_state.score_saved:
-        st.success("✅ Skor sudah disimpan!")
 
-    with st.expander("🛠️ Reset Papan Skor (Admin)"):
-        st.warning("⚠️ Akan menghapus semua data skor sesi ini!")
-        if st.button("🗑️ Reset Semua Skor", use_container_width=True):
-            st.session_state.scoreboard_data = []
-            st.success("✅ Papan skor direset!")
-            st.rerun()
+    # =========================================================
+    # TAB 2 — PUZZLE
+    # =========================================================
+    with tab_puzzle:
+        st.markdown("### 🧩 Papan Skor Puzzle Peta Jawa Timur")
+        st.caption("Peringkat: ⏱️ Waktu tercepat → ❌ Kesalahan paling sedikit → Terbaru")
+
+        st.markdown(
+            """
+            <div style='background:linear-gradient(135deg,#0f3443,#1a1a2e);
+                border:1px solid rgba(255,215,0,0.3);border-radius:12px;
+                padding:12px 16px;margin-bottom:14px;'>
+              <span style='color:#ffd700;font-weight:bold;'>📐 Sistem Penilaian Puzzle:</span>
+              <span style='color:rgba(255,255,255,0.8);font-size:0.9em;'>
+                &nbsp; Skor Penalti = Waktu (detik) + Kesalahan × 10 &nbsp;|&nbsp;
+                Makin kecil skor penalti = Peringkat makin tinggi
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        puzzle_sb    = load_puzzle_scoreboard()
+        puzzle_stats = get_puzzle_scoreboard_stats(puzzle_sb)
+
+        if puzzle_sb:
+            rows_p = []
+            for i, p in enumerate(puzzle_sb[:20], 1):
+                icon = {1: "👑", 2: "🥈", 3: "🥉"}.get(i, f"{i}.")
+                nm   = p.get("nama", "Unknown")
+                if nm == st.session_state.user_name:
+                    nm = f"⭐ {nm} (Kamu)"
+                waktu_fmt = p.get("waktu_format", "--:--")
+                kesalahan = p.get("kesalahan", 0)
+                penalti   = p.get("poin_penalti", "-")
+                tgl       = (p.get("tanggal", "")[:16] if p.get("tanggal") else "")
+                rows_p.append({
+                    "Peringkat":    icon,
+                    "Nama":         nm,
+                    "⏱️ Waktu":     waktu_fmt,
+                    "❌ Kesalahan": kesalahan,
+                    "📊 Penalti":   penalti,
+                    "🗓️ Tanggal":   tgl,
+                })
+            st.dataframe(pd.DataFrame(rows_p), hide_index=True, use_container_width=True)
+
+            # Statistik ringkas
+            pc1, pc2, pc3, pc4 = st.columns(4)
+            with pc1:
+                juara = puzzle_sb[0]
+                st.metric("👑 Juara 1", juara.get("nama", "-"))
+            with pc2:
+                wt = puzzle_stats["waktu_tercepat"]
+                st.metric(
+                    "⚡ Waktu Tercepat",
+                    wt.get("waktu_format", "-") if wt else "-"
+                )
+            with pc3:
+                me = puzzle_stats["kesalahan_minimal"]
+                st.metric(
+                    "🎯 Min. Kesalahan",
+                    f"{me.get('kesalahan','-')} oleh {me.get('nama','-')[:8]}" if me else "-"
+                )
+            with pc4:
+                st.metric("👥 Total Pemain", puzzle_stats["total_pemain"])
+
+            if puzzle_stats["rata_waktu"]:
+                rw = int(puzzle_stats["rata_waktu"])
+                rm, rs = divmod(rw, 60)
+                st.info(
+                    f"📊 Rata-rata waktu: **{rm:02d}:{rs:02d}** | "
+                    f"Rata-rata kesalahan: **{puzzle_stats['rata_kesalahan']}**"
+                )
+
+            # Highlight podium top 3
+            st.markdown("#### 🏅 Podium Juara Puzzle")
+            podium_cols = st.columns(min(3, len(puzzle_sb)))
+            podium_styles = [
+                ("👑", "#ffd700", "linear-gradient(135deg,#2d2010,#3d2e0a)"),
+                ("🥈", "#c0c0c0", "linear-gradient(135deg,#1a1a1a,#2a2a2a)"),
+                ("🥉", "#cd7f32", "linear-gradient(135deg,#1a0e05,#2a1a0a)"),
+            ]
+            for idx, (col, (medal, color, bg)) in enumerate(zip(podium_cols, podium_styles)):
+                p = puzzle_sb[idx]
+                nm = p.get("nama", "?")
+                if nm == st.session_state.user_name:
+                    nm = f"⭐ {nm}"
+                wm_p, ws_p = divmod(int(p.get("waktu_detik", 0)), 60)
+                with col:
+                    st.markdown(
+                        f"""
+                        <div style='background:{bg};border:2px solid {color};
+                            border-radius:14px;padding:16px 12px;text-align:center;'>
+                          <div style='font-size:2em;'>{medal}</div>
+                          <div style='color:{color};font-weight:900;font-size:1.05em;
+                              margin:4px 0;word-break:break-all;'>{nm}</div>
+                          <div style='color:rgba(255,255,255,0.9);font-size:1.2em;
+                              font-weight:bold;'>⏱️ {wm_p:02d}:{ws_p:02d}</div>
+                          <div style='color:rgba(255,255,255,0.7);font-size:0.85em;'>
+                            ❌ {p.get("kesalahan",0)} kesalahan
+                          </div>
+                          <div style='color:{color};font-size:0.8em;margin-top:4px;'>
+                            Penalti: {p.get("poin_penalti","-")}
+                          </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+        else:
+            st.info("Belum ada skor Puzzle. Mainkan Puzzle dulu dan simpan hasilnya!")
+
+        # Skor puzzle user saat ini (jika belum disimpan dari halaman puzzle)
+        st.markdown("---")
+        if st.session_state.puzzle_result_time_sec and not st.session_state.puzzle_score_saved:
+            wt = st.session_state.puzzle_result_time_sec
+            err = st.session_state.puzzle_result_errors or 0
+            wm2, ws2 = divmod(int(wt), 60)
+            st.markdown(
+                f"### 📝 Hasil Puzzle Kakak: **{st.session_state.user_name}**\n\n"
+                f"**Waktu:** {wm2:02d}:{ws2:02d} | **Kesalahan:** {err} | "
+                f"**Penalti:** {int(wt) + err * 10}"
+            )
+            if st.button("💾 Simpan Skor Puzzle dari Sini", use_container_width=True,
+                         type="primary", key="btn_simpan_puzzle_dari_papan"):
+                if add_puzzle_score(st.session_state.user_name, wt, err):
+                    st.session_state.puzzle_score_saved = True
+                    st.success("✅ Skor Puzzle berhasil disimpan!")
+                    st.rerun()
+                else:
+                    st.error("❌ Gagal menyimpan.")
+        elif st.session_state.puzzle_score_saved:
+            wt  = st.session_state.puzzle_result_time_sec or 0
+            err = st.session_state.puzzle_result_errors or 0
+            wm2, ws2 = divmod(int(wt), 60)
+            st.success(
+                f"✅ Skor Puzzle sudah tersimpan! — "
+                f"⏱️ {wm2:02d}:{ws2:02d} | ❌ {err} kesalahan"
+            )
+
+        with st.expander("🛠️ Reset Papan Skor Puzzle (Admin)"):
+            st.warning("⚠️ Akan menghapus semua data skor Puzzle sesi ini!")
+            if st.button("🗑️ Reset Skor Puzzle", use_container_width=True,
+                         key="btn_reset_puzzle_sb"):
+                st.session_state.puzzle_scoreboard_data = []
+                st.success("✅ Papan skor Puzzle direset!")
+                st.rerun()
+
 
 # --- HALAMAN STATISTIK WAKTU ---
 elif PAGE == "Statistik Waktu":
