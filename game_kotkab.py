@@ -812,7 +812,7 @@ _defaults = {
     "game_over": False,
     "questions_asked": [],
     "game_started": False,
-    "current_page": "Game",
+    "current_page": "Quiz",
     "difficulty": "Normal",
     "selected_wilayah_info": None,
     "score_saved": False,
@@ -2212,7 +2212,8 @@ with st.sidebar:
 
     st.markdown("---")
 
-    menu_options = ["📚 Belajar","🎮 Game", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
+    # ==================== PERUBAHAN: "Belajar" -> "Info Wilayah", "Game" -> "Quiz" ====================
+    menu_options = ["📚 Info Wilayah", "🎮 Quiz", "🧩 Puzzle", "🌋 Bromo 3D", "🏛️ Balaikota 3D",
                     "🏆 Papan Skor", "⏱️ Statistik Waktu", "⚙️ Pengaturan", "ℹ️ Tentang"]
     selected_menu = st.radio("Menu", menu_options, index=0,
                              label_visibility="collapsed", key="main_navigation")
@@ -2225,14 +2226,14 @@ with st.sidebar:
         st.rerun()
     st.markdown("---")
 
-    if PAGE == "Game":
-        st.header("🎮 Kontrol Game")
+    if PAGE == "Quiz":
+        st.header("🎮 Kontrol Quiz")
         if not st.session_state.game_started or st.session_state.game_over:
-            if st.button("🎲 Mulai Game Baru", use_container_width=True, type="primary"):
+            if st.button("🎲 Mulai Quiz Baru", use_container_width=True, type="primary"):
                 reset_game()
                 st.rerun()
         else:
-            if st.button("🔄 Reset Game", use_container_width=True):
+            if st.button("🔄 Reset Quiz", use_container_width=True):
                 reset_game()
                 st.rerun()
 
@@ -2285,8 +2286,8 @@ with st.sidebar:
                 st.session_state.puzzle_started = False
                 st.rerun()
 
-    elif PAGE == "Belajar":
-        st.header("📚 Mode Belajar")
+    elif PAGE == "Info Wilayah":
+        st.header("📚 Info Wilayah")
         st.markdown("Klik wilayah di peta untuk melihat informasi lengkap.")
         c1, c2, c3 = st.columns(3)
         with c1:
@@ -2370,14 +2371,14 @@ with st.sidebar:
         st.markdown("**Sepiro Jawa Timur, Sampeyan** v2.9.0\n\nAplikasi interaktif Pembelajaran Geospasial Jawa Timur.")
 
 # Expose PAGE for main content area
-PAGE = st.session_state.get("main_navigation", "🎮 Game")
+PAGE = st.session_state.get("main_navigation", "📚 Info Wilayah")
 PAGE = PAGE.split(" ", 1)[1] if " " in PAGE else PAGE
 
 
 # ==================== KONTEN UTAMA ====================
 
-# --- HALAMAN GAME ---
-if PAGE == "Game":
+# --- HALAMAN QUIZ ---
+if PAGE == "Quiz":
     st.title("🧩 Tebak Bentuk Kota & Kabupaten di Jawa Timur")
 
     if st.session_state.game_started and not st.session_state.game_over:
@@ -2516,9 +2517,9 @@ elif PAGE == "Puzzle":
         )
 
 
-# ==================== HALAMAN BELAJAR (DENGAN LOGO KABUPATEN & KOTA) ====================
-elif PAGE == "Belajar":
-    st.title("📚 Mode Belajar Wilayah Jawa Timur")
+# ==================== HALAMAN INFO WILAYAH (dengan logo) ====================
+elif PAGE == "Info Wilayah":
+    st.title("📚 Info Wilayah Jawa Timur")
     st.markdown("**Klik wilayah pada peta** untuk melihat informasi lengkap!")
     
     # Buat layout 2 kolom untuk peta dan info
@@ -2567,15 +2568,11 @@ elif PAGE == "Belajar":
         if st.session_state.selected_wilayah_info:
             wil = st.session_state.selected_wilayah_info
             
-            # Tampilkan debug info (bisa dihapus nanti)
-            st.caption(f"Debug: Mencari data untuk **{wil}**")
-            
             # Ambil logo URL
             logo_url = get_logo_url(wil)
             
             # Tampilkan header dengan logo dan nama wilayah
             if logo_url:
-                # Layout dengan logo di kiri dan nama di kanan
                 col_logo, col_title = st.columns([1, 3])
                 with col_logo:
                     st.image(logo_url, width=80)
@@ -2588,7 +2585,6 @@ elif PAGE == "Belajar":
                         unsafe_allow_html=True
                     )
             else:
-                # Tanpa logo
                 st.markdown(
                     f"<div style='background:linear-gradient(135deg,#667eea,#764ba2);"
                     f"padding:15px;border-radius:10px;margin-bottom:15px;'>"
@@ -2600,7 +2596,6 @@ elif PAGE == "Belajar":
             # Ambil info wilayah
             info = get_wilayah_info(wil)
             
-            # Tampilkan dalam expander
             with st.expander("🗺️ Geografis", expanded=True):
                 st.write(info["geografis"])
             
@@ -2616,7 +2611,6 @@ elif PAGE == "Belajar":
             with st.expander("🛍️ Oleh-oleh", expanded=True):
                 st.write(info["oleh_oleh"])
             
-            # Tombol untuk reset
             if st.button("🔄 Klik wilayah lain", use_container_width=True):
                 st.session_state.selected_wilayah_info = None
                 st.rerun()
@@ -2638,7 +2632,6 @@ elif PAGE == "Belajar":
             )
             
             with st.expander("📌 Atau pilih dari daftar"):
-                # Daftar wilayah populer
                 popular_regions = [
                     "Kabupaten Banyuwangi", "Kabupaten Malang", "Kota Surabaya",
                     "Kota Batu", "Kabupaten Jember", "Kota Malang",
@@ -2650,16 +2643,13 @@ elif PAGE == "Belajar":
                     "Kabupaten Mojokerto", "Kota Mojokerto"
                 ]
                 
-                # Tampilkan dalam grid 2 kolom dengan logo kecil
                 col_reg1, col_reg2 = st.columns(2)
                 half = len(popular_regions) // 2 + len(popular_regions) % 2
                 
                 for i, region in enumerate(popular_regions[:half]):
                     with col_reg1:
-                        # Ambil logo untuk preview
                         logo_preview = get_logo_url(region)
                         if logo_preview:
-                            # Tampilkan dengan logo kecil
                             col_btn_logo, col_btn_text = st.columns([1, 3])
                             with col_btn_logo:
                                 st.image(logo_preview, width=25)
@@ -2668,17 +2658,14 @@ elif PAGE == "Belajar":
                                     st.session_state.selected_wilayah_info = region
                                     st.rerun()
                         else:
-                            # Tanpa logo
                             if st.button(region, key=f"quick_{region}", use_container_width=True):
                                 st.session_state.selected_wilayah_info = region
                                 st.rerun()
                 
                 for i, region in enumerate(popular_regions[half:]):
                     with col_reg2:
-                        # Ambil logo untuk preview
                         logo_preview = get_logo_url(region)
                         if logo_preview:
-                            # Tampilkan dengan logo kecil
                             col_btn_logo, col_btn_text = st.columns([1, 3])
                             with col_btn_logo:
                                 st.image(logo_preview, width=25)
@@ -2687,7 +2674,6 @@ elif PAGE == "Belajar":
                                     st.session_state.selected_wilayah_info = region
                                     st.rerun()
                         else:
-                            # Tanpa logo
                             if st.button(region, key=f"quick_{region}_{i}", use_container_width=True):
                                 st.session_state.selected_wilayah_info = region
                                 st.rerun()
@@ -2894,7 +2880,7 @@ elif PAGE == "Papan Skor":
         if stats["waktu_tercepat"]:
             st.success(f"⚡ Waktu Tercepat: {stats['waktu_tercepat']['format']} oleh {stats['waktu_tercepat']['nama']}")
     else:
-        st.info("Belum ada skor. Mainkan game dulu!")
+        st.info("Belum ada skor. Mainkan quiz dulu!")
 
     st.markdown("---")
     st.markdown(f"### 📝 Skor Kakak: **{st.session_state.user_name}**")
@@ -2933,12 +2919,12 @@ elif PAGE == "Statistik Waktu":
         st.metric("Durasi Sesi", format_duration(get_session_duration()))
     with c2:
         if st.session_state.total_game_duration > 0:
-            st.metric("Durasi Game", format_duration(st.session_state.total_game_duration))
+            st.metric("Durasi Quiz", format_duration(st.session_state.total_game_duration))
         elif st.session_state.game_start_time and not st.session_state.game_end_time:
             dur = time.time() - st.session_state.game_start_time
-            st.metric("Durasi Game", format_duration(dur))
+            st.metric("Durasi Quiz", format_duration(dur))
         else:
-            st.metric("Durasi Game", "-")
+            st.metric("Durasi Quiz", "-")
     with c3:
         st.metric("Total Soal", st.session_state.total_questions)
 
@@ -2953,12 +2939,12 @@ elif PAGE == "Statistik Waktu":
         st.line_chart(pd.DataFrame({"Soal": df_t["question_number"],
                                     "Waktu (dtk)": df_t["duration"]}).set_index("Soal"))
     else:
-        st.info("Belum ada data. Mulai game untuk melihat statistik waktu.")
+        st.info("Belum ada data. Mulai quiz untuk melihat statistik waktu.")
 
 # --- HALAMAN PENGATURAN ---
 elif PAGE == "Pengaturan":
     st.title("⚙️ Pengaturan Aplikasi")
-    t1, t2, t3 = st.tabs(["🎮 Game", "🎨 Tampilan & Musik", "⏱️ Waktu"])
+    t1, t2, t3 = st.tabs(["🎮 Quiz", "🎨 Tampilan & Musik", "⏱️ Waktu"])
     with t1:
         c1, c2 = st.columns(2)
         with c1:
@@ -2968,10 +2954,10 @@ elif PAGE == "Pengaturan":
             new_diff = st.selectbox("Kesulitan", ["Mudah", "Normal", "Sulit"],
                                     index=["Mudah", "Normal", "Sulit"].index(st.session_state.difficulty),
                                     key="s_diff")
-        if st.button("💾 Simpan Pengaturan Game", use_container_width=True):
+        if st.button("💾 Simpan Pengaturan Quiz", use_container_width=True):
             st.session_state.max_questions = new_max
             st.session_state.difficulty = new_diff
-            st.success("✅ Pengaturan game disimpan!")
+            st.success("✅ Pengaturan quiz disimpan!")
 
     with t2:
         st.markdown("### 🎨 Tampilan")
@@ -3026,7 +3012,7 @@ elif PAGE == "Pengaturan":
             st.rerun()
 
     with t3:
-        st.checkbox("Tampilkan timer di game", value=True, key="s_timer")
+        st.checkbox("Tampilkan timer di quiz", value=True, key="s_timer")
         st.info("Pengaturan waktu aktif secara default.")
 
 # --- HALAMAN TENTANG ---
@@ -3042,7 +3028,7 @@ elif PAGE == "Tentang":
 
         **Fitur:**
         - 🧩 Quiz Tebak bentuk kota & wilayah dari peta
-        - 📚 Mode belajar dengan info wilayah + Logo Kabupaten/Kota
+        - 📚 Info Wilayah dengan informasi lengkap + Logo Kabupaten/Kota
         - 🧩 **Puzzle Drag & Drop** — Kepingan berbentuk POLYGON ASLI wilayah administrasi
         - 🌋 Visualisasi 3D Gunung Bromo
         - 🏛️ Visualisasi 3D Balaikota Malang (Cesium)
@@ -3187,7 +3173,6 @@ elif PAGE == "Tentang":
             unsafe_allow_html=True
         )
 
-    # ==================== RESEARCH ASSISTANTS (BARU) ====================
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(
         "<div style='text-align:center;margin-bottom:16px;'>"
@@ -3197,7 +3182,6 @@ elif PAGE == "Tentang":
         unsafe_allow_html=True
     )
 
-    # Membuat 3 baris untuk Research Assistants
     ra1, ra2, ra3 = st.columns(3)
     
     with ra1:
@@ -3284,7 +3268,7 @@ elif PAGE == "Tentang":
             unsafe_allow_html=True
         )
     
-    ra4, ra5, _ = st.columns(3)  # Kolom ketiga dikosongkan untuk penempatan yang rapi
+    ra4, ra5, _ = st.columns(3)
     
     with ra4:
         st.markdown(
@@ -3353,10 +3337,10 @@ elif PAGE == "Tentang":
     )
 
 
-# ==================== PETA GAME (TIDAK DIGUNAKAN DI BELAJAR LAGI) ====================
+# ==================== PETA QUIZ ====================
 
-if PAGE == "Game":
-    # Game map (tanpa col_info)
+if PAGE == "Quiz":
+    # Quiz map
     m = folium.Map(location=[-7.5, 112.3], zoom_start=8,
                    tiles=None, control_scale=True, prefer_canvas=True)
     folium.TileLayer(
@@ -3384,11 +3368,11 @@ if PAGE == "Game":
     st_folium(m, width=None, height=500, use_container_width=True, key="game_map")
 
     if not st.session_state.game_started and not st.session_state.game_over:
-        if st.button("🎮 Mulai Game", use_container_width=True, type="primary"):
+        if st.button("🎮 Mulai Quiz", use_container_width=True, type="primary"):
             reset_game()
             st.rerun()
 
-    # ==================== AREA GAME ====================
+    # ==================== AREA QUIZ ====================
     st.markdown("---")
 
     if st.session_state.game_over:
@@ -3403,7 +3387,7 @@ if PAGE == "Game":
                 st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
                 st.session_state.show_perfect_balloon = False
 
-            st.markdown("## 🎮 Game Selesai!")
+            st.markdown("## 🎮 Quiz Selesai!")
             st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
             if st.session_state.total_game_duration > 0:
                 st.info(f"⏱️ **Total Waktu:** {format_duration(st.session_state.total_game_duration)}")
@@ -3515,7 +3499,7 @@ if PAGE == "Game":
                         pilih_wilayah()
                         st.rerun()
 
-    # Progress bar game
+    # Progress bar quiz
     if st.session_state.game_started and not st.session_state.game_over:
         st.markdown("---")
         cp1, cp2, cp3, cp4 = st.columns([2, 1, 1, 1])
@@ -3536,8 +3520,8 @@ if PAGE == "Game":
 
 menu_key = PAGE
 footer_texts = {
-    "Game":             f"🗺️ Quiz {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
-    "Belajar":          f"📚 Info Wilayah: {len(wilayah_list)} wilayah tersedia + Logo",
+    "Quiz":             f"🗺️ Quiz {len(wilayah_list)} Wilayah Jawa Timur | Kesulitan: {st.session_state.difficulty}",
+    "Info Wilayah":          f"📚 Info Wilayah: {len(wilayah_list)} wilayah tersedia + Logo",
     "Puzzle":           f"🧩 Puzzle Peta Jawa Timur — {len(jatim_geojson.get('features', []))} Kepingan Kab/Kota | Level Normal",
     "Bromo 3D":         "🌋 Gunung Bromo 3D - Jelajahi keindahan gunung berapi aktif",
     "Balaikota 3D":     "🏛️ Balaikota Malang 3D - Visualisasi bangunan bersejarah Kota Malang",
