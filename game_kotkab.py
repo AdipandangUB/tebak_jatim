@@ -2776,7 +2776,7 @@ elif PAGE == "Puzzle":
             st.markdown(f"**Nama:** {st.session_state.user_name}")
             st.markdown(f"**Waktu:** `{wm:02d}:{ws:02d}`")
 
-            # Inisialisasi _pzl_err hanya jika belum ada (jangan override nilai user)
+            # Inisialisasi _pzl_err hanya sekali saat form pertama muncul
             if "_pzl_err" not in st.session_state:
                 st.session_state["_pzl_err"] = 0
 
@@ -2785,7 +2785,7 @@ elif PAGE == "Puzzle":
                 min_value=0, max_value=999, step=1,
                 key="_pzl_err"
             )
-            st.caption("💡 Penalti = Waktu (detik) + Kesalahan × 10 — makin kecil makin baik")
+            st.caption("💡 Jumlah kesalahan terlihat di layar puzzle saat selesai")
 
             c_save, c_skip = st.columns(2)
             with c_save:
@@ -2803,7 +2803,6 @@ elif PAGE == "Puzzle":
                 )
 
             if simpan:
-                # Ambil nilai dari session_state LANGSUNG — tidak pakai del sebelum rerun
                 _kesalahan = int(st.session_state.get("_pzl_err", 0))
                 if add_puzzle_score(st.session_state.user_name, _js_wkt, _kesalahan):
                     st.session_state.puzzle_score_saved     = True
@@ -2812,19 +2811,21 @@ elif PAGE == "Puzzle":
                     st.session_state.puzzle_result_errors   = _kesalahan
                     st.session_state.puzzle_js_waktu        = None
                     st.session_state.puzzle_js_errors       = None
-                    # Reset _pzl_err SETELAH disimpan, siap untuk sesi berikutnya
-                    st.session_state["_pzl_err"] = 0
+                    # Hapus key widget sebelum rerun agar tidak trigger StreamlitAPIException
+                    del st.session_state["_pzl_err"]
                     st.rerun()
                 else:
                     st.error("❌ Gagal menyimpan skor.")
 
             if skip:
-                st.session_state.puzzle_started       = False
-                st.session_state.puzzle_start_time    = None
-                st.session_state.puzzle_completed     = False
-                st.session_state.puzzle_js_waktu      = None
-                st.session_state.puzzle_js_errors     = None
-                st.session_state["_pzl_err"]          = 0
+                st.session_state.puzzle_started   = False
+                st.session_state.puzzle_start_time = None
+                st.session_state.puzzle_completed  = False
+                st.session_state.puzzle_js_waktu   = None
+                st.session_state.puzzle_js_errors  = None
+                # Hapus key widget sebelum rerun
+                if "_pzl_err" in st.session_state:
+                    del st.session_state["_pzl_err"]
                 st.rerun()
 
         else:
