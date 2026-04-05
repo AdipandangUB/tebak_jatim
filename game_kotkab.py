@@ -3548,7 +3548,7 @@ elif PAGE == "Pengaturan":
         st.checkbox("Tampilkan timer di quiz", value=True, key="s_timer")
         st.info("Pengaturan waktu aktif secara default.")
 
-# --- HALAMAN TENTANG ---
+# ==================== HALAMAN TENTANG ====================
 elif PAGE == "Tentang":
     st.title("ℹ️ Tentang Aplikasi")
 
@@ -3715,9 +3715,44 @@ elif PAGE == "Tentang":
         unsafe_allow_html=True
     )
 
+    # Research Assistants - Baris 1 (3 kolom)
+    # Triska Ludya Wirawati di posisi pertama (kolom 1)
     ra1, ra2, ra3 = st.columns(3)
     
     with ra1:
+        st.markdown(
+            f"""
+            <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
+                        border-radius:16px;padding:22px;text-align:center;
+                        box-shadow:0 6px 20px rgba(255,152,0,0.3);
+                        height:100%;
+                        border:2px solid #ffd700;'>
+              <div style='position:absolute;margin-top:-38px;margin-left:auto;margin-right:auto;left:0;right:0;text-align:center;'>
+                <span style='background:#ffd700;color:#333;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:bold;'>🌟 COORDINATOR</span>
+              </div>
+              <img src='https://pwk.ub.ac.id/wp-content/uploads/2024/02/Foto-Web-Triska-2.png'
+                   style='width:110px;height:110px;border-radius:50%;
+                          object-fit:cover;object-position:top;
+                          border:4px solid #ffd700;
+                          box-shadow:0 4px 12px rgba(0,0,0,0.25);
+                          margin-bottom:12px;
+                          margin-top:10px;'>
+              <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
+                Triska Ludya Wirawati, S.P.W.K
+              </h4>
+              <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
+                        font-size:12px;font-style:italic;'>Coordinator Research Assistant</p>
+              <span style='background:rgba(255,255,255,0.2);color:white;
+                           padding:4px 12px;border-radius:12px;font-size:11px;
+                           border:1px solid rgba(255,255,255,0.3);'>
+                📋 Manajemen Operasional
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    with ra2:
         st.markdown(
             """
             <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
@@ -3745,7 +3780,7 @@ elif PAGE == "Tentang":
             unsafe_allow_html=True
         )
     
-    with ra2:
+    with ra3:
         st.markdown(
             """
             <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
@@ -3773,7 +3808,10 @@ elif PAGE == "Tentang":
             unsafe_allow_html=True
         )
     
-    with ra3:
+    # Research Assistants - Baris 2 (3 kolom)
+    ra4, ra5, ra6 = st.columns(3)
+    
+    with ra4:
         st.markdown(
             """
             <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
@@ -3801,9 +3839,7 @@ elif PAGE == "Tentang":
             unsafe_allow_html=True
         )
     
-    ra4, ra5, _ = st.columns(3)
-    
-    with ra4:
+    with ra5:
         st.markdown(
             """
             <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
@@ -3831,7 +3867,7 @@ elif PAGE == "Tentang":
             unsafe_allow_html=True
         )
     
-    with ra5:
+    with ra6:
         st.markdown(
             """
             <div style='background:linear-gradient(135deg,#FF9800,#f57c00);
@@ -3868,7 +3904,6 @@ elif PAGE == "Tentang":
         "</div>",
         unsafe_allow_html=True
     )
-
 
 # ==================== PETA QUIZ ====================
 
