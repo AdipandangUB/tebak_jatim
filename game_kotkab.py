@@ -3671,7 +3671,7 @@ elif PAGE == "Tentang":
               <span style='background:rgba(255,255,255,0.2);color:white;
                            padding:4px 12px;border-radius:12px;font-size:11px;
                            border:1px solid rgba(255,255,255,0.3);'>
-                🏙️ Participatory Planning
+                🏗️ Infrastructure Planning and Urban Politics
               </span>
             </div>
             """,
@@ -3699,7 +3699,7 @@ elif PAGE == "Tentang":
               <span style='background:rgba(255,255,255,0.2);color:white;
                            padding:4px 12px;border-radius:12px;font-size:11px;
                            border:1px solid rgba(255,255,255,0.3);'>
-                🌿 Environmental Planning
+                🌿 Urban Environmental Governance and Inclusive Development
               </span>
             </div>
             """,
@@ -3832,7 +3832,7 @@ elif PAGE == "Tentang":
               <span style='background:rgba(255,255,255,0.2);color:white;
                            padding:4px 12px;border-radius:12px;font-size:11px;
                            border:1px solid rgba(255,255,255,0.3);'>
-                💻 Developer
+                🏙️ Participatory Planning
               </span>
             </div>
             """,
