@@ -91,6 +91,60 @@ def get_logo_url(nama):
     else:
         return LOGO_KABUPATEN.get(nama_clean, None)
 
+# ==================== FUNGSI CLUE UNTUK QUIZ ====================
+
+def get_wilayah_clue(wilayah_name):
+    """
+    Mengembalikan clue (petunjuk) berupa ciri khas dari wilayah yang ditanyakan.
+    """
+    clues = {
+        # KOTA
+        "Kota Surabaya": "🌊 Kota ini dikenal dengan sebutan Kota Pahlawan dan memiliki ikon Jembatan Suramadu.",
+        "Kota Malang": "🍎 Kota ini dijuluki Kota Apel dan Kota Pendidikan dengan udara sejuk di pegunungan.",
+        "Kota Batu": "🍎 Kota wisata pegunungan ini terkenal dengan wisata Jatim Park dan apelnya.",
+        "Kota Kediri": "🚬 Kota ini dikenal sebagai Kota Tahu dan pusat industri rokok Gudang Garam.",
+        "Kota Madiun": "🍽️ Kota ini terkenal dengan kuliner Pecel Madiun dan Brem.",
+        "Kota Blitar": "🇮🇩 Kota ini merupakan tempat kelahiran Presiden pertama Indonesia, Ir. Soekarno.",
+        "Kota Mojokerto": "🍡 Kota ini dikenal dengan onde-onde dan dekat dengan situs Kerajaan Majapahit di Trowulan.",
+        "Kota Pasuruan": "🦐 Kota transit ini terkenal dengan udang dan kerupuknya.",
+        "Kota Probolinggo": "🥭 Kota ini dijuluki Kota Anggur dan terkenal dengan mangganya.",
+        
+        # KABUPATEN
+        "Kabupaten Banyuwangi": "🔥 Kabupaten di ujung timur Jawa Timur ini terkenal dengan Kawah Ijen yang memiliki fenomena api biru (blue fire).",
+        "Kabupaten Malang": "🏔️ Kabupaten yang mengelilingi Kota Malang ini memiliki wisata Bromo, Coban Rondo, dan pantai selatan.",
+        "Kabupaten Jember": "👗 Kabupaten ini terkenal dengan Jember Fashion Carnival (JFC) yang mendunia.",
+        "Kabupaten Sidoarjo": "🦐 Kabupaten ini terkenal dengan lumpur Lapindo, kerupuk udang, dan Bandara Juanda.",
+        "Kabupaten Kediri": "🌋 Kabupaten ini memiliki Gunung Kelud yang terkenal aktif dan pabrik rokok Gudang Garam.",
+        "Kabupaten Mojokerto": "🏯 Kabupaten ini merupakan lokasi bekas ibu kota Kerajaan Majapahit di Trowulan.",
+        "Kabupaten Pasuruan": "🌋 Kabupaten ini memiliki akses ke Gunung Bromo dari sisi Wonokitri.",
+        "Kabupaten Probolinggo": "🌋 Kabupaten ini memiliki akses ke Gunung Bromo dari sisi Cemorolawang.",
+        "Kabupaten Blitar": "🇮🇩 Kabupaten ini merupakan tempat kelahiran Presiden Soekarno dan memiliki Makam Bung Karno.",
+        "Kabupaten Tulungagung": "🪨 Kabupaten ini terkenal sebagai penghasil marmer terbesar di Indonesia.",
+        "Kabupaten Trenggalek": "🏖️ Kabupaten ini memiliki pantai-pantai indah seperti Pantai Prigi dan Pantai Pasir Putih.",
+        "Kabupaten Ponorogo": "🎭 Kabupaten ini terkenal dengan kesenian Reog yang mendunia.",
+        "Kabupaten Pacitan": "🕳️ Kabupaten ini dijuluki Kota 1001 Goa, terkenal dengan Goa Gong.",
+        "Kabupaten Ngawi": "🏰 Kabupaten ini memiliki Benteng Van den Bosch peninggalan Belanda.",
+        "Kabupaten Magetan": "🌊 Kabupaten ini terkenal dengan Telaga Sarangan di kaki Gunung Lawu.",
+        "Kabupaten Madiun": "🍽️ Kabupaten yang mengelilingi Kota Madiun ini penghasil beras dan jahe.",
+        "Kabupaten Nganjuk": "🥬 Kabupaten ini dikenal sebagai Kota Bayam.",
+        "Kabupaten Jombang": "🕌 Kabupaten ini dikenal sebagai Kota Santri dengan pesantren besar seperti Tebuireng.",
+        "Kabupaten Bojonegoro": "🛢️ Kabupaten ini terkenal sebagai kota minyak dengan sumur minyak tradisional mbah Liyung.",
+        "Kabupaten Tuban": "🕌 Kabupaten ini memiliki Makam Sunan Bonang, salah satu Wali Songo.",
+        "Kabupaten Lamongan": "🍲 Kabupaten ini terkenal dengan kuliner Soto Lamongan dan Makam Sunan Drajat.",
+        "Kabupaten Gresik": "🏭 Kabupaten industri ini memiliki Makam Sunan Giri dan Bandara Juanda.",
+        "Kabupaten Bangkalan": "🌉 Kabupaten di Madura ini merupakan pintu masuk dari Surabaya melalui Jembatan Suramadu.",
+        "Kabupaten Sampang": "🐃 Kabupaten di Madura ini terkenal dengan tradisi Karapan Sapi.",
+        "Kabupaten Pamekasan": "🐃 Kabupaten Madura ini terkenal dengan Karapan Sapi dan batik tulis.",
+        "Kabupaten Sumenep": "🏝️ Kabupaten di ujung timur Madura ini memiliki Keraton Sumenep dan Kepulauan Kangean.",
+        "Kabupaten Bondowoso": "🍯 Kabupaten ini dikenal sebagai Kota Tape dan Kota Kopi.",
+        "Kabupaten Situbondo": "🦏 Kabupaten ini memiliki Taman Nasional Baluran yang dijuluki Africa van Java.",
+        "Kabupaten Lumajang": "🏔️ Kabupaten di kaki Gunung Semeru ini terkenal dengan pisang agung.",
+    }
+    
+    if wilayah_name in clues:
+        return f"💡 {clues[wilayah_name]}"
+    else:
+        return f"💡 {wilayah_name} memiliki potensi wisata dan budaya yang khas di Jawa Timur."
 
 # ==================== FUNGSI EFEK BALON 3 LAPISAN ====================
 
@@ -4003,6 +4057,31 @@ if PAGE == "Quiz":
         with c1:
             st.markdown("### 📝 Pertanyaan")
             st.markdown("**Wilayah manakah yang disorot MERAH pada peta?**")
+        elif st.session_state.game_started:
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("### 📝 Pertanyaan")
+        st.markdown("**Wilayah manakah yang disorot MERAH pada peta?**")
+        
+        # === TAMBAHKAN CLUE DI SINI ===
+        current_wilayah = st.session_state.current_region
+        if current_wilayah:
+            clue_text = get_wilayah_clue(current_wilayah)
+            st.markdown(
+                f"""
+                <div style='background:linear-gradient(135deg,#fef9e6,#fff3cd);
+                    border-left:5px solid #ff9800;
+                    padding:12px 16px;
+                    border-radius:10px;
+                    margin-top:12px;
+                    font-size:14px;
+                    color:#856404;'>
+                    <span style='font-weight:bold;'>💡 Petunjuk:</span> {clue_text}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        # ================================
         with c2:
             st.markdown(f"### Soal {st.session_state.total_questions + 1}/{st.session_state.max_questions}")
 
