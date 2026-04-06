@@ -2752,7 +2752,7 @@ elif PAGE == "Puzzle":
             "</div>",
             unsafe_allow_html=True
         )
-st.markdown("#### ⏱️ Masukkan Waktu & Kesalahan dari Layar Puzzle")
+        st.markdown("#### ⏱️ Masukkan Waktu & Kesalahan dari Layar Puzzle")
         col_wm, col_ws = st.columns(2)
         with col_wm:
             input_menit = st.number_input(
@@ -2830,6 +2830,7 @@ st.markdown("#### ⏱️ Masukkan Waktu & Kesalahan dari Layar Puzzle")
                     st.rerun()
 
         elif _js_wkt:
+                   elif _js_wkt:
             # Puzzle selesai, belum disimpan — tampilkan form simpan
             wm, ws = divmod(int(_js_wkt), 60)
 
@@ -2856,11 +2857,10 @@ st.markdown("#### ⏱️ Masukkan Waktu & Kesalahan dari Layar Puzzle")
 
             st.markdown(f"**Nama:** {st.session_state.user_name}")
             st.markdown(f"**Waktu:** `{wm:02d}:{ws:02d}`")
-
-            # Inisialisasi _pzl_err hanya sekali saat form pertama muncul
             
-_kesalahan_display = int(_js_err) if _js_err else 0
-        st.info(f"❌ Jumlah Kesalahan: **{_kesalahan_display}**")
+            # Tampilkan jumlah kesalahan
+            _kesalahan_display = int(_js_err) if _js_err else 0
+            st.info(f"❌ Jumlah Kesalahan: **{_kesalahan_display}**")
 
             # Tampilkan 3 tombol: Simpan, Main Lagi, Keluar
             c_save, c_skip, c_exit = st.columns(3)
@@ -2893,27 +2893,19 @@ _kesalahan_display = int(_js_err) if _js_err else 0
                     st.session_state.puzzle_result_errors   = _kesalahan
                     st.session_state.puzzle_js_waktu        = None
                     st.session_state.puzzle_js_errors       = None
-                    # Hapus key widget sebelum rerun agar tidak trigger StreamlitAPIException
-                    if "_pzl_err" in st.session_state:
-                        del st.session_state["_pzl_err"]
                     st.rerun()
                 else:
                     st.error("❌ Gagal menyimpan skor.")
 
             if skip:
-                # Reset untuk main lagi tanpa menyimpan
                 st.session_state.puzzle_started   = False
                 st.session_state.puzzle_start_time = None
                 st.session_state.puzzle_completed  = False
                 st.session_state.puzzle_js_waktu   = None
                 st.session_state.puzzle_js_errors  = None
-                # Hapus key widget sebelum rerun
-                if "_pzl_err" in st.session_state:
-                    del st.session_state["_pzl_err"]
                 st.rerun()
                 
             if exit_puzzle:
-                # Reset semua state puzzle dan keluar ke Info Wilayah
                 st.session_state.puzzle_started   = False
                 st.session_state.puzzle_start_time = None
                 st.session_state.puzzle_completed  = False
@@ -2922,10 +2914,6 @@ _kesalahan_display = int(_js_err) if _js_err else 0
                 st.session_state.puzzle_score_saved = False
                 st.session_state.puzzle_result_time_sec = None
                 st.session_state.puzzle_result_errors = None
-                # Hapus key widget sebelum rerun
-                if "_pzl_err" in st.session_state:
-                    del st.session_state["_pzl_err"]
-                # Navigasi ke Info Wilayah
                 st.session_state.pending_navigation = "📚 Info Wilayah"
                 st.rerun()
 
