@@ -99,15 +99,15 @@ def get_wilayah_clue(wilayah_name):
     """
     clues = {
         # KOTA
-        "Surabaya": "🌊 Kota ini dikenal dengan sebutan Kota Pahlawan dan memiliki ikon Jembatan Suramadu.",
-        "Malang": "🍎 Kota ini dijuluki Kota Apel dan Kota Pendidikan dengan udara sejuk di pegunungan.",
-        "Batu": "🍎 Kota wisata pegunungan ini terkenal dengan wisata Jatim Park dan apelnya.",
-        "Kediri": "🚬 Kota ini dikenal sebagai Kota Tahu dan pusat industri rokok Gudang Garam.",
-        "Madiun": "🍽️ Kota ini terkenal dengan kuliner Nasi Pecel dan Brem.",
-        "Blitar": "🇮🇩 Kota ini merupakan tempat kelahiran Presiden pertama Indonesia, Ir. Soekarno.",
-        "Mojokerto": "🍡 Kota ini dikenal dengan onde-onde dan dekat dengan situs Kerajaan Majapahit di Trowulan.",
-        "Pasuruan": "🦐 Kota transit ini terkenal dengan udang dan kerupuknya.",
-        "Probolinggo": "🥭 Kota ini dijuluki Kota Anggur dan terkenal dengan mangganya.",
+        "Kota Surabaya": "🌊 Kota ini dikenal dengan sebutan Kota Pahlawan dan memiliki ikon Jembatan Suramadu.",
+        "Kota Malang": "🍎 Kota ini dijuluki Kota Apel dan Kota Pendidikan dengan udara sejuk di pegunungan.",
+        "Kota Batu": "🍎 Kota wisata pegunungan ini terkenal dengan wisata Jatim Park dan apelnya.",
+        "Kota Kediri": "🚬 Kota ini dikenal sebagai Kota Tahu dan pusat industri rokok Gudang Garam.",
+        "Kota Madiun": "🍽️ Kota ini terkenal dengan kuliner Nasi Pecel dan Brem.",
+        "Kota Blitar": "🇮🇩 Kota ini merupakan tempat kelahiran Presiden pertama Indonesia, Ir. Soekarno.",
+        "Kota Mojokerto": "🍡 Kota ini dikenal dengan onde-onde dan dekat dengan situs Kerajaan Majapahit di Trowulan.",
+        "Kota Pasuruan": "🦐 Kota transit ini terkenal dengan udang dan kerupuknya.",
+        "Kota Probolinggo": "🥭 Kota ini dijuluki Kota Anggur dan terkenal dengan mangganya.",
         
         # KABUPATEN
         "Banyuwangi": "🔥 Kabupaten di ujung timur Jawa Timur ini terkenal dengan Kawah Ijen yang memiliki fenomena api biru (blue fire).",
