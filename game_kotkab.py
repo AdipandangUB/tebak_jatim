@@ -3588,7 +3588,7 @@ elif PAGE == "Tentang":
     st.markdown(
         "<h2 style='text-align:center;color:#0066cc;margin-bottom:6px;'>👨‍💻 Tim Pengembang Aplikasi</h2>"
         "<p style='text-align:center;color:#666;font-size:14px;margin-bottom:24px;'>"
-        "Dikembangkan oleh tim Departemen Perencanaan Wilayah dan Kota, Universitas Brawijaya</p>",
+        "Dikembangkan oleh tim Lab. Environmental Infrastructure Information Systems (EIIS) Departemen Perencanaan Wilayah dan Kota, Universitas Brawijaya</p>",
         unsafe_allow_html=True
     )
 
