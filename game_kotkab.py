@@ -2430,7 +2430,7 @@ with st.sidebar:
     PAGE = selected_menu.split(" ", 1)[1] if " " in selected_menu else selected_menu
 
     st.markdown("---")
-    if st.button("🔄 Ganti Nama", use_container_width=True):
+    if st.button("🔄 Ganti Nama/Keluar", use_container_width=True):
         st.session_state.name_submitted = False
         st.rerun()
     st.markdown("---")
