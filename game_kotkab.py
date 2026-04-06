@@ -2829,7 +2829,7 @@ elif PAGE == "Puzzle":
                     st.session_state.pending_navigation = "📚 Info Wilayah"
                     st.rerun()
 
-                   elif _js_wkt:
+        elif _js_wkt:
             # Puzzle selesai, belum disimpan — tampilkan form simpan
             wm, ws = divmod(int(_js_wkt), 60)
 
@@ -2923,7 +2923,6 @@ elif PAGE == "Puzzle":
                 st.session_state.puzzle_completed = False
                 st.session_state.puzzle_started   = False
                 st.rerun()
-
 
 # ==================== HALAMAN INFO WILAYAH (dengan logo) ====================
 elif PAGE == "Info Wilayah":
