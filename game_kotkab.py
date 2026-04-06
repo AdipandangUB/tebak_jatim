@@ -3899,7 +3899,7 @@ elif PAGE == "Tentang":
     st.markdown(
         "<div style='text-align:center;background:#f8f9fa;padding:12px;border-radius:10px;"
         "border:1px solid #dee2e6;color:#666;font-size:13px;'>"
-        "🏛️ <strong>Departemen Perencanaan Wilayah dan Kota</strong> · "
+        "🏛️ <strong> Lab. Environmental Infrastructure Information Systems (EIIS) - Departemen Perencanaan Wilayah dan Kota</strong> · "
         "Fakultas Teknik · Universitas Brawijaya · Malang, Jawa Timur"
         "</div>",
         unsafe_allow_html=True
