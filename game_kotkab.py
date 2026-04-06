@@ -2752,15 +2752,30 @@ elif PAGE == "Puzzle":
             "</div>",
             unsafe_allow_html=True
         )
+st.markdown("#### ⏱️ Masukkan Waktu & Kesalahan dari Layar Puzzle")
+        col_wm, col_ws = st.columns(2)
+        with col_wm:
+            input_menit = st.number_input(
+                "Menit", min_value=0, max_value=99, step=1, key="_puzzle_menit_input"
+            )
+        with col_ws:
+            input_detik = st.number_input(
+                "Detik (00–59)", min_value=0, max_value=59, step=1, key="_puzzle_detik_input"
+            )
+        input_errors = st.number_input(
+            "❌ Jumlah Kesalahan", min_value=0, max_value=999, step=1, key="_puzzle_errors_input"
+        )
+        st.caption("💡 Lihat waktu (MM:SS) dan jumlah kesalahan yang tampil di layar puzzle saat selesai, lalu masukkan di sini.")
+
         if st.button(
-            "✅ Saya Sudah Selesai — Catat Waktu & Simpan Skor",
+            "✅ Selesai & Lanjut Simpan Skor",
             use_container_width=True,
             type="primary",
             key="btn_puzzle_selesai"
         ):
-            waktu_selesai = int(time.time() - st.session_state.puzzle_start_time) if st.session_state.puzzle_start_time else 0
-            st.session_state.puzzle_js_waktu  = waktu_selesai
-            st.session_state.puzzle_js_errors = 0   # user isi sendiri di form
+            waktu_detik_js = int(input_menit) * 60 + int(input_detik)
+            st.session_state.puzzle_js_waktu  = waktu_detik_js if waktu_detik_js > 0 else 1
+            st.session_state.puzzle_js_errors = int(input_errors)
             st.session_state.puzzle_completed = True
             st.session_state.puzzle_started   = False
             st.rerun()
@@ -2843,15 +2858,9 @@ elif PAGE == "Puzzle":
             st.markdown(f"**Waktu:** `{wm:02d}:{ws:02d}`")
 
             # Inisialisasi _pzl_err hanya sekali saat form pertama muncul
-            if "_pzl_err" not in st.session_state:
-                st.session_state["_pzl_err"] = 0
-
-            st.number_input(
-                "❌ Jumlah Kesalahan (lihat angka di layar puzzle)",
-                min_value=0, max_value=999, step=1,
-                key="_pzl_err"
-            )
-            st.caption("💡 Jumlah kesalahan terlihat di layar puzzle saat selesai")
+            
+_kesalahan_display = int(_js_err) if _js_err else 0
+        st.info(f"❌ Jumlah Kesalahan: **{_kesalahan_display}**")
 
             # Tampilkan 3 tombol: Simpan, Main Lagi, Keluar
             c_save, c_skip, c_exit = st.columns(3)
@@ -2876,7 +2885,7 @@ elif PAGE == "Puzzle":
                 )
 
             if simpan:
-                _kesalahan = int(st.session_state.get("_pzl_err", 0))
+                _kesalahan = int(_js_err) if _js_err is not None else 0
                 if add_puzzle_score(st.session_state.user_name, _js_wkt, _kesalahan):
                     st.session_state.puzzle_score_saved     = True
                     st.session_state.puzzle_completed       = False
@@ -4175,3 +4184,4 @@ footer_texts = {
 footer_text = footer_texts.get(menu_key, "🧩 Sepiro Jawa Timur, Sampeyan")
 st.markdown(create_footer(footer_text, FOOTER_BACKGROUND_URL, st.session_state.footer_brightness),
             unsafe_allow_html=True)
+
