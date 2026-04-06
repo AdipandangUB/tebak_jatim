@@ -3989,8 +3989,6 @@ if PAGE == "Quiz":
 
 # Perbaiki bagian GAME OVER (sekitar baris 2300-2400)
 
-# Perbaiki bagian GAME OVER (sekitar baris 2300-2400)
-
 # ==================== AREA QUIZ ====================
 st.markdown("---")
 
