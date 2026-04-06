@@ -765,9 +765,6 @@ def save_puzzle_scoreboard(scoreboard):
         st.error(f"Error menyimpan skor puzzle: {str(e)}")
         return False
 
-
-
-
 def add_puzzle_score(nama, waktu_detik, kesalahan):
     """Tambahkan hasil puzzle ke papan skor puzzle."""
     try:
@@ -798,7 +795,6 @@ def add_puzzle_score(nama, waktu_detik, kesalahan):
     except Exception as e:
         st.error(f"Error menambah skor puzzle: {str(e)}")
         return False
-
 
 def get_puzzle_scoreboard_stats(scoreboard):
     """Stats dihitung langsung dari semua entri di papan skor."""
@@ -962,6 +958,7 @@ _defaults = {
     "music_volume": 30,
     "music_enabled": True,
     "show_perfect_balloon": False,
+    "balloon_shown": False,  # TAMBAHKAN INI - untuk melacak apakah balon sudah ditampilkan
     # Puzzle state
     "puzzle_started": False,
     "puzzle_start_time": None,
@@ -1074,6 +1071,7 @@ def reset_game():
     st.session_state.question_times = []
     st.session_state.average_answer_time = 0
     st.session_state.show_perfect_balloon = False
+    st.session_state.balloon_shown = False
     pilih_wilayah()
 
 
@@ -3991,6 +3989,8 @@ if PAGE == "Quiz":
 
 # Perbaiki bagian GAME OVER (sekitar baris 2300-2400)
 
+# Perbaiki bagian GAME OVER (sekitar baris 2300-2400)
+
 # ==================== AREA QUIZ ====================
 st.markdown("---")
 
@@ -4000,14 +4000,13 @@ if st.session_state.game_over:
     with c2:
         is_perfect = (st.session_state.score == st.session_state.max_questions)
 
-        # PERBAIKAN: Hanya tampilkan efek balon jika show_perfect_balloon = True
-        # dan hapus efek setelah ditampilkan
-        if is_perfect and st.session_state.show_perfect_balloon:
+        # PERBAIKAN UTAMA: Gunakan session state untuk melacak apakah efek balon sudah ditampilkan
+        # Jangan tampilkan efek balon jika sudah pernah ditampilkan sebelumnya
+        if is_perfect and not st.session_state.get("balloon_shown", False):
             st.balloons()
             st.markdown(get_perfect_score_markdown_effect(), unsafe_allow_html=True)
             st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
-            # JANGAN LANGSUNG SET False DI SINI - nanti setelah simpan skor
-            # st.session_state.show_perfect_balloon = False  # HAPUS BARIS INI
+            st.session_state.balloon_shown = True  # Tandai bahwa efek balon sudah ditampilkan
 
         st.markdown("## 🎮 Quiz Selesai!")
         st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
@@ -4041,16 +4040,12 @@ if st.session_state.game_over:
                                  st.session_state.difficulty, st.session_state.max_questions,
                                  st.session_state.game_start_time, st.session_state.game_end_time):
                         st.session_state.score_saved = True
-                        # PERBAIKAN: Matikan efek balon setelah menyimpan skor
-                        st.session_state.show_perfect_balloon = False
                         st.success("✅ Skor disimpan!")
                         st.rerun()
                     else:
                         st.error("❌ Gagal menyimpan skor.")
         elif st.session_state.score_saved:
             st.success("✅ Skor sudah disimpan!")
-            # PERBAIKAN: Pastikan efek balon mati setelah skor tersimpan
-            st.session_state.show_perfect_balloon = False
 
         if st.button("🔄 Main Lagi", use_container_width=True, type="primary"):
             reset_game()
