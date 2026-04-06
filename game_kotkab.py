@@ -3994,70 +3994,65 @@ if PAGE == "Quiz":
             reset_game()
             st.rerun()
 
-    # ==================== AREA QUIZ ====================
-    st.markdown("---")
+# ==================== AREA QUIZ ====================
+st.markdown("---")
 
-    if st.session_state.game_over:
-        end_game_timer()
-        c1, c2, c3 = st.columns([1, 2, 1])
-        with c2:
-            is_perfect = (st.session_state.score == st.session_state.max_questions)
+if st.session_state.game_over:
+    end_game_timer()
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        is_perfect = (st.session_state.score == st.session_state.max_questions)
 
-            if is_perfect or st.session_state.show_perfect_balloon:
-                st.balloons()
-                st.markdown(get_perfect_score_markdown_effect(), unsafe_allow_html=True)
-                st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
-                st.session_state.show_perfect_balloon = False
+        if is_perfect or st.session_state.show_perfect_balloon:
+            st.balloons()
+            st.markdown(get_perfect_score_markdown_effect(), unsafe_allow_html=True)
+            st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
+            st.session_state.show_perfect_balloon = False
 
-            st.markdown("## 🎮 Quiz Selesai!")
-            st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
-            if st.session_state.total_game_duration > 0:
-                st.info(f"⏱️ **Total Waktu:** {format_duration(st.session_state.total_game_duration)}")
-            if st.session_state.average_answer_time > 0:
-                st.info(f"⚡ **Rata-rata Jawab:** {st.session_state.average_answer_time:.1f} dtk")
+        st.markdown("## 🎮 Quiz Selesai!")
+        st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
+        if st.session_state.total_game_duration > 0:
+            st.info(f"⏱️ **Total Waktu:** {format_duration(st.session_state.total_game_duration)}")
+        if st.session_state.average_answer_time > 0:
+            st.info(f"⚡ **Rata-rata Jawab:** {st.session_state.average_answer_time:.1f} dtk")
 
-            if is_perfect:
-                st.markdown("### 🏆 Selamat! Nilai Sempurna!")
-                if st.session_state.question_times:
-                    fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
-                    st.success(f"⚡ **Tercepat:** Soal {fastest['question_number']} dalam {fastest['duration']:.1f} dtk!")
-            elif st.session_state.score >= 7:
-                st.markdown("### 👍 Bagus! Terus belajar!")
-            elif st.session_state.score >= 5:
-                st.markdown("### 📚 Lumayan, coba lagi!")
-            else:
-                st.markdown("### 💪 Ayo coba lagi!")
+        if is_perfect:
+            st.markdown("### 🏆 Selamat! Nilai Sempurna!")
+            if st.session_state.question_times:
+                fastest = min(st.session_state.question_times, key=lambda x: x["duration"])
+                st.success(f"⚡ **Tercepat:** Soal {fastest['question_number']} dalam {fastest['duration']:.1f} dtk!")
+        elif st.session_state.score >= 7:
+            st.markdown("### 👍 Bagus! Terus belajar!")
+        elif st.session_state.score >= 5:
+            st.markdown("### 📚 Lumayan, coba lagi!")
+        else:
+            st.markdown("### 💪 Ayo coba lagi!")
 
-            if not st.session_state.score_saved and st.session_state.score > 0:
-                st.markdown("---")
-                st.markdown("### 💾 Simpan Skor")
-                with st.form("save_score_form"):
-                    st.markdown(f"Nama: **{st.session_state.user_name}**")
-                    st.markdown(f"Skor: **{st.session_state.score}/{st.session_state.max_questions}** (Level: {st.session_state.difficulty})")
-                    if st.session_state.total_game_duration > 0:
-                        st.markdown(f"Waktu: **{format_duration(st.session_state.total_game_duration)}**")
-                    if st.form_submit_button("💾 Simpan Skor", use_container_width=True, type="primary"):
-                        if add_score(st.session_state.user_name, st.session_state.score,
-                                     st.session_state.difficulty, st.session_state.max_questions,
-                                     st.session_state.game_start_time, st.session_state.game_end_time):
-                            st.session_state.score_saved = True
-                            st.success("✅ Skor disimpan!")
-                            st.rerun()
-                        else:
-                            st.error("❌ Gagal menyimpan skor.")
-            elif st.session_state.score_saved:
-                st.success("✅ Skor sudah disimpan!")
+        if not st.session_state.score_saved and st.session_state.score > 0:
+            st.markdown("---")
+            st.markdown("### 💾 Simpan Skor")
+            with st.form("save_score_form"):
+                st.markdown(f"Nama: **{st.session_state.user_name}**")
+                st.markdown(f"Skor: **{st.session_state.score}/{st.session_state.max_questions}** (Level: {st.session_state.difficulty})")
+                if st.session_state.total_game_duration > 0:
+                    st.markdown(f"Waktu: **{format_duration(st.session_state.total_game_duration)}**")
+                if st.form_submit_button("💾 Simpan Skor", use_container_width=True, type="primary"):
+                    if add_score(st.session_state.user_name, st.session_state.score,
+                                 st.session_state.difficulty, st.session_state.max_questions,
+                                 st.session_state.game_start_time, st.session_state.game_end_time):
+                        st.session_state.score_saved = True
+                        st.success("✅ Skor disimpan!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Gagal menyimpan skor.")
+        elif st.session_state.score_saved:
+            st.success("✅ Skor sudah disimpan!")
 
-            if st.button("🔄 Main Lagi", use_container_width=True, type="primary"):
-                reset_game()
-                st.rerun()
+        if st.button("🔄 Main Lagi", use_container_width=True, type="primary"):
+            reset_game()
+            st.rerun()
 
-    elif st.session_state.game_started:
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown("### 📝 Pertanyaan")
-            st.markdown("**Wilayah manakah yang disorot MERAH pada peta?**")
-        elif st.session_state.game_started:
+elif st.session_state.game_started:
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("### 📝 Pertanyaan")
@@ -4082,86 +4077,86 @@ if PAGE == "Quiz":
                 unsafe_allow_html=True
             )
         # ================================
-        with c2:
-            st.markdown(f"### Soal {st.session_state.total_questions + 1}/{st.session_state.max_questions}")
+        
+    with c2:
+        st.markdown(f"### Soal {st.session_state.total_questions + 1}/{st.session_state.max_questions}")
 
-        if st.session_state.question_start_time:
-            qtime = time.time() - st.session_state.question_start_time
-            st.progress(min(qtime / 60, 1.0), text=f"⏱️ Waktu: {qtime:.1f} dtk")
+    if st.session_state.question_start_time:
+        qtime = time.time() - st.session_state.question_start_time
+        st.progress(min(qtime / 60, 1.0), text=f"⏱️ Waktu: {qtime:.1f} dtk")
 
-        st.markdown("### Pilih Jawaban:")
-        options = st.session_state.options
-        half    = len(options) // 2 + len(options) % 2
-        ca1, ca2 = st.columns(2)
-        answer_selected = None
+    st.markdown("### Pilih Jawaban:")
+    options = st.session_state.options
+    half    = len(options) // 2 + len(options) % 2
+    ca1, ca2 = st.columns(2)
+    answer_selected = None
 
-        with ca1:
-            for i, opt in enumerate(options[:half]):
-                if st.button(opt, key=f"opt_{i}", use_container_width=True,
-                             disabled=st.session_state.answered):
-                    answer_selected = opt
-        with ca2:
-            for i, opt in enumerate(options[half:]):
-                if st.button(opt, key=f"opt_{i+half}", use_container_width=True,
-                             disabled=st.session_state.answered):
-                    answer_selected = opt
+    with ca1:
+        for i, opt in enumerate(options[:half]):
+            if st.button(opt, key=f"opt_{i}", use_container_width=True,
+                         disabled=st.session_state.answered):
+                answer_selected = opt
+    with ca2:
+        for i, opt in enumerate(options[half:]):
+            if st.button(opt, key=f"opt_{i+half}", use_container_width=True,
+                         disabled=st.session_state.answered):
+                answer_selected = opt
 
-        if answer_selected and not st.session_state.answered:
-            is_correct = (answer_selected == st.session_state.correct_answer)
-            q_time = end_question_timer(is_correct)
-            st.session_state.total_questions += 1
-            if is_correct:
-                st.session_state.score += 1
-                st.session_state.feedback = f"✅ **Benar! Hebat! (Waktu: {q_time:.1f} dtk)**"
-            else:
-                st.session_state.feedback = (
-                    f"❌ **Jawaban benar: {st.session_state.correct_answer} "
-                    f"(Waktu: {q_time:.1f} dtk)**"
+    if answer_selected and not st.session_state.answered:
+        is_correct = (answer_selected == st.session_state.correct_answer)
+        q_time = end_question_timer(is_correct)
+        st.session_state.total_questions += 1
+        if is_correct:
+            st.session_state.score += 1
+            st.session_state.feedback = f"✅ **Benar! Hebat! (Waktu: {q_time:.1f} dtk)**"
+        else:
+            st.session_state.feedback = (
+                f"❌ **Jawaban benar: {st.session_state.correct_answer} "
+                f"(Waktu: {q_time:.1f} dtk)**"
+            )
+        st.session_state.answered = True
+
+        if st.session_state.total_questions >= st.session_state.max_questions:
+            st.session_state.game_over      = True
+            st.session_state.game_end_time  = time.time()
+            if st.session_state.game_start_time is not None:
+                st.session_state.total_game_duration = (
+                    st.session_state.game_end_time - st.session_state.game_start_time
                 )
-            st.session_state.answered = True
+            else:
+                st.session_state.total_game_duration = sum(
+                    q["duration"] for q in st.session_state.question_times
+                )
+            if st.session_state.score == st.session_state.max_questions:
+                st.session_state.show_perfect_balloon = True
 
-            if st.session_state.total_questions >= st.session_state.max_questions:
-                st.session_state.game_over      = True
-                st.session_state.game_end_time  = time.time()
-                if st.session_state.game_start_time is not None:
-                    st.session_state.total_game_duration = (
-                        st.session_state.game_end_time - st.session_state.game_start_time
-                    )
-                else:
-                    st.session_state.total_game_duration = sum(
-                        q["duration"] for q in st.session_state.question_times
-                    )
-                if st.session_state.score == st.session_state.max_questions:
-                    st.session_state.show_perfect_balloon = True
+        st.rerun()
 
-            st.rerun()
-
-        if st.session_state.feedback:
-            st.markdown("---")
-            cf1, cf2, cf3 = st.columns([1, 2, 1])
-            with cf2:
-                st.markdown(f"### {st.session_state.feedback}")
-                if st.session_state.answered and st.session_state.total_questions < st.session_state.max_questions:
-                    if st.button("➡️ Soal Berikutnya", use_container_width=True, type="primary"):
-                        pilih_wilayah()
-                        st.rerun()
-
-    # Progress bar quiz
-    if st.session_state.game_started and not st.session_state.game_over:
+    if st.session_state.feedback:
         st.markdown("---")
-        cp1, cp2, cp3, cp4 = st.columns([2, 1, 1, 1])
-        with cp1:
-            progress = st.session_state.total_questions / st.session_state.max_questions
-            st.progress(progress, text=f"Progress: {st.session_state.total_questions}/{st.session_state.max_questions}")
-        with cp2:
-            st.markdown(f"### ⭐ Skor: {st.session_state.score}")
-        with cp3:
-            st.markdown(f"### 🎯 Target: {st.session_state.max_questions}")
-        with cp4:
-            if st.session_state.game_start_time:
-                dur = time.time() - st.session_state.game_start_time
-                st.markdown(f"### ⏱️ {format_duration(dur)}")
+        cf1, cf2, cf3 = st.columns([1, 2, 1])
+        with cf2:
+            st.markdown(f"### {st.session_state.feedback}")
+            if st.session_state.answered and st.session_state.total_questions < st.session_state.max_questions:
+                if st.button("➡️ Soal Berikutnya", use_container_width=True, type="primary"):
+                    pilih_wilayah()
+                    st.rerun()
 
+# Progress bar quiz
+if st.session_state.game_started and not st.session_state.game_over:
+    st.markdown("---")
+    cp1, cp2, cp3, cp4 = st.columns([2, 1, 1, 1])
+    with cp1:
+        progress = st.session_state.total_questions / st.session_state.max_questions
+        st.progress(progress, text=f"Progress: {st.session_state.total_questions}/{st.session_state.max_questions}")
+    with cp2:
+        st.markdown(f"### ⭐ Skor: {st.session_state.score}")
+    with cp3:
+        st.markdown(f"### 🎯 Target: {st.session_state.max_questions}")
+    with cp4:
+        if st.session_state.game_start_time:
+            dur = time.time() - st.session_state.game_start_time
+            st.markdown(f"### ⏱️ {format_duration(dur)}")
 
 # ==================== FOOTER ====================
 
