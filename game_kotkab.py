@@ -3989,6 +3989,8 @@ if PAGE == "Quiz":
             reset_game()
             st.rerun()
 
+# Perbaiki bagian GAME OVER (sekitar baris 2300-2400)
+
 # ==================== AREA QUIZ ====================
 st.markdown("---")
 
@@ -3998,11 +4000,14 @@ if st.session_state.game_over:
     with c2:
         is_perfect = (st.session_state.score == st.session_state.max_questions)
 
-        if is_perfect or st.session_state.show_perfect_balloon:
+        # PERBAIKAN: Hanya tampilkan efek balon jika show_perfect_balloon = True
+        # dan hapus efek setelah ditampilkan
+        if is_perfect and st.session_state.show_perfect_balloon:
             st.balloons()
             st.markdown(get_perfect_score_markdown_effect(), unsafe_allow_html=True)
             st.components.v1.html(get_balloon_effect_html(), height=340, scrolling=False)
-            st.session_state.show_perfect_balloon = False
+            # JANGAN LANGSUNG SET False DI SINI - nanti setelah simpan skor
+            # st.session_state.show_perfect_balloon = False  # HAPUS BARIS INI
 
         st.markdown("## 🎮 Quiz Selesai!")
         st.markdown(f"### Skor Akhir: **{st.session_state.score}/{st.session_state.max_questions}**")
@@ -4036,12 +4041,16 @@ if st.session_state.game_over:
                                  st.session_state.difficulty, st.session_state.max_questions,
                                  st.session_state.game_start_time, st.session_state.game_end_time):
                         st.session_state.score_saved = True
+                        # PERBAIKAN: Matikan efek balon setelah menyimpan skor
+                        st.session_state.show_perfect_balloon = False
                         st.success("✅ Skor disimpan!")
                         st.rerun()
                     else:
                         st.error("❌ Gagal menyimpan skor.")
         elif st.session_state.score_saved:
             st.success("✅ Skor sudah disimpan!")
+            # PERBAIKAN: Pastikan efek balon mati setelah skor tersimpan
+            st.session_state.show_perfect_balloon = False
 
         if st.button("🔄 Main Lagi", use_container_width=True, type="primary"):
             reset_game()
