@@ -3992,7 +3992,7 @@ elif PAGE == "Tentang":
                           box-shadow:0 4px 12px rgba(0,0,0,0.25);
                           margin-bottom:12px;'>
               <h4 style='color:white;margin:0 0 4px 0;font-size:15px;line-height:1.3;'>
-                Dr. (Cand.) Mustika Anggraeni,<br>S.T., M.Si.
+                Dr. Mustika Anggraeni,<br>S.T., M.Si.
               </h4>
               <p style='color:rgba(255,255,255,0.8);margin:0 0 12px 0;
                         font-size:12px;font-style:italic;'>Anggota 2</p>
