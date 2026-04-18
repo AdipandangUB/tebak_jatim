@@ -1591,18 +1591,24 @@ def create_footer(footer_text, image_url, brightness=0.7):
 
 def get_puzzle_html(geojson_data, start_time_ms):
     """
-    Puzzle peta JAWA TIMUR UTUH:
-    - 1 wilayah provinsi (seluruh Jawa Timur)
-    - Setiap kepingan = 1 kabupaten/kota (bentuk polygon asli GeoJSON)
-    - Level Normal saja (semua kab/kota = kepingan)
-    - Drag & drop ke posisi geografis yang tepat
+    Puzzle peta JAWA TIMUR UTUH — v3.1 (Touch-fixed)
+    Perubahan v3.1:
+    - Unified Input System: Mouse + Touch (iPad/tablet/HP) + Stylus
+    - canvasPosFromClient(cx, cy) mengganti canvasPos(e)
+    - getEventXY(e) normalisasi semua event ke [clientX, clientY]
+    - Semua drag listener dipasang di document (bukan canvas)
+    - touchend menggunakan changedTouches
+    - touchcancel mencegah ghost drag
+    - touch-action: none di body & panel (iOS Safari)
+    - Hit area diperbesar jadi 12px untuk jari
+    - buildThumbnails pakai startDragFromPanel (unified)
     """
     all_features = geojson_data.get("features", [])
     if not all_features:
         return "<p>❌ Data wilayah tidak ditemukan.</p>"
 
     geojson_str = json.dumps(geojson_data)
-    SNAP_DIST   = 60   # piksel toleransi snap (level Normal)
+    SNAP_DIST   = 60
 
     html = f"""<!DOCTYPE html>
 <html lang="id">
@@ -1612,12 +1618,16 @@ def get_puzzle_html(geojson_data, start_time_ms):
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
   * {{ margin:0; padding:0; box-sizing:border-box; }}
-  body {{
+  /* touch-action: none di body & panel mencegah iOS Safari intercept scroll saat drag */
+  html, body {{
     font-family: 'Nunito', sans-serif;
     background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     min-height: 100vh;
     color: white;
     padding: 10px;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
   }}
   #puzzle-header {{ text-align:center; padding:6px 0 10px 0; }}
   #puzzle-header h2 {{
@@ -1642,7 +1652,8 @@ def get_puzzle_html(geojson_data, start_time_ms):
   #canvas-wrapper {{
     position:relative; background:rgba(255,255,255,0.04);
     border:2px solid rgba(255,255,255,0.15); border-radius:14px;
-    overflow:hidden; flex:1 1 560px; max-width:700px;
+    overflow:visible; flex:1 1 560px; max-width:700px;
+    touch-action: none;
   }}
   #canvas-label {{
     position:absolute; top:7px; left:10px; font-size:0.68em;
@@ -1650,13 +1661,17 @@ def get_puzzle_html(geojson_data, start_time_ms):
     text-transform:uppercase; pointer-events:none; z-index:10;
   }}
   #puzzle-canvas {{
-    display:block; width:100%; touch-action:none; user-select:none; cursor:grab;
+    display:block; width:100%;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    cursor:grab;
   }}
   #puzzle-canvas:active {{ cursor:grabbing; }}
   #pieces-panel {{
     background:rgba(255,255,255,0.06); border:2px dashed rgba(255,255,255,0.2);
     border-radius:14px; padding:10px; flex:0 0 190px;
     max-height:640px; overflow-y:auto; min-width:155px;
+    touch-action: pan-y; /* panel boleh scroll vertikal, tapi bukan drag horizontal */
   }}
   #pieces-panel h4 {{
     font-size:0.78em; color:rgba(255,255,255,0.6); text-transform:uppercase;
@@ -1668,6 +1683,8 @@ def get_puzzle_html(geojson_data, start_time_ms):
     border-radius:7px; cursor:grab; transition:all 0.2s; overflow:hidden;
     display:flex; align-items:center; justify-content:center;
     position:relative;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
   }}
   .piece-thumb:hover {{
     background:rgba(255,215,0,0.15); border-color:#ffd700;
@@ -1701,6 +1718,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
     border-radius:18px; padding:7px 18px; font-size:0.82em; font-weight:700;
     font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s;
     box-shadow:0 3px 10px rgba(102,126,234,0.4);
+    touch-action: manipulation;
   }}
   .puzzle-btn:hover {{ transform:translateY(-2px); box-shadow:0 5px 16px rgba(102,126,234,0.6); }}
   .puzzle-btn.danger {{ background:linear-gradient(135deg,#f44336,#c62828); }}
@@ -1709,6 +1727,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
     display:none; position:fixed; top:0; left:0; width:100%; height:100%;
     background:rgba(0,0,0,0.88); z-index:999; justify-content:center;
     align-items:center; flex-direction:column; text-align:center; padding:20px;
+    touch-action: auto;
   }}
   #win-overlay.show {{ display:flex; }}
   #win-box {{
@@ -1805,7 +1824,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
       📜 Scroll ke bawah untuk menyimpan skor!
     </p>
     <button class="puzzle-btn success"
-      style="margin-top:10px;font-size:1em;padding:10px 30px;"
+      style="margin-top:10px;font-size:1em;padding:10px 30px;touch-action:manipulation;"
       onclick="location.reload()">🔄 Main Lagi</button>
   </div>
 </div>
@@ -1822,7 +1841,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
   const W = 680, H = 560;
   canvas.width = W; canvas.height = H;
 
-  // ===== PROYEKSI — fit seluruh Jawa Timur =====
+  // ===== PROYEKSI =====
   let minLon=180, maxLon=-180, minLat=90, maxLat=-90;
 
   function iterGeom(geom, cb) {{
@@ -1868,7 +1887,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return p;
   }}
 
-  // Hitung luas poligon (dalam satuan proyeksi)
   function polyArea(ring) {{
     let area = 0;
     const pts = ring.map(c => project(c[0], c[1]));
@@ -1878,11 +1896,8 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return Math.abs(area / 2);
   }}
 
-  // Centroid proyeksi: untuk MultiPolygon pakai polygon TERBESAR
-  // sehingga kepulauan kecil tidak menarik centroid ke tengah laut
   function geomCentroid(geom) {{
     if(geom.type === 'MultiPolygon') {{
-      // Cari polygon terbesar berdasarkan luas ring luar
       let bestRing = null, bestArea = 0;
       geom.coordinates.forEach(poly => {{
         const area = polyArea(poly[0]);
@@ -1894,7 +1909,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
         return [sx/bestRing.length, sy/bestRing.length];
       }}
     }}
-    // Polygon biasa atau fallback: rata-rata semua titik
     let sx=0, sy=0, n=0;
     iterGeom(geom, (lon,lat) => {{
       const [x,y] = project(lon,lat);
@@ -1903,7 +1917,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return [sx/n, sy/n];
   }}
 
-  // Bounding box proyeksi
   function geomBBox(geom) {{
     let x1=W, x2=0, y1=H, y2=0;
     iterGeom(geom, (lon,lat) => {{
@@ -1914,7 +1927,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
     return {{ x1,x2,y1,y2, w:x2-x1, h:y2-y1 }};
   }}
 
-  // ===== BUILD PIECES — setiap feature = 1 kepingan =====
+  // ===== BUILD PIECES =====
   const pieces = GEOJSON.features.map((feat, i) => {{
     const name     = feat.properties.name;
     const centroid = geomCentroid(feat.geometry);
@@ -1925,9 +1938,9 @@ def get_puzzle_html(geojson_data, start_time_ms):
       name:     name,
       geometry: feat.geometry,
       path:     path,
-      centroid: centroid,   // posisi target di canvas (dx=0 = terpasang)
+      centroid: centroid,
       bbox:     bbox,
-      dx:       0,          // offset drag dari posisi target
+      dx:       0,
       dy:       0,
       placed:   false,
       inPanel:  true,
@@ -1959,15 +1972,14 @@ def get_puzzle_html(geojson_data, start_time_ms):
       drawThumb(p, tc.getContext('2d'));
       div.appendChild(tc);
 
-      // Label nama singkat
       const lbl = document.createElement('div');
       lbl.className = 'piece-label';
-      // Singkat: hapus "Kabupaten " / "Kota "
       lbl.textContent = p.name.replace('Kabupaten ','').replace('Kota ','');
       div.appendChild(lbl);
 
-      div.addEventListener('mousedown', e => startDragPanel(e, p));
-      div.addEventListener('touchstart', e => startDragPanelTouch(e, p), {{passive:false}});
+      // Unified handler: mouse dan touch lewat startDragFromPanel
+      div.addEventListener('mousedown',  e => startDragFromPanel(e, p));
+      div.addEventListener('touchstart', e => startDragFromPanel(e, p), {{ passive: false }});
       piecesContainer.appendChild(div);
     }});
   }}
@@ -1992,8 +2004,8 @@ def get_puzzle_html(geojson_data, start_time_ms):
       }});
       lp.closePath();
     }}
-    piece.geometry.coordinates.forEach ? 
-      (piece.geometry.type === 'MultiPolygon' 
+    piece.geometry.coordinates.forEach ?
+      (piece.geometry.type === 'MultiPolygon'
         ? piece.geometry.coordinates.forEach(poly => poly.forEach(addRingLocal))
         : piece.geometry.coordinates.forEach(addRingLocal))
       : null;
@@ -2011,137 +2023,126 @@ def get_puzzle_html(geojson_data, start_time_ms):
 
   buildThumbnails();
 
-  // ===== DRAG STATE =====
+  // ===================================================================
+  // UNIFIED INPUT SYSTEM — Mouse + Touch (iPad/tablet/HP) + Stylus
+  // ===================================================================
+
   let dragging = null;
   let mouseX = 0, mouseY = 0;
   let mistakes = 0;
 
-  function canvasPos(e) {{
+  function canvasPosFromClient(cx, cy) {{
     const rect = canvas.getBoundingClientRect();
-    const cx   = e.touches ? e.touches[0].clientX : e.clientX;
-    const cy   = e.touches ? e.touches[0].clientY : e.clientY;
     return [
       (cx - rect.left) * (W / rect.width),
       (cy - rect.top)  * (H / rect.height)
     ];
   }}
 
-  function startDragPanel(e, piece) {{
-    e.preventDefault();
-    if(piece.placed) return;
-    dragging = piece;
-    piece.inPanel = false;
-    const [mx,my] = canvasPos(e);
-    piece.dx = mx - piece.centroid[0];
-    piece.dy = my - piece.centroid[1];
-    piece.dragOffX = 0; piece.dragOffY = 0;
-    mouseX=mx; mouseY=my;
+  function getEventXY(e) {{
+    if (e.touches && e.touches.length > 0) {{
+      return [e.touches[0].clientX, e.touches[0].clientY];
+    }}
+    if (e.changedTouches && e.changedTouches.length > 0) {{
+      return [e.changedTouches[0].clientX, e.changedTouches[0].clientY];
+    }}
+    return [e.clientX, e.clientY];
+  }}
+
+  function startDragFromPanel(e, piece) {{
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+    if (piece.placed) return;
+    const [cx, cy] = getEventXY(e);
+    const [mx, my] = canvasPosFromClient(cx, cy);
+    dragging       = piece;
+    piece.inPanel  = false;
+    piece.dx       = mx - piece.centroid[0];
+    piece.dy       = my - piece.centroid[1];
+    piece.dragOffX = 0;
+    piece.dragOffY = 0;
+    mouseX = mx; mouseY = my;
     render();
   }}
 
-  function startDragPanelTouch(e, piece) {{
-    e.preventDefault();
-    if(piece.placed) return;
-    dragging = piece;
-    piece.inPanel = false;
-    const touch = e.touches[0];
-    const rect  = canvas.getBoundingClientRect();
-    const mx = (touch.clientX-rect.left)*(W/rect.width);
-    const my = (touch.clientY-rect.top)*(H/rect.height);
-    piece.dx = mx - piece.centroid[0];
-    piece.dy = my - piece.centroid[1];
-    piece.dragOffX = 0; piece.dragOffY = 0;
-    mouseX=mx; mouseY=my;
-    render();
-  }}
-
-  canvas.addEventListener('mousedown', e => {{
-    const [mx,my] = canvasPos(e);
-    for(let i=pieces.length-1; i>=0; i--) {{
-      const p = pieces[i];
-      if(p.placed || p.inPanel) continue;
-      const bb = p.bbox;
-      if(mx >= bb.x1+p.dx-4 && mx <= bb.x2+p.dx+4 &&
-         my >= bb.y1+p.dy-4 && my <= bb.y2+p.dy+4) {{
-        dragging = p;
-        const pcx = p.centroid[0] + p.dx;
-        const pcy = p.centroid[1] + p.dy;
-        p.dragOffX = mx - pcx;
-        p.dragOffY = my - pcy;
-        mouseX=mx; mouseY=my;
+  function startDragFromCanvas(e) {{
+    if (e.cancelable) e.preventDefault();
+    const [cx, cy] = getEventXY(e);
+    const [mx, my] = canvasPosFromClient(cx, cy);
+    for (let i = pieces.length - 1; i >= 0; i--) {{
+      const p   = pieces[i];
+      if (p.placed || p.inPanel) continue;
+      const bb  = p.bbox;
+      const hit = 12;
+      if (mx >= bb.x1 + p.dx - hit && mx <= bb.x2 + p.dx + hit &&
+          my >= bb.y1 + p.dy - hit && my <= bb.y2 + p.dy + hit) {{
+        dragging      = p;
+        p.dragOffX    = mx - (p.centroid[0] + p.dx);
+        p.dragOffY    = my - (p.centroid[1] + p.dy);
+        mouseX = mx; mouseY = my;
         render();
         break;
       }}
     }}
-  }});
+  }}
 
-  document.addEventListener('mousemove', e => {{
-    if(!dragging) return;
-    const [mx,my] = canvasPos(e);
-    mouseX=mx; mouseY=my;
+  function handleDragMove(e) {{
+    if (!dragging) return;
+    if (e.cancelable) e.preventDefault();
+    const [cx, cy] = getEventXY(e);
+    const [mx, my] = canvasPosFromClient(cx, cy);
+    mouseX = mx; mouseY = my;
     dragging.dx = mx - dragging.centroid[0] - dragging.dragOffX;
     dragging.dy = my - dragging.centroid[1] - dragging.dragOffY;
     render();
-
-    // Tooltip: tunjukkan nama wilayah yang sedang di-drag
     const tt = document.getElementById('tooltip');
     tt.textContent = dragging.name;
-    tt.style.left  = Math.min(mx+12, W-120) + 'px';
-    tt.style.top   = Math.max(my-28, 5) + 'px';
+    tt.style.left  = Math.min(Math.max(mx + 14, 4), W - 140) + 'px';
+    tt.style.top   = Math.max(my - 32, 4) + 'px';
     tt.style.display = 'block';
-  }});
+  }}
 
-  document.addEventListener('mouseup', () => {{
+  function handleDragEnd(e) {{
     document.getElementById('tooltip').style.display = 'none';
-    if(dragging) {{
-      trySnap(dragging, mouseX, mouseY);
-      dragging = null;
-      render();
+    if (!dragging) return;
+    if (e.changedTouches && e.changedTouches.length > 0) {{
+      const [cx, cy] = [e.changedTouches[0].clientX, e.changedTouches[0].clientY];
+      const [mx, my] = canvasPosFromClient(cx, cy);
+      mouseX = mx; mouseY = my;
     }}
-  }});
-
-  canvas.addEventListener('touchmove', e => {{
-    e.preventDefault();
-    if(!dragging) return;
-    const [mx,my] = canvasPos(e);
-    mouseX=mx; mouseY=my;
-    dragging.dx = mx - dragging.centroid[0] - dragging.dragOffX;
-    dragging.dy = my - dragging.centroid[1] - dragging.dragOffY;
+    trySnap(dragging, mouseX, mouseY);
+    dragging = null;
     render();
-  }}, {{passive:false}});
+  }}
 
-  document.addEventListener('touchend', () => {{
-    if(dragging) {{
-      trySnap(dragging, mouseX, mouseY);
-      dragging = null;
-      render();
-    }}
-  }});
+  canvas.addEventListener('mousedown',  startDragFromCanvas);
+  canvas.addEventListener('touchstart', startDragFromCanvas, {{ passive: false }});
+  document.addEventListener('mousemove',   handleDragMove,  {{ passive: false }});
+  document.addEventListener('touchmove',   handleDragMove,  {{ passive: false }});
+  document.addEventListener('mouseup',     handleDragEnd);
+  document.addEventListener('touchend',    handleDragEnd,   {{ passive: false }});
+  document.addEventListener('touchcancel', handleDragEnd,   {{ passive: false }});
+
+  // ===================================================================
 
   // ===== SNAP =====
-  // Wilayah kepulauan: centroid bisa bergeser, beri toleransi ekstra
   const KEPULAUAN_BONUS = {{
-    'Kabupaten Sumenep': 2.2,   // kepulauan sangat tersebar (Kangean, Masalembu)
+    'Kabupaten Sumenep': 2.2,
     'Kabupaten Bangkalan': 1.4,
     'Kabupaten Sampang':  1.4,
     'Kabupaten Pamekasan':1.4,
-    'Kabupaten Gresik':   1.3,  // ada Pulau Bawean
+    'Kabupaten Gresik':   1.3,
   }};
 
   function trySnap(piece, dropX, dropY) {{
     const tx   = piece.centroid[0];
     const ty   = piece.centroid[1];
     const dist = Math.hypot(dropX - tx, dropY - ty);
-
-    // Threshold dasar: akar luas bbox (lebih representatif dari min dimension)
     const bb     = piece.bbox;
     const sqrtArea = Math.sqrt(bb.w * bb.h);
     const baseThr  = Math.max(SNAP_DIST, Math.min(sqrtArea * 0.45, 72));
-
-    // Bonus threshold untuk wilayah kepulauan
     const bonus  = KEPULAUAN_BONUS[piece.name] || 1.0;
     const thr    = baseThr * bonus * (W / 680);
-
     if(dist <= thr) {{
       piece.dx = 0; piece.dy = 0;
       piece.placed = true; piece.inPanel = false;
@@ -2154,7 +2155,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
       mistakes++;
       showFB(dropX, dropY, false);
       updateAccuracy();
-      // Kepingan tetap mengambang di posisi drop
     }}
   }}
 
@@ -2195,7 +2195,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
       document.getElementById('win-time').textContent =
         String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
       document.getElementById('win-moves').textContent = mistakes+' kesalahan';
-      // Tampilkan overlay — user scroll ke bawah untuk simpan skor via tombol Streamlit
       setTimeout(() => document.getElementById('win-overlay').classList.add('show'), 600);
     }}
   }}
@@ -2211,18 +2210,14 @@ def get_puzzle_html(geojson_data, start_time_ms):
   function drawPiece(piece, dx, dy, isDrag) {{
     ctx.save();
     ctx.translate(dx, dy);
-
     ctx.shadowColor = isDrag ? 'rgba(255,215,0,0.9)' : 'rgba(0,0,0,0.5)';
     ctx.shadowBlur  = isDrag ? 22 : 8;
     ctx.fillStyle   = `hsla(${{piece.hue}}, ${{isDrag?82:66}}%, ${{isDrag?66:54}}%, ${{isDrag?0.96:0.82}})`;
     ctx.fill(piece.path);
-
     ctx.shadowBlur  = 0;
     ctx.strokeStyle = isDrag ? '#ffd700' : 'rgba(255,255,255,0.65)';
     ctx.lineWidth   = isDrag ? 2.5 : 1.2;
     ctx.stroke(piece.path);
-
-    // Label nama wilayah di peta (hanya jika tidak di-drag & wilayah cukup besar)
     if(!isDrag) {{
       const bb = piece.bbox;
       if(bb.w > 18 && bb.h > 10) {{
@@ -2234,7 +2229,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
         ctx.textBaseline = 'middle';
         ctx.shadowColor  = 'rgba(0,0,0,0.9)';
         ctx.shadowBlur   = 3;
-        // Singkat nama
         const short = piece.name.replace('Kabupaten ','').replace('Kota ','★');
         ctx.fillText(short, cx_, cy_);
         ctx.shadowBlur = 0;
@@ -2245,8 +2239,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
 
   function render() {{
     ctx.clearRect(0, 0, W, H);
-
-    // 1. Ghost outline semua wilayah (panduan posisi)
     pieces.forEach(p => {{
       if(p.placed) return;
       ctx.save();
@@ -2259,20 +2251,11 @@ def get_puzzle_html(geojson_data, start_time_ms):
       ctx.fill(p.path);
       ctx.restore();
     }});
-
-    // 2. Kepingan terpasang
-    pieces.forEach(p => {{
-      if(!p.placed) return;
-      drawPiece(p, 0, 0, false);
-    }});
-
-    // 3. Kepingan mengambang (tidak di panel, bukan yang di-drag)
+    pieces.forEach(p => {{ if(!p.placed) return; drawPiece(p, 0, 0, false); }});
     pieces.forEach(p => {{
       if(p.placed || p.inPanel || p === dragging) return;
       drawPiece(p, p.dx, p.dy, false);
     }});
-
-    // 4. Kepingan sedang di-drag (paling atas)
     if(dragging && !dragging.placed) {{
       drawPiece(dragging, dragging.dx, dragging.dy, true);
     }}
@@ -2286,7 +2269,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
     pieces.forEach(p => {{
       if(p.placed) return;
       p.inPanel = false;
-      // Scatter acak di seluruh area canvas
       const bb = p.bbox;
       p.dx = (Math.random() * (W - margin*2 - bb.w) + margin) - bb.x1;
       p.dy = (Math.random() * (H - margin*2 - bb.h) + margin) - bb.y1;
@@ -2295,7 +2277,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
   }};
 
   window.showHint = function() {{
-    // Flash outline seluruh Jawa Timur
     let n=0;
     const iv = setInterval(() => {{
       if(++n > 8) {{ clearInterval(iv); render(); return; }}
@@ -2311,9 +2292,7 @@ def get_puzzle_html(geojson_data, start_time_ms):
 
   window.resetPuzzle = function() {{
     mistakes = 0;
-    pieces.forEach(p => {{
-      p.placed=false; p.inPanel=true; p.dx=0; p.dy=0;
-    }});
+    pieces.forEach(p => {{ p.placed=false; p.inPanel=true; p.dx=0; p.dy=0; }});
     document.getElementById('accuracy-display').textContent = '100%';
     buildThumbnails();
     updateProgress();
@@ -2333,7 +2312,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
     }}, 80);
   }};
 
-  // Scatter awal
   shufflePieces();
 
 }})();
@@ -2342,7 +2320,6 @@ def get_puzzle_html(geojson_data, start_time_ms):
 </html>"""
 
     return html
-
 
 # ==================== BACA HASIL PUZZLE DARI JS (query_params) ====================
 # JS tutupOverlayDanSimpan() menulis ?puzzle_waktu=X&puzzle_salah=Y ke URL lalu reload
