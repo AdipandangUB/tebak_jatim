@@ -3968,7 +3968,7 @@ elif PAGE == "Tentang":
               <div style='position:absolute;margin-top:-38px;margin-left:auto;margin-right:auto;left:0;right:0;text-align:center;'>
                 <span style='background:#ffd700;color:#333;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:bold;'>🌟 COORDINATOR</span>
               </div>
-              <img src='https://pwk.ub.ac.id/wp-content/uploads/2024/02/Foto-Web-Triska-2.png'
+              <img src='https://adipandang.wordpress.com/wp-content/uploads/2026/04/1.png'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid #ffd700;
