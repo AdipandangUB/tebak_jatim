@@ -899,7 +899,59 @@ jatim_geojson, wilayah_list = result
 kota_list = [w for w in wilayah_list if w.startswith("Kota ")]
 kab_list  = [w for w in wilayah_list if not w.startswith("Kota ")]
 
+# ==================== CENTROID LABEL WILAYAH ====================
 
+def compute_centroids(geojson_data):
+    """
+    Hitung centroid terbaik (polygon terluas) tiap wilayah dari jatim_geojson.
+    Menggunakan rumus shoelace agar akurat untuk bentuk tidak beraturan.
+    Untuk MultiPolygon (kepulauan) dipilih polygon dengan luas terbesar
+    sehingga centroid jatuh di daratan utama, bukan di tengah laut.
+    """
+    def poly_centroid(ring):
+        n = len(ring)
+        cx, cy, area = 0, 0, 0
+        for i in range(n):
+            j = (i + 1) % n
+            cross = ring[i][0] * ring[j][1] - ring[j][0] * ring[i][1]
+            area += cross
+            cx += (ring[i][0] + ring[j][0]) * cross
+            cy += (ring[i][1] + ring[j][1]) * cross
+        area /= 2
+        if abs(area) < 1e-10:          # fallback rata-rata jika area ≈ 0
+            return (sum(p[0] for p in ring) / n,
+                    sum(p[1] for p in ring) / n)
+        return cx / (6 * area), cy / (6 * area)
+
+    def ring_area(ring):
+        n = len(ring)
+        a = 0
+        for i in range(n):
+            j = (i + 1) % n
+            a += ring[i][0] * ring[j][1] - ring[j][0] * ring[i][1]
+        return abs(a / 2)
+
+    centroids = {}
+    for feat in geojson_data.get("features", []):
+        name = feat["properties"].get("name", "")
+        geom = feat["geometry"]
+        if geom["type"] == "Polygon":
+            lon, lat = poly_centroid(geom["coordinates"][0])
+        else:                          # MultiPolygon
+            best_ring, best_area = None, 0
+            for poly in geom["coordinates"]:
+                a = ring_area(poly[0])
+                if a > best_area:
+                    best_area = a
+                    best_ring = poly[0]
+            lon, lat = poly_centroid(best_ring)
+        centroids[name] = (lat, lon)   # folium: (lat, lon)
+    return centroids
+
+
+# Hitung centroid sekali saja saat startup
+wilayah_centroids = compute_centroids(jatim_geojson)
+    
 # ==================== FUNGSI WAKTU ====================
 
 def get_current_time_info():
@@ -3146,6 +3198,39 @@ elif PAGE == "Info Wilayah":
                 "weight": 3, "fillOpacity": 0.7
             }
         ).add_to(m)
+
+# ---- Label nama wilayah di centroid ----
+        for nama_wil, (lat_c, lon_c) in wilayah_centroids.items():
+            # Singkat nama: hapus "Kabupaten " supaya muat di dalam poligon
+            label_short = (nama_wil
+                           .replace("Kabupaten ", "")
+                           .replace("Kota ", "★ "))
+            # Tentukan ukuran font: kota lebih kecil (wilayah sempit)
+            font_size = "8px" if nama_wil.startswith("Kota ") else "9px"
+            folium.Marker(
+                location=[lat_c, lon_c],
+                icon=folium.DivIcon(
+                    html=(
+                        f"<div style='"
+                        f"font-family:Arial,sans-serif;"
+                        f"font-size:{font_size};"
+                        f"font-weight:bold;"
+                        f"color:#fff;"
+                        f"text-shadow:"
+                        f"  -1px -1px 0 #333,"
+                        f"   1px -1px 0 #333,"
+                        f"  -1px  1px 0 #333,"
+                        f"   1px  1px 0 #333;"
+                        f"white-space:nowrap;"
+                        f"pointer-events:none;"
+                        f"transform:translate(-50%,-50%);"
+                        f"'>{label_short}</div>"
+                    ),
+                    icon_size=(1, 1),
+                    icon_anchor=(0, 0),
+                )
+            ).add_to(m)
+        # ---- /Label ----
 
         map_data = st_folium(m, width=None, height=500, use_container_width=True,
                              key="belajar_map")
