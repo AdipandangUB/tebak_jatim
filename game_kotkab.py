@@ -2368,6 +2368,49 @@ if not st.session_state.name_submitted:
 
         st.markdown("---")
         st.markdown(
+            """
+            <div style='
+                text-align:center;
+                margin: 18px 0;
+                padding: 18px 22px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 14px;
+                box-shadow: 0 4px 16px rgba(102,126,234,0.35);
+            '>
+                <p style='
+                    color: rgba(255,255,255,0.85);
+                    font-size: 13px;
+                    margin: 0 0 6px 0;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                '>📖 Panduan Penggunaan</p>
+                <p style='
+                    color: white;
+                    font-size: 17px;
+                    font-weight: 700;
+                    margin: 0 0 14px 0;
+                    line-height: 1.4;
+                '>📘 Modul Penggunaan Aplikasi<br><em style="font-size:15px;font-weight:400;">Sepiro Jawa Timur, Sampeyan?</em></p>
+                <a href="https://online.fliphtml5.com/Adipandang/ivws/#p=1"
+                   target="_blank"
+                   style='
+                    display: inline-block;
+                    background: white;
+                    color: #667eea;
+                    padding: 10px 28px;
+                    border-radius: 25px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    text-decoration: none;
+                    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+                    transition: all 0.2s;
+                '>📄 Buka Modul &rarr;</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown(
             "<div style='text-align:center;color:#666;font-size:14px;'>"
             "<p>✨ Fitur: 🎮 Quiz | 📚 Info Wilayah | 🧩 Puzzle | 🌋 Bromo 3D | 🏛️ Balaikota 3D | 🏆 Papan Skor | 🎵 Musik Latar</p></div>",
             unsafe_allow_html=True
