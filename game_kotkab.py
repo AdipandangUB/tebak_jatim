@@ -4030,7 +4030,7 @@ elif PAGE == "Tentang":
               <div style='position:absolute;margin-top:-38px;margin-left:auto;margin-right:auto;left:0;right:0;text-align:center;'>
                 <span style='background:#ffd700;color:#333;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:bold;'>🌟 COORDINATOR</span>
               </div>
-              <img src='https://adipandang.wordpress.com/wp-content/uploads/2026/04/1.png'
+              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Triska.png'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid #ffd700;
@@ -4059,7 +4059,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://adipandang.wordpress.com/wp-content/uploads/2026/03/nabila-zahra.jpeg'
+              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Nabila_Zahra.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
@@ -4087,7 +4087,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://media.licdn.com/dms/image/v2/D4E03AQGqTT63jvv2Fg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1723509953345?e=2147483647&v=beta&t=oSubn-UP7bawIpCNv7qCQ3w3ykUdTu-3hkzUE4YQO5w'
+              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Riska_Dwi.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
@@ -4118,7 +4118,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://img.freepik.com/vektor-premium/gambar-profil-avatar-pria-diisolasi-pada-gambar-profil-avatar-latar-belakang-untuk-pria_1293239-4842.jpg'
+              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Muhammad_Fulan.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
@@ -4146,7 +4146,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://img.freepik.com/vektor-premium/ilustrasi-vektor-profil-avatar-wanita-imut_1058532-14546.jpg'
+              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Daniella_Nathalie.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
@@ -4174,7 +4174,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://png.pngtree.com/png-clipart/20240416/original/pngtree-hijab-girl-cartoon-avatar-png-image_14848857.png'
+              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Naraya_Helga.jpeg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
