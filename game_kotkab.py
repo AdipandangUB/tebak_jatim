@@ -4030,7 +4030,7 @@ elif PAGE == "Tentang":
               <div style='position:absolute;margin-top:-38px;margin-left:auto;margin-right:auto;left:0;right:0;text-align:center;'>
                 <span style='background:#ffd700;color:#333;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:bold;'>🌟 COORDINATOR</span>
               </div>
-              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Triska.png'
+              <img src='https://raw.githubusercontent.com/AdipandangUB/tebak_jatim/main/Triska.png'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid #ffd700;
@@ -4059,7 +4059,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Nabila_Zahra.jpg'
+              <img src='https://raw.githubusercontent.com/AdipandangUB/tebak_jatim/main/Nabila%20Zahra.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
@@ -4087,7 +4087,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Riska_Dwi.jpg'
+              <img src='https://raw.githubusercontent.com/AdipandangUB/tebak_jatim/main/Riska%20Dwi.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
@@ -4118,7 +4118,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Muhammad_Fulan.jpg'
+              <img src='https://raw.githubusercontent.com/AdipandangUB/tebak_jatim/main/Muhammad%20Fulan.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
@@ -4146,7 +4146,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Daniella_Nathalie.jpg'
+              <img src='https://raw.githubusercontent.com/AdipandangUB/tebak_jatim/main/Daniella%20Nathalie.jpg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
@@ -4174,7 +4174,7 @@ elif PAGE == "Tentang":
                         border-radius:16px;padding:22px;text-align:center;
                         box-shadow:0 6px 20px rgba(255,152,0,0.3);
                         height:100%;'>
-              <img src='https://raw.githubusercontent.com/adipandang/sepiro-jatim/main/assets/Naraya_Helga.jpeg'
+              <img src='https://raw.githubusercontent.com/AdipandangUB/tebak_jatim/main/Naraya%20Helga.jpeg'
                    style='width:110px;height:110px;border-radius:50%;
                           object-fit:cover;object-position:top;
                           border:4px solid rgba(255,255,255,0.6);
